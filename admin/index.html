@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Dashboard Packrafting Canden</h2>
+      </div>
+      <div style="font-size:0.875rem;color:#64748b;">
+        <i class="fa-solid fa-circle" style="color:#10b981;font-size:0.6rem;margin-right:0.3rem;"></i> Online
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Stats Cards -->
+      <div class="dash-stats">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon orange"><i class="fa-solid fa-compass"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-paket">0</h4>
+            <p>Total Paket Wisata</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon teal"><i class="fa-solid fa-image"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-banner">0</h4>
+            <p>Hero Banner Aktif</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon green"><i class="fa-solid fa-camera"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-galeri">0</h4>
+            <p>Foto Galeri</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon blue"><i class="fa-solid fa-circle-question"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-faq">0</h4>
+            <p>FAQ Pertanyaan</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="dash-quick-grid">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3><i class="fa-solid fa-bolt" style="color:#ea580c;margin-right:0.4rem;"></i> Aksi Cepat Pengelolaan</h3>
+          </div>
+          <div class="admin-card-body dash-action-grid">
+            <a href="banner.html" class="btn-admin btn-admin-primary" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-image"></i> Ganti Hero Banner
+            </a>
+            <a href="paket.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-compass"></i> Kelola Paket Wisata
+            </a>
+            <a href="video.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-circle-play"></i> Video Pengalaman
+            </a>
+            <a href="informasi.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata
+            </a>
+            <a href="kontak.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-brands fa-whatsapp"></i> Update WhatsApp &amp; Rute
+            </a>
+            <a href="../index.html" target="_blank" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-eye"></i> Preview Website
+            </a>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3><i class="fa-solid fa-circle-info" style="color:#0e7490;margin-right:0.4rem;"></i> Ringkasan Wisata</h3>
+          </div>
+          <div class="admin-card-body" style="font-size:0.875rem;line-height:1.8;">
+            <p style="margin-bottom:0.75rem;"><strong>Brand:</strong> Packrafting Canden</p>
+            <p style="margin-bottom:0.75rem;"><strong>Lokasi:</strong> Desa Canden, Jetis, Bantul</p>
+            <p style="margin-bottom:0.75rem;"><strong>Format Booking:</strong> Direct WhatsApp Message</p>
+            <p style="margin:0;color:#64748b;">Perubahan data melalui admin tersimpan langsung di browser (localStorage) dan siap disinkronkan ke API backend.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => renderDashboardStats());
+  </script>
+</body>
+</html>

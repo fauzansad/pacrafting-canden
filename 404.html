@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Halaman Tidak Ditemukan | Packrafting Canden</title>
+  <link rel="icon" type="image/png" href="assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .not-found-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background: radial-gradient(circle at center, rgba(14, 116, 144, 0.08) 0%, #fcfbf9 100%);
+    }
+    .not-found-box {
+      max-width: 540px;
+      padding: 3rem 2rem;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .not-found-badge {
+      display: inline-block;
+      font-size: 5rem;
+      font-weight: 900;
+      color: var(--primary, #0e7490);
+      line-height: 1;
+      margin-bottom: 1rem;
+      letter-spacing: -2px;
+    }
+    .not-found-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1b4332;
+      margin-bottom: 0.75rem;
+    }
+    .not-found-desc {
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .not-found-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #0e7490;
+      color: #ffffff;
+      padding: 0.85rem 1.75rem;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(14, 116, 144, 0.25);
+    }
+    .not-found-btn:hover {
+      background: #08566a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(14, 116, 144, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="not-found-page">
+    <div class="not-found-box">
+      <div class="not-found-badge">404</div>
+      <h1 class="not-found-title">Oops! Halaman Tidak Ditemukan</h1>
+      <p class="not-found-desc">
+        Sepertinya arus sungai membawa Anda ke rute yang salah. Halaman yang Anda cari tidak tersedia atau telah dipindahkan.
+      </p>
+      <a href="/" class="not-found-btn">
+        <i class="fa-solid fa-house"></i> Kembali ke Beranda
+      </a>
+    </div>
+  </div>
+</body>
+</html>

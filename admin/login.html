@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin | Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .password-input-wrap {
+      position: relative;
+    }
+    .password-input-wrap input {
+      padding-right: 2.75rem !important;
+    }
+    .toggle-pwd-btn {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.25rem;
+    }
+    .toggle-pwd-btn:hover {
+      color: #0e7490;
+    }
+    .lockout-msg {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      border-left: 4px solid #dc2626;
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-header">
+        <div style="margin-bottom:1.25rem;">
+          <img src="../assets/images/logo/logo-square.png" alt="Logo Packrafting Canden" style="width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.25));">
+        </div>
+        <h2>Admin Packrafting</h2>
+        <p>Desa Canden, Bantul, Yogyakarta</p>
+      </div>
+
+      <div class="lockout-msg" id="lockout-box">
+        <i class="fa-solid fa-shield-halved"></i> Terlalu banyak percobaan gagal. Silakan tunggu <span id="lockout-timer">60</span> detik.
+      </div>
+
+      <form class="login-form" id="login-form">
+        <div class="form-group">
+          <label for="username">Username / Email</label>
+          <input type="text" id="username" placeholder="Masukkan username admin" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="password" placeholder="Masukkan password admin" autocomplete="current-password" required>
+            <button type="button" class="toggle-pwd-btn" id="toggle-pwd" aria-label="Lihat Password">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-login" id="submit-btn">
+          <i class="fa-solid fa-right-to-bracket" style="margin-right:0.4rem;"></i> Masuk ke Dashboard
+        </button>
+      </form>
+
+      <div style="text-align:center;margin-top:1.5rem;">
+        <a href="../index.html" style="color:#0e7490;font-size:0.875rem;text-decoration:none;font-weight:600;">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Website Wisata
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    const MAX_ATTEMPTS = 5;
+    const LOCKOUT_SECONDS = 60;
+
+    const loginForm = document.getElementById('login-form');
+    const lockoutBox = document.getElementById('lockout-box');
+    const lockoutTimerEl = document.getElementById('lockout-timer');
+    const submitBtn = document.getElementById('submit-btn');
+    const pwdInput = document.getElementById('password');
+    const togglePwdBtn = document.getElementById('toggle-pwd');
+
+    // Show/Hide password toggle
+    togglePwdBtn.addEventListener('click', function() {
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      this.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+    });
+
+    // Check Lockout on Load
+    function checkLockout() {
+      const lockUntil = parseInt(localStorage.getItem('packraft_lockout_until') || '0');
+      const now = Date.now();
+      if (lockUntil > now) {
+        const remainingSec = Math.ceil((lockUntil - now) / 1000);
+        activateLockout(remainingSec);
+        return true;
+      }
+      return false;
+    }
+
+    function activateLockout(seconds) {
+      lockoutBox.style.display = 'block';
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+
+      let remaining = seconds;
+      lockoutTimerEl.textContent = remaining;
+
+      const timer = setInterval(() => {
+        remaining--;
+        lockoutTimerEl.textContent = remaining;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          localStorage.removeItem('packraft_lockout_until');
+          localStorage.setItem('packraft_failed_attempts', '0');
+          lockoutBox.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+      }, 1000);
+    }
+
+    checkLockout();
+
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (checkLockout()) return;
+
+      const rawU = document.getElementById('username').value;
+      const rawP = document.getElementById('password').value;
+
+      // 1. Anti-SQL Injection & Malicious Pattern Detector
+      if (typeof Security !== 'undefined') {
+        if (Security.containsSqlInjection(rawU) || Security.containsSqlInjection(rawP)) {
+          let failed = parseInt(localStorage.getItem('packraft_failed_attempts') || '0') + 1;
+          localStorage.setItem('packraft_failed_attempts', failed.toString());
+          
+          if (failed >= MAX_ATTEMPTS) {
+            const lockTime = Date.now() + (LOCKOUT_SECONDS * 1000);
+            localStorage.setItem('packraft_lockout_until', lockTime.toString());
+            activateLockout(LOCKOUT_SECONDS);
+            showToast(`Percobaan injeksi terdeteksi! Akun dikunci selama ${LOCKOUT_SECONDS} detik.`, 'error');
+          } else {
+            showToast('Peringatan: Karakter atau sintaks query berbahaya terdeteksi!', 'error');
+          }
+          return;
+        }
+      }
+
+      const u = (typeof Security !== 'undefined') ? Security.sanitizeUsername(rawU) : rawU.trim();
+      const p = (typeof Security !== 'undefined') ? Security.sanitizeText(rawP) : rawP.trim();
+
+      if (!u || !p) {
+        showToast('Username dan password wajib diisi dengan format valid!', 'warning');
+        return;
+      }
+
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
+      submitBtn.disabled = true;
+
+      const inputHash = await DataStore.hashPassword(p);
+      const cred = DataStore.getAdminCredentials();
+
+      // Check username and hash match
+      const isUserMatch = (u.toLowerCase() === cred.username.toLowerCase());
+      const isPassMatch = (inputHash === cred.passwordHash || (cred.legacyHash && inputHash === cred.legacyHash));
+
+      if (isUserMatch && isPassMatch) {
+        // Success
+        localStorage.setItem('packraft_failed_attempts', '0');
+        localStorage.removeItem('packraft_lockout_until');
+        sessionStorage.setItem('admin_logged_in', 'true');
+        sessionStorage.setItem('admin_user', cred.username);
+        sessionStorage.setItem('admin_session_time', Date.now().toString());
+
+        showToast('Login berhasil! Mengalihkan...', 'success');
+        const isFile = window.location.protocol === 'file:';
+        setTimeout(() => {
+          window.location.href = isFile ? 'index.html' : '/admin/index.html';
+        }, 600);
+      } else {
+        // Failed
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Dashboard';
+        submitBtn.disabled = false;
+
+        let failed = parseInt(localStorage.getItem('packraft_failed_attempts') || '0') + 1;
+        localStorage.setItem('packraft_failed_attempts', failed.toString());
+
+        if (failed >= MAX_ATTEMPTS) {
+          const lockTime = Date.now() + (LOCKOUT_SECONDS * 1000);
+          localStorage.setItem('packraft_lockout_until', lockTime.toString());
+          activateLockout(LOCKOUT_SECONDS);
+          showToast(`Terlalu banyak percobaan gagal. Akun dikunci selama ${LOCKOUT_SECONDS} detik!`, 'error');
+        } else {
+          const remaining = MAX_ATTEMPTS - failed;
+          showToast(`Username atau Password salah! Sisa percobaan: ${remaining}`, 'error');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

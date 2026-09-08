@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Library | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link active"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Media Library</h2>
+      </div>
+      <div style="font-size:0.875rem;color:#64748b;">
+        <i class="fa-solid fa-circle" style="color:#10b981;font-size:0.6rem;margin-right:0.3rem;"></i> Online
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Media Desa</h3>
+          <button class="btn-admin btn-admin-primary" onclick="document.getElementById('media-upload').click()"><i class="fa-solid fa-upload"></i> Upload Media</button>
+          <input type="file" id="media-upload" accept="image/*" multiple style="display:none;">
+        </div>
+        <div class="admin-card-body">
+          <p style="font-size:0.875rem;color:#64748b;margin-bottom:1.5rem;">Library untuk menyimpan dan mengelola gambar yang digunakan di website. Klik nama file untuk menyalin.</p>
+
+          <div class="media-grid" id="media-grid">
+            <!-- Rendered by admin.js -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      renderMediaLibrary();
+
+      // Media upload handler
+      document.getElementById('media-upload').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const media = DataStore.getMedia();
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        let processed = 0;
+        let addedCount = 0;
+
+        files.forEach(function(file) {
+          if (!validTypes.includes(file.type)) {
+            showToast('Format ' + file.name + ' tidak valid', 'warning');
+            processed++;
+            return;
+          }
+          if (file.size > 5 * 1024 * 1024) {
+            showToast(file.name + ' terlalu besar (maks 5MB)', 'warning');
+            processed++;
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            media.unshift({
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              url: evt.target.result,
+              uploadedAt: new Date().toISOString()
+            });
+            addedCount++;
+            processed++;
+
+            if (processed === files.length) {
+              DataStore.saveMedia(media);
+              showToast(addedCount + ' file media berhasil diunggah!', 'success');
+              renderMediaLibrary();
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+
+        e.target.value = '';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paket Wisata | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link active"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Manajemen Paket Wisata</h2>
+      </div>
+      <button class="btn-admin btn-admin-primary" onclick="addPaket()">
+        <i class="fa-solid fa-plus"></i> Tambah Paket Baru
+      </button>
+    </div>
+
+    <div class="admin-content">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Daftar Paket Packrafting</h3>
+        </div>
+        <div class="admin-card-body">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nama Paket &amp; Level</th>
+                <th>Harga</th>
+                <th>Durasi</th>
+                <th>Fasilitas</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="paket-admin-list"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Form Paket -->
+      <div class="admin-card" id="paket-form" style="display:none;" data-mode="add" data-edit-id="">
+        <div class="admin-card-header">
+          <h3>Form Paket Wisata</h3>
+          <button class="btn-admin btn-admin-outline" onclick="document.getElementById('paket-form').style.display='none'"><i class="fa-solid fa-xmark"></i> Tutup</button>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paket-nama">Nama Paket Wisata *</label>
+              <input type="text" id="paket-nama" placeholder="Contoh: PACKRAFTING EXPERIENCE">
+            </div>
+
+            <div class="form-group">
+              <label for="paket-harga">Harga (Placeholder / Angka) *</label>
+              <input type="text" id="paket-harga" placeholder="Contoh: [HARGA] atau 150.000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paket-durasi">Estimasi Durasi</label>
+              <input type="text" id="paket-durasi" placeholder="Contoh: ± [DURASI] atau ± 2 Jam">
+            </div>
+
+            <div class="form-group">
+              <label for="paket-level">Tingkat Kesulitan / Cocok Untuk</label>
+              <input type="text" id="paket-level" placeholder="Contoh: Pemula &amp; Keluarga">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="paket-deskripsi">Deskripsi Singkat</label>
+            <textarea id="paket-deskripsi" rows="2" placeholder="Deskripsi daya tarik paket"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="paket-fasilitas">Daftar Fasilitas (Satu fasilitas per baris)</label>
+            <textarea id="paket-fasilitas" rows="5" placeholder="Perahu Packraft &amp; Dayung&#10;Pelampung Standar&#10;Helm Pengaman&#10;River Guide"></textarea>
+          </div>
+
+          <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">
+            <button class="btn-admin btn-admin-primary" onclick="savePaket()">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Paket
+            </button>
+            <button class="btn-admin btn-admin-outline" onclick="document.getElementById('paket-form').style.display='none'">
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => renderPaketAdmin());
+  </script>
+</body>
+</html>

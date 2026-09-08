@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berita &amp; Artikel | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link active"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Manajemen Berita &amp; Artikel Packrafting</h2>
+      </div>
+      <div style="font-size:0.875rem;color:#64748b;">
+        <i class="fa-solid fa-circle" style="color:#10b981;font-size:0.6rem;margin-right:0.3rem;"></i> Online
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Daftar Berita &amp; Artikel Packrafting</h3>
+          <button class="btn-admin btn-admin-primary" onclick="addBeritaAdmin()"><i class="fa-solid fa-plus"></i> Tambah Berita</button>
+        </div>
+        <div class="admin-card-body">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Kategori</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="berita-admin-list">
+              <!-- Rendered by admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Berita Form -->
+      <div class="admin-card" id="berita-form" style="display:none;" data-mode="add" data-edit-id="">
+        <div class="admin-card-header"><h3>Form Berita</h3><button class="btn-admin btn-admin-outline" onclick="document.getElementById('berita-form').style.display='none'"><i class="fa-solid fa-xmark"></i> Tutup</button></div>
+        <div class="admin-card-body">
+          <div class="admin-form">
+            <div class="form-group">
+              <label for="berita-judul">Judul Berita <span class="required">*</span></label>
+              <input type="text" id="berita-judul" placeholder="Masukkan judul berita">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="berita-kategori">Kategori</label>
+                <select id="berita-kategori">
+                  <option value="Pemerintahan">Pemerintahan</option>
+                  <option value="Kegiatan Desa">Kegiatan Desa</option>
+                  <option value="Masyarakat">Masyarakat</option>
+                  <option value="Pembangunan">Pembangunan</option>
+                  <option value="Sosial">Sosial</option>
+                  <option value="Pengumuman">Pengumuman</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="berita-tanggal">Tanggal <span class="required">*</span></label>
+                <input type="date" id="berita-tanggal">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="berita-penulis">Penulis</label>
+              <input type="text" id="berita-penulis" placeholder="Nama penulis" value="Admin Desa">
+            </div>
+
+            <div class="form-group">
+              <label for="berita-ringkasan">Ringkasan</label>
+              <textarea id="berita-ringkasan" placeholder="Ringkasan singkat berita" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Isi Berita</label>
+              <div class="editor-toolbar">
+                <button type="button" onclick="execCmd('bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" onclick="execCmd('italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" onclick="execCmd('underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                <div class="separator"></div>
+                <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+                <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+                <div class="separator"></div>
+                <button type="button" onclick="execCmd('formatBlock', 'h3')" title="Heading"><i class="fa-solid fa-heading"></i></button>
+                <button type="button" onclick="execCmd('formatBlock', 'p')" title="Paragraph"><i class="fa-solid fa-paragraph"></i></button>
+              </div>
+              <div class="editor-content" id="berita-isi" contenteditable="true"></div>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+              <button class="btn-admin btn-admin-primary" onclick="saveBeritaAdmin()"><i class="fa-solid fa-floppy-disk"></i> Simpan Berita</button>
+              <button class="btn-admin btn-admin-outline" onclick="document.getElementById('berita-form').style.display='none'">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      renderBeritaAdmin();
+    });
+  </script>
+</body>
+</html>

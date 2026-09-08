@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontak &amp; Rute Sungai | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link active"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Pengaturan Rute Sungai &amp; WhatsApp Booking</h2>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <!-- Lokasi Rute Sungai -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-route" style="color:#0e7490;margin-right:0.4rem;"></i> Rute Pengarungan Sungai Opak</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="kontak-start-name"><i class="fa-solid fa-play text-accent"></i> Nama Titik Start / Meeting Point</label>
+              <input type="text" id="kontak-start-name" placeholder="Starting Point Susur Sungai Opak">
+            </div>
+
+            <div class="form-group">
+              <label for="kontak-start-url"><i class="fa-solid fa-link text-accent"></i> Google Maps URL Titik Start</label>
+              <input type="text" id="kontak-start-url" placeholder="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="kontak-finish-name"><i class="fa-solid fa-flag-checkered" style="color:#ef4444;"></i> Nama Titik Finish</label>
+              <input type="text" id="kontak-finish-name" placeholder="Wisata Potrobayan">
+            </div>
+
+            <div class="form-group">
+              <label for="kontak-finish-url"><i class="fa-solid fa-link" style="color:#ef4444;"></i> Google Maps URL Titik Finish</label>
+              <input type="text" id="kontak-finish-url" placeholder="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kontak & Reservasi -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-brands fa-whatsapp" style="color:#25D366;margin-right:0.4rem;"></i> Kontak Reservasi WhatsApp &amp; Sosial Media</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label for="kontak-wa"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Nomor WhatsApp Reservasi *</label>
+            <input type="text" id="kontak-wa" placeholder="Contoh: 628123456789 atau [NOMOR_WHATSAPP]">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="kontak-email"><i class="fa-solid fa-envelope"></i> Email Reservasi</label>
+              <input type="text" id="kontak-email" placeholder="[EMAIL_RESERVASI]">
+            </div>
+
+            <div class="form-group">
+              <label for="kontak-ig"><i class="fa-brands fa-instagram" style="color:#E1306C;"></i> Instagram URL</label>
+              <input type="text" id="kontak-ig" placeholder="https://instagram.com/packrafting.canden">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="kontak-tiktok"><i class="fa-brands fa-tiktok"></i> TikTok URL</label>
+              <input type="text" id="kontak-tiktok" placeholder="https://tiktok.com/@packrafting.canden">
+            </div>
+
+            <div class="form-group">
+              <label for="kontak-youtube"><i class="fa-brands fa-youtube" style="color:#dc2626;"></i> YouTube URL</label>
+              <input type="text" id="kontak-youtube" placeholder="https://youtube.com/@packrafting.canden">
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem;">
+            <button class="btn-admin btn-admin-primary" onclick="saveKontakAdmin()">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Semua Pengaturan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => loadKontakAdmin());
+  </script>
+</body>
+</html>

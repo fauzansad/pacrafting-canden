@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panduan &amp; Info Wisata | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="berita.html" class="sidebar-link"><i class="fa-solid fa-newspaper"></i> Berita Packrafting</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link active"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+      <a href="media.html" class="sidebar-link"><i class="fa-solid fa-folder-open"></i> Media Library</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Panduan &amp; Informasi Wisata Packrafting</h2>
+      </div>
+      <div style="font-size:0.875rem;color:#64748b;">
+        <i class="fa-solid fa-circle" style="color:#10b981;font-size:0.6rem;margin-right:0.3rem;"></i> Online
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Profil Pengelola & Pokdarwis -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-users" style="color:#0e7490;margin-right:0.4rem;"></i> 1. Profil Pengelola &amp; Pokdarwis</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label for="info-nama-pengelola">Nama Pengelola / Pokdarwis</label>
+            <input type="text" id="info-nama-pengelola" placeholder="Contoh: Pokdarwis &amp; Pengelola Susur Sungai Desa Canden">
+          </div>
+          <div class="form-group">
+            <label for="info-deskripsi-pengelola">Deskripsi Tim &amp; Instruktur Wisata</label>
+            <textarea id="info-deskripsi-pengelola" rows="3" placeholder="Deskripsi pengelola dan tim pemandu yang ramah serta profesional"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="info-legalitas">Legalitas &amp; Sertifikasi Keamanan</label>
+            <input type="text" id="info-legalitas" placeholder="Contoh: Binaan Dinas Pariwisata &amp; Instruktur Bersertifikasi">
+          </div>
+        </div>
+      </div>
+
+      <!-- Akses & Petunjuk Jalan -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-route" style="color:#ea580c;margin-right:0.4rem;"></i> 2. Akses &amp; Petunjuk Jalan Menuju Starting Point</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label for="info-titik-kumpul">Titik Kumpul / Meeting Point</label>
+            <input type="text" id="info-titik-kumpul" placeholder="Starting Point Susur Sungai Opak (Canden, Jetis, Bantul)">
+          </div>
+          <div class="form-group">
+            <label for="info-akses-rute">Panduan Akses Rute Kendaraan</label>
+            <textarea id="info-akses-rute" rows="3" placeholder="Petunjuk akses rute jalan untuk mobil pribadi, motor, atau bus pariwisata"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fasilitas Umum & Jam Operasional -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-store" style="color:#16a34a;margin-right:0.4rem;"></i> 3. Fasilitas Wisata &amp; Jam Operasional</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label for="info-fasilitas-basecamp">Fasilitas di Basecamp / Titik Start</label>
+            <textarea id="info-fasilitas-basecamp" rows="3" placeholder="Toilet &amp; Kamar Mandi Bilas Bersih, Tempat Ganti Baju, Mushola, Gazebo, Loker..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="info-fasilitas-sekitar">Fasilitas Sekitar Lokasi</label>
+            <textarea id="info-fasilitas-sekitar" rows="2" placeholder="Area Parkir Luas, Warung Makan Tradisional, Spot Foto Tepi Sungai..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="info-jam-operasional">Jam Operasional &amp; Jadwal Sesi Trip</label>
+            <input type="text" id="info-jam-operasional" placeholder="Contoh: Setiap Hari: 07.30 – 16.30 WIB (Sesi Pagi &amp; Siang)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;margin-bottom:2rem;">
+        <button type="button" class="btn-admin btn-admin-primary" onclick="saveWisataInfoAdmin()" style="padding:0.85rem 2.25rem;font-size:0.95rem;">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Informasi &amp; Panduan Wisata
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script>
+    function loadWisataInfoAdmin() {
+      const info = DataStore.getWisataInfo();
+      if (!info) return;
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+      };
+
+      setVal('info-nama-pengelola', info.namaPengelola);
+      setVal('info-deskripsi-pengelola', info.deskripsiPengelola);
+      setVal('info-legalitas', info.legalitas);
+      setVal('info-titik-kumpul', info.titikKumpul);
+      setVal('info-akses-rute', info.aksesRute);
+      setVal('info-fasilitas-basecamp', info.fasilitasBasecamp);
+      setVal('info-fasilitas-sekitar', info.fasilitasSekitar);
+      setVal('info-jam-operasional', info.jamOperasional);
+    }
+
+    function saveWisataInfoAdmin() {
+      const info = DataStore.getWisataInfo() || {};
+      info.namaPengelola = document.getElementById('info-nama-pengelola').value.trim();
+      info.deskripsiPengelola = document.getElementById('info-deskripsi-pengelola').value.trim();
+      info.legalitas = document.getElementById('info-legalitas').value.trim();
+      info.titikKumpul = document.getElementById('info-titik-kumpul').value.trim();
+      info.aksesRute = document.getElementById('info-akses-rute').value.trim();
+      info.fasilitasBasecamp = document.getElementById('info-fasilitas-basecamp').value.trim();
+      info.fasilitasSekitar = document.getElementById('info-fasilitas-sekitar').value.trim();
+      info.jamOperasional = document.getElementById('info-jam-operasional').value.trim();
+
+      DataStore.saveWisataInfo(info);
+      showToast('Informasi & Panduan Wisata berhasil disimpan!', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadWisataInfoAdmin();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rute Sungai &amp; Kontak | Packrafting Canden</title>
+  <meta name="description" content="Informasi lokasi titik kumpul Start (Susur Sungai Opak) dan Finish (Wisata Potrobayan), peta rute sungai, dan layanan booking Packrafting Canden.">
+  <link rel="icon" type="image/png" href="assets/images/logo/logo-square.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/logo-square.png">
+  <meta property="og:image" content="assets/images/logo/logo-horizontal.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand" title="Packrafting Canden">
+        <img src="assets/images/logo/logo-square.png" alt="Logo Packrafting Canden" class="brand-logo-square">
+        <div class="brand-text">
+          <span>PACKRAFTING CANDEN</span>
+          <span class="brand-sub">Adventure on the River</span>
+        </div>
+      </a>
+
+      <div class="nav-overlay" id="nav-overlay"></div>
+
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="index.html#home" class="nav-link">Home</a></li>
+        <li><a href="index.html#tentang" class="nav-link">Tentang</a></li>
+        <li><a href="index.html#paket" class="nav-link">Paket</a></li>
+        <li><a href="index.html#pengalaman" class="nav-link">Pengalaman</a></li>
+        <li><a href="galeri.html" class="nav-link">Galeri</a></li>
+        <li><a href="index.html#lokasi" class="nav-link">Rute &amp; Peta</a></li>
+        <li><a href="kontak.html" class="nav-link active">Kontak</a></li>
+      </ul>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg, #030e1a 0%, #0756a0 60%, #126939 100%);padding:8rem 0 4rem;text-align:center;color:#fff;">
+    <div class="container">
+      <div class="badge-tag badge-tag-orange" style="color:#fff;border-color:rgba(255,255,255,0.3);">Rute Sungai &amp; Reservasi</div>
+      <h1 style="color:#fff;margin-bottom:0.75rem;">LOKASI &amp; TITIK KUMPUL</h1>
+      <p style="color:rgba(255,255,255,0.85);max-width:640px;margin:0 auto;font-size:var(--fs-lg);">
+        Rute pengarungan Sungai Opak dari Starting Point Canden hingga finish di Wisata Potrobayan.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="location-grid">
+        <div>
+          <!-- Start Point -->
+          <div class="location-info-card" style="border-left:4px solid #10b981;margin-bottom:1.5rem;">
+            <div style="margin-bottom:0.4rem;">
+              <span class="badge" style="background:#dcfce7;color:#16a34a;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.7rem;font-weight:800;">TITIK START / MEETING POINT</span>
+            </div>
+            <h4><i class="fa-solid fa-play text-accent"></i> Starting Point Susur Sungai Opak</h4>
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+              Titik kumpul resmi, registrasi peserta, fitting alat keselamatan, dan awal keberangkatan di Desa Canden, Jetis, Bantul.
+            </p>
+            <a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" class="btn btn-river btn-sm" data-start-maps>
+              <i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Start
+            </a>
+          </div>
+
+          <!-- Finish Point -->
+          <div class="location-info-card" style="border-left:4px solid #ef4444;margin-bottom:1.5rem;">
+            <div style="margin-bottom:0.4rem;">
+              <span class="badge" style="background:#fee2e2;color:#dc2626;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.7rem;font-weight:800;">TITIK FINISH &amp; BILAS</span>
+            </div>
+            <h4><i class="fa-solid fa-flag-checkered" style="color:#ef4444;"></i> Wisata Potrobayan</h4>
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+              Titik pendaratan akhir di pertemuan Sungai Opak &amp; Oya, bilas bersih, dan penjemputan transportasi kembali.
+            </p>
+            <a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" class="btn btn-outline btn-sm" data-finish-maps>
+              <i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Finish
+            </a>
+          </div>
+
+          <!-- 5 Meeting Points Card -->
+          <div class="location-info-card" style="border-left:4px solid #f59e0b;margin-bottom:1.5rem;">
+            <div style="margin-bottom:0.4rem;">
+              <span class="badge" style="background:#fef3c7;color:#d97706;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.7rem;font-weight:800;">5 PILIHAN MEETING POINT</span>
+            </div>
+            <h4><i class="fa-solid fa-map-pin" style="color:#f59e0b;"></i> Titik Kumpul Fleksibel</h4>
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;color:var(--text-light);">
+              Pilih meeting point terdekat Anda (dikonfirmasi lebih lanjut oleh admin):
+            </p>
+            <ul style="font-size:var(--fs-xs);padding-left:1.2rem;line-height:1.8;color:var(--text);">
+              <li>Rumah Makan Kongkow</li>
+              <li>Rumah Makan Kopi Klotok Paris</li>
+              <li>Rumah Makan Paon Darmo</li>
+              <li>Kantor BUMKal Candi Arta Kalurahan Canden</li>
+              <li>Basecamp Packrafting Canden</li>
+            </ul>
+          </div>
+
+          <!-- WA Box & Kontak Card -->
+          <div class="location-info-card" style="border-left:4px solid #10b981;">
+            <h4><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp &amp; Kontak Resmi</h4>
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+              Hubungi WhatsApp Admin di <strong data-display-wa>0812 6009 2044</strong> atau email <strong data-display-email>candenpackraft@gmail.com</strong>.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+              <a href="https://wa.me/6281260092044" target="_blank" class="btn btn-accent btn-sm" data-social-wa>
+                <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp
+              </a>
+              <a href="mailto:candenpackraft@gmail.com" class="btn btn-outline btn-sm" data-social-email>
+                <i class="fa-solid fa-envelope"></i> Kirim Email
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="location-map-wrap">
+          <div id="map"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container text-center">
+      <div style="margin-bottom:1.5rem;display:flex;justify-content:center;">
+        <a href="index.html" title="Packrafting Canden">
+          <img src="assets/images/logo/logo-horizontal.png" alt="Packrafting Canden" style="height:60px;width:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4));">
+        </a>
+      </div>
+      <p style="color:#94a3b8;font-size:var(--fs-sm);margin-bottom:0.5rem;">
+        Sensasi Packrafting Pertama di Yogyakarta dengan Konsep Wellness Tourism
+      </p>
+      <p style="color:#64748b;font-size:var(--fs-xs);margin-bottom:1.5rem;">
+        Rute Susur Sungai Opak 4,5 km: Canden &rarr; Wisata Potrobayan, Bantul, D.I. Yogyakarta
+      </p>
+
+      <div style="display:flex;justify-content:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <a href="https://www.instagram.com/candenpackraft?igsi=MXR2cjR0ejN5cXRZeA==" target="_blank" aria-label="Instagram" data-social-ig style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#cbd5e1;"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@candenpackrafting?_r=1&_t=ZS-996LSTBR2Ht" target="_blank" aria-label="TikTok" data-social-tiktok style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#cbd5e1;"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="https://youtube.com/@packraftingcanden?si=Equbd3pEqt4Ym5oH" target="_blank" aria-label="YouTube" data-social-yt style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#cbd5e1;"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://wa.me/6281260092044" target="_blank" aria-label="WhatsApp" data-social-wa style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#cbd5e1;"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:1.5rem;font-size:var(--fs-xs);color:#64748b;">
+        &copy; 2026 Packrafting Canden. All Rights Reserved. &bull; Email: candenpackraft@gmail.com
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating WA -->
+  <a href="https://wa.me/6281260092044" class="float-wa-btn" id="float-wa-btn" aria-label="Chat WhatsApp Booking" data-social-wa>
+    <i class="fa-brands fa-whatsapp"></i>
+    <span>Booking via WhatsApp</span>
+  </a>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

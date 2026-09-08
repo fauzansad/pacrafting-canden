@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wilayah | Desa Canden</title>
+  <meta name="description" content="Informasi wilayah, batas wilayah, dan peta Desa Canden, Kapanewon Jetis, Kabupaten Bantul, DIY.">
+  <meta property="og:title" content="Wilayah | Desa Canden">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+  <div class="loading-screen" aria-hidden="true"><div class="loading-spinner"></div><p>Memuat...</p></div>
+
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand"><div class="logo-icon">DC</div><span>Desa Canden<small class="brand-sub">Kab. Bantul, DIY</small></span></a>
+      <div class="nav-overlay"></div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="index.html" class="nav-link">Beranda</a></li>
+        <li><a href="profil.html" class="nav-link">Profil Desa</a></li>
+        <li><a href="pemerintahan.html" class="nav-link">Pemerintahan</a></li>
+        <li><a href="wilayah.html" class="nav-link active">Wilayah</a></li>
+        <li><a href="potensi.html" class="nav-link">Potensi Desa</a></li>
+        <li><a href="berita.html" class="nav-link">Berita</a></li>
+        <li><a href="galeri.html" class="nav-link">Galeri</a></li>
+        <li><a href="kontak.html" class="nav-link">Kontak</a></li>
+        <li class="nav-cta"><a href="kontak.html" class="btn btn-primary btn-sm">Layanan Desa</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="breadcrumb-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Beranda</a>
+        <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="current">Wilayah</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Wilayah Desa Canden</h1>
+      <p>Informasi wilayah, batas, dan peta Desa Canden</p>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <div class="container">
+
+      <!-- Informasi Wilayah -->
+      <div class="content-card reveal">
+        <h3><i class="fa-solid fa-map-location-dot" style="color:var(--primary);margin-right:0.5rem;"></i> Informasi Wilayah</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1.5rem;">
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-map"></i></div>
+            <h4>Luas Wilayah</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Luas Wilayah]</div>
+          </div>
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-building-flag"></i></div>
+            <h4>Padukuhan</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Jumlah]</div>
+          </div>
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-people-roof"></i></div>
+            <h4>Jumlah RT</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Jumlah RT]</div>
+          </div>
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+            <h4>Jumlah RW</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Jumlah RW]</div>
+          </div>
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-mountain"></i></div>
+            <h4>Ketinggian</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Data] mdpl</div>
+          </div>
+          <div class="wilayah-card" style="box-shadow:none;background:var(--bg-alt);">
+            <div class="card-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+            <h4>Kondisi Geografis</h4>
+            <div class="card-value" style="font-size:var(--fs-xl);">[Data]</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batas Wilayah -->
+      <div class="content-card reveal">
+        <h3><i class="fa-solid fa-compass" style="color:var(--primary);margin-right:0.5rem;"></i> Batas Wilayah</h3>
+        <div class="batas-grid">
+          <div class="batas-item">
+            <div class="batas-direction">U</div>
+            <div class="batas-info">
+              <h5>Utara</h5>
+              <p>[Data Batas Wilayah Utara]</p>
+            </div>
+          </div>
+          <div class="batas-item">
+            <div class="batas-direction">T</div>
+            <div class="batas-info">
+              <h5>Timur</h5>
+              <p>[Data Batas Wilayah Timur]</p>
+            </div>
+          </div>
+          <div class="batas-item">
+            <div class="batas-direction">S</div>
+            <div class="batas-info">
+              <h5>Selatan</h5>
+              <p>[Data Batas Wilayah Selatan]</p>
+            </div>
+          </div>
+          <div class="batas-item">
+            <div class="batas-direction">B</div>
+            <div class="batas-info">
+              <h5>Barat</h5>
+              <p>[Data Batas Wilayah Barat]</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peta -->
+      <div class="content-card reveal">
+        <h3><i class="fa-solid fa-location-dot" style="color:var(--primary);margin-right:0.5rem;"></i> Peta Desa Canden</h3>
+        <div class="map-wrapper" style="margin-top:1rem;">
+          <div id="map"></div>
+        </div>
+        <p style="margin-top:1rem;font-size:var(--fs-sm);text-align:center;">[PLACEHOLDER] Koordinat peta bersifat sementara. Ganti dengan koordinat Desa Canden yang sebenarnya.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col footer-about"><div class="footer-brand"><div class="logo-icon">DC</div><span>Desa Canden</span></div><p>Desa Canden, Kapanewon Jetis, Kabupaten Bantul, DIY.</p></div>
+        <div class="footer-col"><h4>Navigasi</h4><ul class="footer-links"><li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Beranda</a></li><li><a href="profil.html"><i class="fa-solid fa-chevron-right"></i> Profil</a></li><li><a href="pemerintahan.html"><i class="fa-solid fa-chevron-right"></i> Pemerintahan</a></li><li><a href="berita.html"><i class="fa-solid fa-chevron-right"></i> Berita</a></li></ul></div>
+        <div class="footer-col"><h4>Informasi</h4><ul class="footer-info"><li><i class="fa-solid fa-location-dot"></i> [Alamat Kantor Desa Canden]</li><li><i class="fa-solid fa-phone"></i> [Nomor Telepon]</li><li><i class="fa-solid fa-envelope"></i> [Email Desa]</li></ul></div>
+        <div class="footer-col"><h4>Media Sosial</h4><div class="footer-social"><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a><a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a><a href="https://wa.me/[NOMOR]" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a></div></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2026 Pemerintah Desa Canden. All Rights Reserved. | <a href="admin/login.html">Admin</a></p></div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="back-to-top" aria-label="Kembali ke atas"><i class="fa-solid fa-chevron-up"></i></button>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
