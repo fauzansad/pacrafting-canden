@@ -207,14 +207,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const galeriList = DataStore.getPublishedGaleri ? DataStore.getPublishedGaleri() : DataStore.getGaleri();
     if (!galeriList || galeriList.length === 0) return;
 
-    const displayList = galeriList.slice(0, 6);
+    const displayList = galeriList;
     galleryGrid.innerHTML = displayList.map(function (g, idx) {
       const isFirst = idx === 0;
-      const spanClass = isFirst ? 'span-2-row span-2-col' : '';
-      const hasImg = g.gambar && g.gambar.trim() !== '';
+      const isWide = idx === 7 && displayList.length === 8;
+      let spanClass = '';
+      if (isFirst) spanClass = 'span-2-row span-2-col';
+      else if (isWide) spanClass = 'span-2-col';
+
+      let imgSrc = g.gambar ? g.gambar.trim() : '';
+      if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
+        imgSrc = imgSrc.replace(/^\/+/, '');
+      }
+      const hasImg = Boolean(imgSrc);
 
       const content = hasImg
-        ? `<img src="${g.gambar}" alt="${g.judul}" style="width:100%;height:100%;object-fit:cover;">`
+        ? `<img src="${imgSrc}" alt="${g.judul}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
         : `
           <div class="gallery-card-placeholder">
             <i class="fa-solid fa-water"></i>
@@ -224,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
 
       return `
-        <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${g.gambar || ''}" data-caption="${g.caption || g.judul}">
+        <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${imgSrc}" data-caption="${g.caption || g.judul}">
           ${content}
           <div class="gallery-card-overlay">
             <h5>${g.judul}</h5>
