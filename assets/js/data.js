@@ -109,7 +109,7 @@ const PackraftData = {
       ctaLink: '#booking',
       ctaSecondaryText: 'LIHAT PAKET WISATA',
       ctaSecondaryLink: '#paket',
-      gambar: '',
+      gambar: 'assets/images/hero/hero-packraft.jpg',
       position: 'center',
       status: 'active',
       urutan: 1
@@ -404,49 +404,58 @@ const DataStore = {
       });
       if (res.ok) {
         console.log(`[Supabase Cloud] Berhasil sinkronisasi '${key}'`);
+        return true;
       } else {
-        console.warn(`[Supabase Cloud] Status respon ${res.status} untuk '${key}'`);
+        const errText = await res.text();
+        console.warn(`[Supabase Cloud] Status respon ${res.status} untuk '${key}':`, errText);
+        throw new Error(`Cloud sync error (${res.status}): ${errText}`);
       }
     } catch (err) {
       console.warn(`[Supabase Cloud] Gagal sinkronisasi '${key}':`, err);
+      throw err;
     }
   },
 
   // Initial Sync from Supabase Cloud
-  async initCloudSync() {
-    try {
-      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data?select=*`, {
-        headers: {
-          'apikey': this.SUPABASE_KEY,
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`
-        }
-      });
-      if (!res.ok) return;
-      const records = await res.json();
-      if (!Array.isArray(records)) return;
+  _cloudSyncPromise: null,
+  initCloudSync() {
+    if (this._cloudSyncPromise) return this._cloudSyncPromise;
+    this._cloudSyncPromise = (async () => {
+      try {
+        const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data?select=*`, {
+          headers: {
+            'apikey': this.SUPABASE_KEY,
+            'Authorization': `Bearer ${this.SUPABASE_KEY}`
+          }
+        });
+        if (!res.ok) return;
+        const records = await res.json();
+        if (!Array.isArray(records)) return;
 
-      let hasChanges = false;
-      records.forEach(item => {
-        if (!item.key || item.value === undefined) return;
-        const storageKey = 'packraft_' + item.key;
-        const currentLocal = localStorage.getItem(storageKey);
-        const remoteString = JSON.stringify(item.value);
+        let hasChanges = false;
+        records.forEach(item => {
+          if (!item.key || item.value === undefined) return;
+          const storageKey = 'packraft_' + item.key;
+          const currentLocal = localStorage.getItem(storageKey);
+          const remoteString = JSON.stringify(item.value);
 
-        if (currentLocal !== remoteString) {
-          try {
-            localStorage.setItem(storageKey, remoteString);
-            hasChanges = true;
-          } catch (e) {}
-        }
-      });
+          if (currentLocal !== remoteString) {
+            try {
+              localStorage.setItem(storageKey, remoteString);
+              hasChanges = true;
+            } catch (e) {}
+          }
+        });
 
-      if (hasChanges) {
-        console.log('[Supabase Cloud] Data terbaru dimuat dari cloud, memperbarui tampilan...');
-        window.dispatchEvent(new CustomEvent('packraft_data_updated'));
+        // Always notify UI when cloud data finishes syncing (critical for incognito / fresh sessions)
+        window.dispatchEvent(new CustomEvent('packraft_data_updated', { detail: { source: 'cloud' } }));
+      } catch (e) {
+        console.warn('[Supabase Cloud] Sedang offline / gagal memuat data cloud, menggunakan cache lokal:', e);
+      } finally {
+        this._cloudSyncPromise = null;
       }
-    } catch (e) {
-      console.warn('[Supabase Cloud] Sedang offline / gagal memuat data cloud, menggunakan cache lokal:', e);
-    }
+    })();
+    return this._cloudSyncPromise;
   },
 
   // Format nomor WhatsApp internasional (contoh 0812... -> 62812...)

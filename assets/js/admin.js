@@ -221,8 +221,12 @@ function renderBannerList() {
 
   container.innerHTML = banners.map(function (b) {
     const hasImg = b.gambar && b.gambar.trim() !== '';
+    let previewSrc = b.gambar;
+    if (previewSrc && !previewSrc.startsWith('http') && !previewSrc.startsWith('data:')) {
+      previewSrc = '../' + previewSrc.replace(/^\/+/, '');
+    }
     const imgPreview = hasImg 
-      ? `<img src="${b.gambar}" alt="Banner" style="width:110px;height:75px;object-fit:cover;object-position:${b.position || 'center'};border-radius:8px;border:1px solid #cbd5e1;">`
+      ? `<img src="${previewSrc}" alt="Banner" style="width:110px;height:75px;object-fit:cover;object-position:${b.position || 'center'};border-radius:8px;border:1px solid #cbd5e1;">`
       : `<div style="width:110px;height:75px;border-radius:8px;background:linear-gradient(135deg, #091a11 0%, #164e32 60%, #0d4653 100%);display:flex;align-items:center;justify-content:center;color:#67e8f9;font-size:1.5rem;"><i class="fa-solid fa-water"></i></div>`;
 
     return `
@@ -331,7 +335,11 @@ function showBannerImagePreview(src) {
   const pos = document.getElementById('banner-position') ? document.getElementById('banner-position').value : 'center';
 
   if (img && empty) {
-    img.src = src;
+    let displaySrc = src;
+    if (displaySrc && !displaySrc.startsWith('http') && !displaySrc.startsWith('data:')) {
+      displaySrc = '../' + displaySrc.replace(/^\/+/, '');
+    }
+    img.src = displaySrc;
     img.style.display = 'block';
     img.style.objectPosition = pos;
     empty.style.display = 'none';
@@ -386,24 +394,51 @@ function editBanner(id) {
   }
 }
 
-function saveBanner() {
+async function saveBanner() {
   const form = document.getElementById('banner-form');
   const id = parseInt(form.dataset.editId) || 1;
   const banners = DataStore.getBanners();
   const banner = banners.find(b => b.id === id) || banners[0];
 
   if (banner) {
+    const saveBtn = form.querySelector('button.btn-admin-primary');
+    const originalHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
+    }
+
     banner.judul = document.getElementById('banner-judul').value.trim();
     banner.subheading = document.getElementById('banner-sub').value.trim();
     banner.lead = document.getElementById('banner-lead').value.trim();
     banner.ctaText = document.getElementById('banner-cta').value.trim();
     banner.position = document.getElementById('banner-position').value;
+
+    const urlInput = document.getElementById('banner-img-url');
+    const urlVal = urlInput ? urlInput.value.trim() : '';
+    if (urlVal && (!currentBannerImageData || !currentBannerImageData.startsWith('data:'))) {
+      currentBannerImageData = urlVal;
+    }
+    if (currentBannerImageData && !currentBannerImageData.startsWith('http') && !currentBannerImageData.startsWith('data:')) {
+      currentBannerImageData = currentBannerImageData.replace(/^\/+/, '');
+    }
     banner.gambar = currentBannerImageData;
 
-    DataStore.saveBanners(banners);
-    showToast('Banner hero & gambar latar berhasil disimpan!', 'success');
-    form.style.display = 'none';
-    renderBannerList();
+    try {
+      showToast('Menyimpan perubahan ke cloud database...', 'info');
+      await DataStore.saveBanners(banners);
+      showToast('Banner hero & gambar latar berhasil disimpan ke cloud!', 'success');
+      form.style.display = 'none';
+      renderBannerList();
+    } catch (err) {
+      console.error('Gagal menyimpan banner:', err);
+      showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalHtml;
+      }
+    }
   }
 }
 

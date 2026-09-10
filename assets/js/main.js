@@ -150,29 +150,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const heroTitleEl = document.querySelector('.hero-title');
     const heroSubEl = document.querySelector('.hero-sub');
     const heroLeadEl = document.querySelector('.hero-lead');
-    const heroCtaBtn = document.getElementById('main-booking-wa-btn');
+    const heroCtaBtn = document.getElementById('main-booking-wa-btn') || document.querySelector('.hero-actions a.btn');
     const heroSlideArt = document.querySelector('.hero-slide-art');
+    const heroLocationEl = document.querySelector('.hero-location');
 
     // Dynamic Background Image & Focal Position
     if (heroSlideArt) {
       if (b.gambar && b.gambar.trim() !== '') {
-        heroSlideArt.style.backgroundImage = `url("${b.gambar}")`;
+        let imgSrc = b.gambar.trim();
+        if (!imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
+          imgSrc = imgSrc.replace(/^\/+/, '');
+        }
+        heroSlideArt.style.backgroundImage = `url("${imgSrc}")`;
         heroSlideArt.style.backgroundSize = 'cover';
         heroSlideArt.style.backgroundPosition = b.position || 'center';
+        heroSlideArt.style.backgroundRepeat = 'no-repeat';
       } else {
         heroSlideArt.style.backgroundImage = '';
         heroSlideArt.style.backgroundSize = '';
         heroSlideArt.style.backgroundPosition = '';
+        heroSlideArt.style.backgroundRepeat = '';
         if (typeof heroSlideArt.style.removeProperty === 'function') {
           heroSlideArt.style.removeProperty('background-image');
           heroSlideArt.style.removeProperty('background-size');
           heroSlideArt.style.removeProperty('background-position');
+          heroSlideArt.style.removeProperty('background-repeat');
         }
       }
     }
 
     if (b.judul && heroTitleEl) {
-      // Split words for accent span if desired
       heroTitleEl.innerHTML = b.judul.replace('CANDEN', '<span>CANDEN</span>');
     }
     if (b.subheading && heroSubEl) {
@@ -182,7 +189,10 @@ document.addEventListener('DOMContentLoaded', function () {
       heroLeadEl.textContent = b.lead;
     }
     if (b.ctaText && heroCtaBtn) {
-      heroCtaBtn.innerHTML = `<i class="fa-brands fa-whatsapp"></i> ${b.ctaText}`;
+      heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${b.ctaText}`;
+    }
+    if (b.lokasiTag && heroLocationEl) {
+      heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> ${b.lokasiTag}`;
     }
   }
 
@@ -273,8 +283,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   refreshAllDynamicContent();
 
-  // Re-render automatically whenever Supabase Cloud syncs new data
+  // Re-render automatically whenever Supabase Cloud syncs new data or local tab changes
   window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
+  window.addEventListener('storage', refreshAllDynamicContent);
 
   // ---- 4. Navbar Scroll Effect ----
   const navbar = document.getElementById('navbar');
