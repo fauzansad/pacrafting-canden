@@ -109,7 +109,7 @@ const PackraftData = {
       ctaLink: '#booking',
       ctaSecondaryText: 'LIHAT PAKET WISATA',
       ctaSecondaryLink: '#paket',
-      gambar: 'assets/images/hero/hero-packraft.jpg',
+      gambar: '',
       position: 'center',
       status: 'active',
       urutan: 1

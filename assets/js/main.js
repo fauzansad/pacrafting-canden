@@ -160,9 +160,14 @@ document.addEventListener('DOMContentLoaded', function () {
         heroSlideArt.style.backgroundSize = 'cover';
         heroSlideArt.style.backgroundPosition = b.position || 'center';
       } else {
-        heroSlideArt.style.backgroundImage = 'none';
+        heroSlideArt.style.backgroundImage = '';
         heroSlideArt.style.backgroundSize = '';
         heroSlideArt.style.backgroundPosition = '';
+        if (typeof heroSlideArt.style.removeProperty === 'function') {
+          heroSlideArt.style.removeProperty('background-image');
+          heroSlideArt.style.removeProperty('background-size');
+          heroSlideArt.style.removeProperty('background-position');
+        }
       }
     }
 
