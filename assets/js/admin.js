@@ -898,61 +898,7 @@ function initGaleriFileListener() {
   }
 }
 
-// ---- 9. Media Library Management ----
-function renderMediaLibrary() {
-  const grid = document.getElementById('media-grid');
-  if (!grid) return;
-
-  const mediaList = DataStore.getMedia();
-  if (mediaList.length === 0) {
-    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:2rem;">Media library masih kosong. Klik "Upload Media" untuk mengunggah gambar.</p>';
-    return;
-  }
-
-  grid.innerHTML = mediaList.map(function(m) {
-    let src = formatAdminAssetUrl(m.url);
-    if (!src) {
-      src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';
-    }
-    const sizeStr = m.size ? Math.round(m.size / 1024) + ' KB' : 'File Foto';
-    return `
-      <div class="media-item">
-        <img src="${src}" alt="${m.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';" style="height:140px;width:100%;object-fit:cover;">
-        <div class="media-item-info">
-          <h4 class="media-item-title" title="Klik untuk menyalin: ${m.name}" onclick="copyMediaUrl('${m.url || src}')" style="cursor:pointer;">${m.name}</h4>
-          <div class="media-item-meta">
-            <span>${sizeStr}</span>
-            <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteMediaItem(${m.id})"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function copyMediaUrl(url) {
-  if (!url) return;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(function() {
-      showToast('URL disalin: ' + url, 'info');
-    }).catch(function() {
-      showToast('URL: ' + url, 'info');
-    });
-  } else {
-    showToast('URL: ' + url, 'info');
-  }
-}
-
-function deleteMediaItem(id) {
-  if (confirm('Hapus media ini?')) {
-    let list = DataStore.getMedia().filter(m => m.id !== id);
-    DataStore.saveMedia(list);
-    showToast('Media berhasil dihapus', 'success');
-    renderMediaLibrary();
-  }
-}
-
-// ---- 10. Init Admin System ----
+// ---- 9. Init Admin System ----
 document.addEventListener('DOMContentLoaded', function () {
   if (!window.location.pathname.includes('login')) {
     checkAuth();
@@ -1007,7 +953,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-refresh admin views when cloud database updates
   window.addEventListener('packraft_data_updated', function () {
-    if (document.getElementById('media-grid')) renderMediaLibrary();
     if (document.getElementById('banner-admin-list')) renderBannerList();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
     if (document.getElementById('berita-admin-list')) renderBeritaAdmin();
