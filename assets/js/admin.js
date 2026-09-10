@@ -728,10 +728,17 @@ function renderGaleriAdmin() {
   }
 
   container.innerHTML = galeriList.map(function (g) {
-    const imgSrc = g.gambar && g.gambar.trim() !== '' ? g.gambar : 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';
+    let imgSrc = g.gambar && g.gambar.trim() !== '' ? g.gambar.trim() : '';
+    if (imgSrc) {
+      if (!imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
+        imgSrc = '../' + imgSrc.replace(/^\/+/, '');
+      }
+    } else {
+      imgSrc = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';
+    }
     return `
       <div class="media-item">
-        <img src="${imgSrc}" alt="${g.judul}" style="height:150px;width:100%;object-fit:cover;">
+        <img src="${imgSrc}" alt="${g.judul}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="height:150px;width:100%;object-fit:cover;">
         <div class="media-item-info">
           <h4 class="media-item-title">${g.judul}</h4>
           <div class="media-item-meta">
@@ -779,7 +786,11 @@ function editGaleriAdmin(id) {
     
     const prev = document.getElementById('galeri-preview-img');
     if (prev && galeri.gambar) {
-      prev.innerHTML = `<img src="${galeri.gambar}" style="max-height:120px;border-radius:8px;margin-top:0.75rem;">`;
+      let prevSrc = galeri.gambar.trim();
+      if (!prevSrc.startsWith('http') && !prevSrc.startsWith('data:')) {
+        prevSrc = '../' + prevSrc.replace(/^\/+/, '');
+      }
+      prev.innerHTML = `<img src="${prevSrc}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="max-height:120px;border-radius:8px;margin-top:0.75rem;">`;
     }
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
   }
@@ -898,11 +909,18 @@ function renderMediaLibrary() {
   }
 
   grid.innerHTML = mediaList.map(function(m) {
-    const src = m.url || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';
+    let src = m.url ? m.url.trim() : '';
+    if (src) {
+      if (!src.startsWith('http') && !src.startsWith('data:')) {
+        src = '../' + src.replace(/^\/+/, '');
+      }
+    } else {
+      src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';
+    }
     const sizeStr = m.size ? Math.round(m.size / 1024) + ' KB' : 'File Foto';
     return `
       <div class="media-item">
-        <img src="${src}" alt="${m.name}" style="height:140px;width:100%;object-fit:cover;">
+        <img src="${src}" alt="${m.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';" style="height:140px;width:100%;object-fit:cover;">
         <div class="media-item-info">
           <h4 class="media-item-title" title="${m.name}">${m.name}</h4>
           <div class="media-item-meta">

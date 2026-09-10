@@ -79,7 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     container.innerHTML = paketList.map(function (p, index) {
       const isFeatured = p.featured || index === 0;
-      const ribbonHtml = p.badge ? `<div class="paket-ribbon">${p.badge}</div>` : (isFeatured ? `<div class="paket-ribbon">Populer</div>` : '');
+      const ribbonText = p.badge ? p.badge : (isFeatured ? 'Populer' : '');
+      const ribbonHtml = ribbonText ? `<div class="paket-badge-row"><span class="paket-ribbon">${ribbonText}</span></div>` : '';
       const btnClass = isFeatured ? 'btn btn-accent' : 'btn btn-outline';
       const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join('');
       const waUrl = DataStore.getBookingWhatsAppUrl(p.nama);
@@ -102,14 +103,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
       return `
         <div class="paket-card ${isFeatured ? 'featured' : ''} reveal revealed">
-          ${ribbonHtml}
           <div class="paket-header">
+            ${ribbonHtml}
             <h3>${p.nama}</h3>
             <div class="paket-subtitle">${p.deskripsi || 'Sensasi Packrafting Wellness Tourism'}</div>
-            <div class="paket-price">
+            <div class="paket-price-box">
               ${normalPriceHtml}
-              <span class="amount">${displayPrice}</span>
-              <span class="unit">${p.unit || '/ orang'}</span>
+              <div class="paket-price">
+                <span class="amount">${displayPrice}</span>
+                <span class="unit">${p.unit || '/ orang'}</span>
+              </div>
             </div>
           </div>
           <div class="paket-body">
@@ -287,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
   window.addEventListener('storage', refreshAllDynamicContent);
 
-  // ---- 4. Navbar Scroll Effect ----
+  // ---- 4. Navbar Scroll Effect & ScrollSpy ----
   const navbar = document.getElementById('navbar');
   if (navbar) {
     function checkNavbar() {
@@ -300,6 +303,53 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', checkNavbar, { passive: true });
     checkNavbar();
   }
+
+  // ScrollSpy Active Link Indicator
+  const navLinks = document.querySelectorAll('.nav-menu .nav-link');
+  const spySections = [];
+
+  navLinks.forEach(function (link) {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#') && href.length > 1) {
+      const target = document.querySelector(href);
+      if (target) {
+        spySections.push({ id: href, el: target, link: link });
+      }
+    }
+  });
+
+  function updateActiveNavLink() {
+    if (spySections.length === 0) return;
+    const scrollPos = window.scrollY + 130;
+    const isAtBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 60);
+
+    let activeItem = null;
+
+    if (isAtBottom) {
+      activeItem = spySections[spySections.length - 1];
+    } else {
+      for (let i = 0; i < spySections.length; i++) {
+        const item = spySections[i];
+        const top = item.el.offsetTop;
+        const height = item.el.offsetHeight;
+        if (scrollPos >= top && scrollPos < top + height) {
+          activeItem = item;
+          break;
+        }
+      }
+      if (!activeItem && window.scrollY < 200) {
+        activeItem = spySections[0];
+      }
+    }
+
+    if (activeItem) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      activeItem.link.classList.add('active');
+    }
+  }
+
+  window.addEventListener('scroll', updateActiveNavLink, { passive: true });
+  updateActiveNavLink();
 
   // ---- 5. Mobile Menu Toggle ----
   const navToggle = document.getElementById('nav-toggle');
@@ -325,9 +375,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Close on navigation link click
+    // Close on navigation link click & immediately update active state
     navMenu.querySelectorAll('.nav-link').forEach(function (link) {
       link.addEventListener('click', function () {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
         navToggle.classList.remove('active');
         navMenu.classList.remove('active');
         if (navOverlay) navOverlay.classList.remove('active');
