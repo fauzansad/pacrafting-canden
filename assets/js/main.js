@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
         heroSlideArt.style.backgroundSize = 'cover';
         heroSlideArt.style.backgroundPosition = b.position || 'center';
       } else {
-        heroSlideArt.style.backgroundImage = '';
+        heroSlideArt.style.backgroundImage = 'none';
         heroSlideArt.style.backgroundSize = '';
         heroSlideArt.style.backgroundPosition = '';
       }

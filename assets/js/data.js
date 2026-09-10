@@ -483,9 +483,6 @@ const DataStore = {
       try {
         const parsed = JSON.parse(stored);
         if (parsed && parsed.length > 0) {
-          if (!parsed[0].gambar || parsed[0].gambar.trim() === '') {
-            parsed[0].gambar = PackraftData.banners[0].gambar;
-          }
           return parsed;
         }
       } catch (e) {}
@@ -560,10 +557,6 @@ const DataStore = {
       try {
         const parsed = JSON.parse(stored);
         if (parsed && parsed.length > 0) {
-          const hasAnyImg = parsed.some(g => g.gambar && g.gambar.trim() !== '');
-          if (!hasAnyImg) {
-            return PackraftData.galeri;
-          }
           return parsed;
         }
       } catch (e) {}
