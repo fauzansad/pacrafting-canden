@@ -70,9 +70,52 @@
 
           <!-- Video Live Preview -->
           <div class="form-group" style="margin-bottom:1.5rem;">
-            <label>Live Preview Video:</label>
+            <label>Live Player Preview:</label>
             <div id="video-preview-container" style="background:#0b1710;border-radius:12px;overflow:hidden;height:240px;display:flex;align-items:center;justify-content:center;color:#94a3b8;">
               <p><i class="fa-solid fa-film" style="font-size:2rem;margin-bottom:0.5rem;display:block;text-align:center;"></i>Masukkan URL YouTube untuk melihat preview</p>
+            </div>
+          </div>
+
+          <!-- Video Thumbnail / Cover Management -->
+          <div class="form-group" style="margin-bottom:1.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;">
+            <label style="font-weight:700;color:#0f172a;display:flex;align-items:center;gap:0.4rem;margin-bottom:0.5rem;">
+              <i class="fa-solid fa-image text-accent" style="color:#ea580c;"></i> Foto Thumbnail / Cover Video (Sebelum Diputar)
+            </label>
+            <p style="font-size:0.8rem;color:#64748b;margin-bottom:1rem;">
+              Foto ini yang akan muncul sebagai latar belakang video di halaman depan (bukan sekadar gradasi biru biasa).
+            </p>
+
+            <div style="display:flex;gap:1.25rem;align-items:flex-start;flex-wrap:wrap;">
+              <!-- Thumbnail Preview Box -->
+              <div style="width:260px;height:146px;border-radius:10px;overflow:hidden;border:2px solid #cbd5e1;position:relative;background:#091a11;box-shadow:0 4px 12px rgba(0,0,0,0.15);flex-shrink:0;">
+                <img id="video-cover-preview" src="../assets/images/hero/hero-packraft.jpg" alt="Preview Thumbnail" style="width:100%;height:100%;object-fit:cover;">
+                <div style="position:absolute;inset:0;background:linear-gradient(135deg, rgba(9,26,17,0.4) 0%, rgba(4,18,22,0.65) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;">
+                  <div style="width:44px;height:44px;border-radius:50%;background:#ea580c;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(234,88,12,0.6);margin-bottom:0.4rem;">
+                    <i class="fa-solid fa-play" style="font-size:1rem;margin-left:3px;"></i>
+                  </div>
+                  <span style="font-size:0.65rem;font-weight:700;letter-spacing:0.05em;text-shadow:0 1px 4px rgba(0,0,0,0.8);">PREVIEW TAMPILAN</span>
+                </div>
+              </div>
+
+              <!-- Action Controls -->
+              <div style="flex:1;min-width:240px;">
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+                  <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="document.getElementById('video-cover-file').click()">
+                    <i class="fa-solid fa-upload"></i> Upload Foto Kustom
+                  </button>
+                  <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="useYoutubeThumbnail()">
+                    <i class="fa-brands fa-youtube" style="color:#ef4444;"></i> Ambil Thumbnail YouTube
+                  </button>
+                  <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="resetDefaultThumbnail()">
+                    <i class="fa-solid fa-rotate-left"></i> Foto Default Sungai
+                  </button>
+                </div>
+                <input type="file" id="video-cover-file" accept="image/*" style="display:none;" onchange="handleCoverUpload(event)">
+                <input type="text" id="video-cover-url" placeholder="Atau paste URL gambar thumbnail kustom di sini" oninput="onCoverUrlChange(this.value)">
+                <small style="display:block;color:#64748b;margin-top:0.35rem;font-size:0.75rem;">
+                  Pilih salah satu: Upload foto kustom, ambil otomatis dari video YouTube, atau gunakan foto default sungai.
+                </small>
+              </div>
             </div>
           </div>
 
@@ -97,28 +140,102 @@
   </main>
 
   <div class="toast-container" id="toast-container"></div>
-  <script src="../assets/js/data.js?v=2.8"></script>
-  <script src="../assets/js/admin.js?v=2.8"></script>
+  <script src="../assets/js/data.js?v=2.9"></script>
+  <script src="../assets/js/admin.js?v=2.9"></script>
   <script>
+    let currentCoverImage = '';
+
+    function getYoutubeVideoId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
     function previewVideo(url) {
       const container = document.getElementById('video-preview-container');
       if (!container) return;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-      const match = (url || '').match(regExp);
-      if (match && match[2].length === 11) {
-        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${match[2]}" frameborder="0" allowfullscreen style="width:100%;height:100%;"></iframe>`;
+      const videoId = getYoutubeVideoId(url);
+      if (videoId) {
+        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="width:100%;height:100%;"></iframe>`;
       } else {
         container.innerHTML = `<div style="text-align:center;color:#94a3b8;padding:1.5rem;"><i class="fa-brands fa-youtube" style="font-size:2.5rem;color:#ef4444;margin-bottom:0.5rem;display:block;"></i>Link siap disimpan. Masukkan link spesifik video untuk preview langsung.</div>`;
       }
+    }
+
+    function updateCoverPreview(src) {
+      const img = document.getElementById('video-cover-preview');
+      if (!img) return;
+      let displaySrc = src ? src.trim() : '';
+      if (!displaySrc) {
+        displaySrc = '../assets/images/hero/hero-packraft.jpg';
+      } else if (!displaySrc.startsWith('http') && !displaySrc.startsWith('data:')) {
+        displaySrc = (typeof formatAdminAssetUrl === 'function') ? formatAdminAssetUrl(displaySrc) : ('../' + displaySrc.replace(/^\/+/, ''));
+      }
+      img.src = displaySrc;
+    }
+
+    function useYoutubeThumbnail() {
+      const url = document.getElementById('video-url').value.trim();
+      const videoId = getYoutubeVideoId(url);
+      if (videoId) {
+        currentCoverImage = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        document.getElementById('video-cover-url').value = currentCoverImage;
+        updateCoverPreview(currentCoverImage);
+        showToast('Thumbnail YouTube berhasil diambil!', 'success');
+      } else {
+        showToast('Masukkan URL video YouTube yang valid terlebih dahulu', 'warning');
+      }
+    }
+
+    function resetDefaultThumbnail() {
+      currentCoverImage = 'assets/images/hero/hero-packraft.jpg';
+      document.getElementById('video-cover-url').value = '';
+      updateCoverPreview(currentCoverImage);
+      showToast('Thumbnail direset ke foto default petualangan sungai!', 'info');
+    }
+
+    function onCoverUrlChange(val) {
+      currentCoverImage = val.trim();
+      updateCoverPreview(currentCoverImage);
+    }
+
+    function handleCoverUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast('File harus berupa gambar (JPG, PNG, WebP)', 'warning');
+        return;
+      }
+
+      if (file.size > 4 * 1024 * 1024) {
+        showToast('Ukuran foto maksimal 4MB', 'warning');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        currentCoverImage = evt.target.result;
+        document.getElementById('video-cover-url').value = '';
+        updateCoverPreview(currentCoverImage);
+        showToast('Foto thumbnail berhasil dimuat!', 'success');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
     }
 
     function loadVideoAdmin() {
       const v = DataStore.getVideo();
       if (!v) return;
       document.getElementById('video-url').value = v.youtubeUrl || '';
-      document.getElementById('video-title').value = v.title || 'Lihat Keseruan Petualangan';
+      document.getElementById('video-title').value = v.title || 'Feel the Ride — Packrafting Canden';
       document.getElementById('video-subtitle').value = v.subtitle || '';
       previewVideo(v.youtubeUrl);
+
+      currentCoverImage = v.coverImg || '';
+      document.getElementById('video-cover-url').value = (currentCoverImage.startsWith('data:') ? '' : currentCoverImage);
+      updateCoverPreview(currentCoverImage || 'assets/images/hero/hero-packraft.jpg');
     }
 
     function saveVideoAdmin() {
@@ -128,11 +245,12 @@
 
       const v = DataStore.getVideo() || {};
       v.youtubeUrl = url;
-      v.title = title || 'Lihat Keseruan Petualangan';
+      v.title = title || 'Feel the Ride — Packrafting Canden';
       v.subtitle = subtitle;
+      v.coverImg = currentCoverImage || 'assets/images/hero/hero-packraft.jpg';
 
       DataStore.saveVideo(v);
-      showToast('Pengaturan video pengalaman berhasil disimpan!', 'success');
+      showToast('Pengaturan video & foto thumbnail berhasil disimpan!', 'success');
     }
 
     document.addEventListener('DOMContentLoaded', function() {

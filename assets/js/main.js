@@ -458,9 +458,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (v.title && sectionTitle) sectionTitle.textContent = v.title;
     if (v.subtitle && sectionLead) sectionLead.textContent = v.subtitle;
-    if (v.coverImg && videoThumb) {
-      videoThumb.style.backgroundImage = `url("${v.coverImg}")`;
+    // Dynamic thumbnail detection
+    let coverSrc = v.coverImg ? v.coverImg.trim() : '';
+    const rawVideoUrl = v.youtubeUrl || v.embedUrl || '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = rawVideoUrl.match(regExp);
+    const videoId = (match && match[2].length === 11) ? match[2] : null;
+
+    if (!coverSrc) {
+      if (videoId) {
+        coverSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      } else {
+        coverSrc = 'assets/images/hero/hero-packraft.jpg';
+      }
+    }
+
+    if (videoThumb && coverSrc) {
+      if (!coverSrc.startsWith('http') && !coverSrc.startsWith('data:')) {
+        coverSrc = coverSrc.replace(/^\/+/, '');
+      }
+      videoThumb.style.backgroundImage = `linear-gradient(135deg, rgba(9, 26, 17, 0.45) 0%, rgba(4, 18, 22, 0.75) 100%), url("${coverSrc}")`;
       videoThumb.style.backgroundSize = 'cover';
+      videoThumb.style.backgroundPosition = 'center';
     }
 
     const videoPlayBtn = document.getElementById('video-play-btn');

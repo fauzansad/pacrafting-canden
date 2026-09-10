@@ -329,7 +329,7 @@ const PackraftData = {
     subtitle: 'Sensasi Petualangan Menyusuri Sungai Opak',
     youtubeUrl: 'https://youtube.com/@packraftingcanden?si=Equbd3pEqt4Ym5oH',
     embedUrl: 'https://www.youtube.com/embed/live_stream?channel=UCpackraftingcanden',
-    coverImg: ''
+    coverImg: 'assets/images/hero/hero-packraft.jpg'
   },
 
   // ---- Frequently Asked Questions ----
@@ -592,7 +592,18 @@ const DataStore = {
 
   getVideo() {
     const stored = localStorage.getItem('packraft_video');
-    return stored ? JSON.parse(stored) : PackraftData.video;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          if (!parsed.coverImg) {
+            parsed.coverImg = PackraftData.video.coverImg;
+          }
+          return Object.assign({}, PackraftData.video, parsed);
+        }
+      } catch (e) {}
+    }
+    return PackraftData.video;
   },
   saveVideo(data) {
     return this.saveToCloud('video', data);
