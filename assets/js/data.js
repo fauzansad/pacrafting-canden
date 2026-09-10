@@ -109,7 +109,7 @@ const PackraftData = {
       ctaLink: '#booking',
       ctaSecondaryText: 'LIHAT PAKET WISATA',
       ctaSecondaryLink: '#paket',
-      gambar: '',
+      gambar: 'assets/images/hero/hero-packraft.jpg',
       position: 'center',
       status: 'active',
       urutan: 1
@@ -236,14 +236,14 @@ const PackraftData = {
 
   // ---- Galeri Foto Petualangan ----
   galeri: [
-    { id: 1, judul: 'Aksi Menyusuri Arus Sungai Opak', kategori: 'Aktivitas', gambar: '', caption: 'Keseruan packrafting menembus aliran Sungai Opak' },
-    { id: 2, judul: 'Rimbun Alami Tepian Sungai', kategori: 'Pemandangan', gambar: '', caption: 'Pemandangan hijau asri di sepanjang rute susur sungai' },
-    { id: 3, judul: 'Keseruan Bersama Teman', kategori: 'Komunitas', gambar: '', caption: 'Momen petualangan seru bersama sahabat' },
-    { id: 4, judul: 'Safety Briefing di Starting Point', kategori: 'Persiapan', gambar: '', caption: 'Briefing instruktur sebelum turun ke sungai' },
-    { id: 5, judul: 'Family Fun Packraft', kategori: 'Keluarga', gambar: '', caption: 'Keceriaan keluarga menikmati air sungai yang segar' },
-    { id: 6, judul: 'Finish di Wisata Potrobayan', kategori: 'Aktivitas', gambar: '', caption: 'Selebrasi tiba di garis finish Potrobayan' },
-    { id: 7, judul: 'Peralatan Siap Digunakan', kategori: 'Persiapan', gambar: '', caption: 'Perahu packraft dan helm terawat rapi' },
-    { id: 8, judul: 'Spot Foto Tepi Sungai', kategori: 'Pemandangan', gambar: '', caption: 'Spot foto instagramable di aliran Sungai Opak' }
+    { id: 1, judul: 'Aksi Menyusuri Arus Sungai Opak', kategori: 'Aktivitas', gambar: 'assets/images/galeri/1.jpg', caption: 'Keseruan packrafting menembus aliran Sungai Opak' },
+    { id: 2, judul: 'Rimbun Alami Tepian Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/2.jpg', caption: 'Pemandangan hijau asri di sepanjang rute susur sungai' },
+    { id: 3, judul: 'Keseruan Bersama Teman', kategori: 'Komunitas', gambar: 'assets/images/galeri/3.jpg', caption: 'Momen petualangan seru bersama sahabat' },
+    { id: 4, judul: 'Safety Briefing di Starting Point', kategori: 'Persiapan', gambar: 'assets/images/galeri/4.jpg', caption: 'Briefing instruktur sebelum turun ke sungai' },
+    { id: 5, judul: 'Family Fun Packraft', kategori: 'Keluarga', gambar: 'assets/images/galeri/6.jpg', caption: 'Keceriaan keluarga menikmati air sungai yang segar' },
+    { id: 6, judul: 'Finish di Wisata Potrobayan', kategori: 'Aktivitas', gambar: 'assets/images/galeri/7.jpg', caption: 'Selebrasi tiba di garis finish Potrobayan' },
+    { id: 7, judul: 'Peralatan Siap Digunakan', kategori: 'Persiapan', gambar: 'assets/images/galeri/tes.jpg', caption: 'Perahu packraft dan helm terawat rapi' },
+    { id: 8, judul: 'Spot Foto Tepi Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/5.jpg', caption: 'Spot foto instagramable di aliran Sungai Opak' }
   ],
 
   // ---- Testimonial ----
@@ -312,7 +312,15 @@ const PackraftData = {
 
   // ---- Media Library Default ----
   media: [
-    { id: 1, name: 'hero-packraft.jpg', size: 1024000, type: 'image/jpeg', url: '', uploadedAt: '2026-08-01T00:00:00.000Z' }
+    { id: 1, name: 'hero-packraft.jpg', size: 3644614, type: 'image/jpeg', url: 'assets/images/hero/hero-packraft.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 2, name: '1.jpg', size: 233158, type: 'image/jpeg', url: 'assets/images/galeri/1.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 3, name: '2.jpg', size: 3760209, type: 'image/jpeg', url: 'assets/images/galeri/2.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 4, name: '3.jpg', size: 3760209, type: 'image/jpeg', url: 'assets/images/galeri/3.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 5, name: '4.jpg', size: 3870747, type: 'image/jpeg', url: 'assets/images/galeri/4.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 6, name: '5.jpg', size: 3644614, type: 'image/jpeg', url: 'assets/images/galeri/5.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 7, name: '6.jpg', size: 5324361, type: 'image/jpeg', url: 'assets/images/galeri/6.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 8, name: '7.jpg', size: 6434239, type: 'image/jpeg', url: 'assets/images/galeri/7.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' },
+    { id: 9, name: 'tes.jpg', size: 1537028, type: 'image/jpeg', url: 'assets/images/galeri/tes.jpg', uploadedAt: '2026-09-10T08:00:00.000Z' }
   ],
 
   // ---- Video Pengalaman ----
@@ -392,7 +400,18 @@ const DataStore = {
 
   getBanners() {
     const stored = localStorage.getItem('packraft_banners');
-    return stored ? JSON.parse(stored) : PackraftData.banners;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.length > 0) {
+          if (!parsed[0].gambar || parsed[0].gambar.trim() === '') {
+            parsed[0].gambar = PackraftData.banners[0].gambar;
+          }
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return PackraftData.banners;
   },
   saveBanners(data) {
     localStorage.setItem('packraft_banners', JSON.stringify(data));
@@ -458,7 +477,19 @@ const DataStore = {
 
   getGaleri() {
     const stored = localStorage.getItem('packraft_galeri');
-    return stored ? JSON.parse(stored) : PackraftData.galeri;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.length > 0) {
+          const hasAnyImg = parsed.some(g => g.gambar && g.gambar.trim() !== '');
+          if (!hasAnyImg) {
+            return PackraftData.galeri;
+          }
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return PackraftData.galeri;
   },
   getPublishedGaleri() {
     return this.getGaleri().filter(g => g.status !== 'inactive');
