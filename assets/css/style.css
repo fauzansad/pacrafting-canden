@@ -121,7 +121,7 @@ body {
   font-family: var(--font-body);
   font-size: var(--fs-base);
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg-dark);
   line-height: 1.7;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -179,6 +179,7 @@ p {
 .section {
   padding: var(--section-py) 0;
   position: relative;
+  background: var(--bg);
 }
 
 .section-alt {
@@ -368,6 +369,18 @@ p {
   z-index: 1000;
   transition: all var(--transition);
   padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 0 1.25rem;
+}
+
+.navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--bg-dark);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .navbar.scrolled {
@@ -2436,6 +2449,14 @@ p {
 @media (max-width: 768px) {
   :root {
     --section-py: 4.5rem;
+  }
+
+  .navbar {
+    background: rgba(6, 21, 36, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: calc(0.85rem + env(safe-area-inset-top, 0px)) 0 0.85rem;
   }
 
   .nav-menu {
