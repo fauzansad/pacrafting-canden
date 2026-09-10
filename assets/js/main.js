@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', function () {
       heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${b.ctaText}`;
     }
     if (b.lokasiTag && heroLocationEl) {
-      heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> ${b.lokasiTag}`;
+      const cleanTag = b.lokasiTag.replace(/^[📍\s]+/, '');
+      heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
     }
   }
 

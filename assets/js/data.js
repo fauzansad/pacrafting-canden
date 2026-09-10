@@ -104,7 +104,7 @@ const PackraftData = {
       judul: 'PACKRAFTING CANDEN',
       subheading: 'Adventure on the River',
       lead: 'Rasakan sensasi menyusuri Sungai Opak dari Starting Point Canden hingga finish di Wisata Potrobayan. Petualangan air seru, alami, dan tak terlupakan!',
-      lokasiTag: '📍 Rute Sungai Opak &bull; 4,5 KM (± 1,5 Jam) &bull; Canden ke Potrobayan',
+      lokasiTag: 'Rute Sungai Opak &bull; 4,5 KM (± 1,5 Jam) &bull; Canden ke Potrobayan',
       ctaText: 'BOOKING SEKARANG',
       ctaLink: '#booking',
       ctaSecondaryText: 'LIHAT PAKET WISATA',
