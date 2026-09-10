@@ -724,32 +724,104 @@ function deleteBeritaAdmin(id) {
 
 // ---- 8. Galeri Foto Management ----
 let currentGaleriImageData = '';
+let currentGaleriFilter = 'all';
+
+function filterGaleriAdmin(status, btn) {
+  currentGaleriFilter = status;
+  if (btn) {
+    document.querySelectorAll('#galeri-filter-tabs button').forEach(b => {
+      b.classList.remove('btn-admin-primary');
+      b.classList.add('btn-admin-outline');
+    });
+    btn.classList.remove('btn-admin-outline');
+    btn.classList.add('btn-admin-primary');
+  }
+  renderGaleriAdmin();
+}
+
+function toggleGaleriStatus(id) {
+  const list = DataStore.getGaleri();
+  const item = list.find(g => g.id === id);
+  if (item) {
+    const isCurrentlyActive = (item.status !== 'hidden');
+    item.status = isCurrentlyActive ? 'hidden' : 'active';
+    DataStore.saveGaleri(list);
+    showToast(`Foto "${item.judul}" ${item.status === 'active' ? 'DITAMPILKAN di website' : 'TIDAK DITAMPILKAN (disembunyikan)'}!`, item.status === 'active' ? 'success' : 'warning');
+    renderGaleriAdmin();
+  }
+}
 
 function renderGaleriAdmin() {
   const container = document.getElementById('galeri-admin-grid');
   if (!container) return;
 
   const galeriList = DataStore.getGaleri();
+
+  // Update counters
+  const countAll = galeriList.length;
+  const countActive = galeriList.filter(g => g.status !== 'hidden').length;
+  const countHidden = galeriList.filter(g => g.status === 'hidden').length;
+
+  const elAll = document.getElementById('count-all');
+  const elActive = document.getElementById('count-active');
+  const elHidden = document.getElementById('count-hidden');
+  if (elAll) elAll.textContent = countAll;
+  if (elActive) elActive.textContent = countActive;
+  if (elHidden) elHidden.textContent = countHidden;
+
   if (galeriList.length === 0) {
     container.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:2rem;">Belum ada foto galeri. Klik "Tambah Foto" untuk mengunggah.</p>';
     return;
   }
 
-  container.innerHTML = galeriList.map(function (g) {
+  // Filter based on active tab
+  let filtered = galeriList;
+  if (currentGaleriFilter === 'active') {
+    filtered = galeriList.filter(g => g.status !== 'hidden');
+  } else if (currentGaleriFilter === 'hidden') {
+    filtered = galeriList.filter(g => g.status === 'hidden');
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:2rem;">Tidak ada foto dengan status ${currentGaleriFilter === 'active' ? '"Ditampilkan"' : '"Disembunyikan"'}.</p>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(function (g) {
     let imgSrc = formatAdminAssetUrl(g.gambar);
     if (!imgSrc) {
       imgSrc = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';
     }
+
+    const isShown = (g.status !== 'hidden');
+    const statusBadge = isShown
+      ? `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#ecfdf5;color:#059669;padding:0.2rem 0.55rem;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #a7f3d0;"><i class="fa-solid fa-circle-check"></i> Ditampilkan</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#fef2f2;color:#dc2626;padding:0.2rem 0.55rem;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #fecaca;"><i class="fa-solid fa-eye-slash"></i> Disembunyikan</span>`;
+
+    const toggleBtn = isShown
+      ? `<button class="btn-admin btn-admin-outline btn-admin-sm" title="Klik untuk sembunyikan dari website" onclick="toggleGaleriStatus(${g.id})" style="color:#dc2626;border-color:#fca5a5;padding:0.25rem 0.5rem;font-size:0.75rem;"><i class="fa-solid fa-eye-slash"></i> Sembunyikan</button>`
+      : `<button class="btn-admin btn-admin-primary btn-admin-sm" title="Klik untuk tampilkan di website" onclick="toggleGaleriStatus(${g.id})" style="background:#059669;border-color:#059669;padding:0.25rem 0.5rem;font-size:0.75rem;"><i class="fa-solid fa-eye"></i> Tampilkan</button>`;
+
+    const cardStyle = isShown ? '' : 'style="opacity:0.8;border:1.5px dashed #f87171;background:#fffaf0;"';
+
     return `
-      <div class="media-item">
-        <img src="${imgSrc}" alt="${g.judul}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="height:150px;width:100%;object-fit:cover;">
+      <div class="media-item" ${cardStyle}>
+        <div style="position:relative;">
+          <img src="${imgSrc}" alt="${g.judul}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="height:150px;width:100%;object-fit:cover;">
+          <div style="position:absolute;top:8px;right:8px;">
+            ${statusBadge}
+          </div>
+        </div>
         <div class="media-item-info">
           <h4 class="media-item-title">${g.judul}</h4>
-          <div class="media-item-meta">
-            <span>${g.kategori || 'Petualangan'}</span>
-            <div style="display:flex;gap:0.3rem;">
-              <button class="btn-admin btn-admin-outline btn-admin-sm" onclick="editGaleriAdmin(${g.id})"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteGaleriAdmin(${g.id})"><i class="fa-solid fa-trash"></i></button>
+          <div style="font-size:0.775rem;color:#64748b;margin-bottom:0.5rem;">
+            <span><i class="fa-solid fa-tag"></i> ${g.kategori || 'Petualangan'}</span>
+          </div>
+          <div class="media-item-meta" style="flex-wrap:wrap;gap:0.4rem;padding-top:0.4rem;border-top:1px solid #f1f5f9;">
+            ${toggleBtn}
+            <div style="display:flex;gap:0.25rem;margin-left:auto;">
+              <button class="btn-admin btn-admin-outline btn-admin-sm" title="Edit Foto" onclick="editGaleriAdmin(${g.id})"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn-admin btn-admin-danger btn-admin-sm" title="Hapus Foto" onclick="deleteGaleriAdmin(${g.id})"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
         </div>
@@ -768,6 +840,9 @@ function addGaleriAdmin() {
     document.getElementById('galeri-judul').value = '';
     document.getElementById('galeri-kategori').value = 'Aktivitas';
     document.getElementById('galeri-deskripsi').value = '';
+    if (document.getElementById('galeri-status')) {
+      document.getElementById('galeri-status').value = 'active';
+    }
     const prev = document.getElementById('galeri-preview-img');
     if (prev) prev.innerHTML = '';
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
@@ -787,6 +862,9 @@ function editGaleriAdmin(id) {
     document.getElementById('galeri-judul').value = galeri.judul || '';
     document.getElementById('galeri-kategori').value = galeri.kategori || 'Kegiatan Desa';
     document.getElementById('galeri-deskripsi').value = galeri.caption || galeri.deskripsi || '';
+    if (document.getElementById('galeri-status')) {
+      document.getElementById('galeri-status').value = (galeri.status === 'hidden') ? 'hidden' : 'active';
+    }
     
     const prev = document.getElementById('galeri-preview-img');
     if (prev && galeri.gambar) {
@@ -803,6 +881,7 @@ function saveGaleriAdmin() {
   const judul = document.getElementById('galeri-judul').value.trim();
   const kategori = document.getElementById('galeri-kategori').value;
   const deskripsi = document.getElementById('galeri-deskripsi').value.trim();
+  const status = document.getElementById('galeri-status') ? document.getElementById('galeri-status').value : 'active';
 
   if (!judul) {
     showToast('Judul foto harus diisi!', 'error');
@@ -819,6 +898,7 @@ function saveGaleriAdmin() {
       item.kategori = kategori;
       item.caption = deskripsi;
       item.deskripsi = deskripsi;
+      item.status = status;
       if (currentGaleriImageData) item.gambar = currentGaleriImageData;
     }
   } else {
@@ -828,7 +908,8 @@ function saveGaleriAdmin() {
       kategori: kategori,
       caption: deskripsi,
       deskripsi: deskripsi,
-      gambar: currentGaleriImageData || ''
+      gambar: currentGaleriImageData || '',
+      status: status
     });
   }
 
@@ -842,7 +923,6 @@ function saveGaleriAdmin() {
     showToast(mode === 'edit' ? 'Foto galeri berhasil diperbarui!' : 'Foto baru berhasil ditambahkan ke galeri!', 'success');
   } catch (err) {
     console.error('Storage error:', err);
-    // If quota exceeded, trim old default placeholder entries and retry
     try {
       const trimmedList = list.slice(0, 15);
       DataStore.saveGaleri(trimmedList);

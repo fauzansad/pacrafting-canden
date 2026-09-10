@@ -236,14 +236,14 @@ const PackraftData = {
 
   // ---- Galeri Foto Petualangan ----
   galeri: [
-    { id: 1, judul: 'Aksi Menyusuri Arus Sungai Opak', kategori: 'Aktivitas', gambar: 'assets/images/galeri/1.jpg', caption: 'Keseruan packrafting menembus aliran Sungai Opak' },
-    { id: 2, judul: 'Rimbun Alami Tepian Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/2.jpg', caption: 'Pemandangan hijau asri di sepanjang rute susur sungai' },
-    { id: 3, judul: 'Keseruan Bersama Teman', kategori: 'Komunitas', gambar: 'assets/images/galeri/3.jpg', caption: 'Momen petualangan seru bersama sahabat' },
-    { id: 4, judul: 'Safety Briefing di Starting Point', kategori: 'Persiapan', gambar: 'assets/images/galeri/4.jpg', caption: 'Briefing instruktur sebelum turun ke sungai' },
-    { id: 5, judul: 'Family Fun Packraft', kategori: 'Keluarga', gambar: 'assets/images/galeri/6.jpg', caption: 'Keceriaan keluarga menikmati air sungai yang segar' },
-    { id: 6, judul: 'Finish di Wisata Potrobayan', kategori: 'Aktivitas', gambar: 'assets/images/galeri/7.jpg', caption: 'Selebrasi tiba di garis finish Potrobayan' },
-    { id: 7, judul: 'Peralatan Siap Digunakan', kategori: 'Persiapan', gambar: 'assets/images/galeri/tes.jpg', caption: 'Perahu packraft dan helm terawat rapi' },
-    { id: 8, judul: 'Spot Foto Tepi Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/5.jpg', caption: 'Spot foto instagramable di aliran Sungai Opak' }
+    { id: 1, judul: 'Aksi Menyusuri Arus Sungai Opak', kategori: 'Aktivitas', gambar: 'assets/images/galeri/1.jpg', caption: 'Keseruan packrafting menembus aliran Sungai Opak', status: 'active' },
+    { id: 2, judul: 'Rimbun Alami Tepian Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/2.jpg', caption: 'Pemandangan hijau asri di sepanjang rute susur sungai', status: 'active' },
+    { id: 3, judul: 'Keseruan Bersama Teman', kategori: 'Komunitas', gambar: 'assets/images/galeri/3.jpg', caption: 'Momen petualangan seru bersama sahabat', status: 'active' },
+    { id: 4, judul: 'Safety Briefing di Starting Point', kategori: 'Persiapan', gambar: 'assets/images/galeri/4.jpg', caption: 'Briefing instruktur sebelum turun ke sungai', status: 'active' },
+    { id: 5, judul: 'Family Fun Packraft', kategori: 'Keluarga', gambar: 'assets/images/galeri/6.jpg', caption: 'Keceriaan keluarga menikmati air sungai yang segar', status: 'active' },
+    { id: 6, judul: 'Finish di Wisata Potrobayan', kategori: 'Aktivitas', gambar: 'assets/images/galeri/7.jpg', caption: 'Selebrasi tiba di garis finish Potrobayan', status: 'active' },
+    { id: 7, judul: 'Peralatan Siap Digunakan', kategori: 'Persiapan', gambar: 'assets/images/galeri/tes.jpg', caption: 'Perahu packraft dan helm terawat rapi', status: 'active' },
+    { id: 8, judul: 'Spot Foto Tepi Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/5.jpg', caption: 'Spot foto instagramable di aliran Sungai Opak', status: 'active' }
   ],
 
   // ---- Testimonial ----
@@ -573,7 +573,7 @@ const DataStore = {
     return PackraftData.galeri;
   },
   getPublishedGaleri() {
-    return this.getGaleri().filter(g => g.status !== 'inactive');
+    return this.getGaleri().filter(g => g.status !== 'hidden' && g.status !== 'inactive');
   },
   saveGaleri(data) {
     return this.saveToCloud('galeri', data);

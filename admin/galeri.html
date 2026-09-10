@@ -55,11 +55,25 @@
     <div class="admin-content">
 
       <div class="admin-card">
-        <div class="admin-card-header">
-          <h3>Galeri Foto</h3>
+        <div class="admin-card-header" style="flex-wrap:wrap;gap:0.75rem;">
+          <div>
+            <h3 style="margin-bottom:0.25rem;">Galeri Foto Dokumentasi</h3>
+            <p style="margin:0;font-size:0.825rem;color:#64748b;">Kelola foto yang ditampilkan atau disembunyikan di website.</p>
+          </div>
           <button class="btn-admin btn-admin-primary" onclick="addGaleriAdmin()"><i class="fa-solid fa-plus"></i> Tambah Foto</button>
         </div>
         <div class="admin-card-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;padding-bottom:1rem;border-bottom:1px solid #e2e8f0;">
+            <div class="admin-filter-group" style="display:flex;gap:0.5rem;" id="galeri-filter-tabs">
+              <button class="btn-admin btn-admin-sm btn-admin-primary" data-status-filter="all" onclick="filterGaleriAdmin('all', this)">Semua (<span id="count-all">0</span>)</button>
+              <button class="btn-admin btn-admin-sm btn-admin-outline" data-status-filter="active" onclick="filterGaleriAdmin('active', this)"><i class="fa-solid fa-eye" style="color:#16a34a;"></i> Ditampilkan (<span id="count-active">0</span>)</button>
+              <button class="btn-admin btn-admin-sm btn-admin-outline" data-status-filter="hidden" onclick="filterGaleriAdmin('hidden', this)"><i class="fa-solid fa-eye-slash" style="color:#dc2626;"></i> Disembunyikan (<span id="count-hidden">0</span>)</button>
+            </div>
+            <div style="font-size:0.8rem;color:#64748b;">
+              <i class="fa-solid fa-circle-info"></i> Klik tombol mata pada foto untuk langsung mengubah status tampil di website.
+            </div>
+          </div>
+
           <div class="media-grid" id="galeri-admin-grid">
             <!-- Rendered by admin.js -->
           </div>
@@ -100,7 +114,15 @@
             </div>
 
             <div class="form-group">
-              <label for="galeri-deskripsi">Deskripsi</label>
+              <label for="galeri-status">Status Tampilan di Website</label>
+              <select id="galeri-status">
+                <option value="active">Ditampilkan (Muncul di Website)</option>
+                <option value="hidden">Tidak Ditampilkan (Disembunyikan)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="galeri-deskripsi">Deskripsi / Caption</label>
               <textarea id="galeri-deskripsi" placeholder="Deskripsi singkat" rows="2"></textarea>
             </div>
 
@@ -116,8 +138,8 @@
   </main>
 
   <div class="toast-container" id="toast-container"></div>
-  <script src="../assets/js/data.js?v=2.8"></script>
-  <script src="../assets/js/admin.js?v=2.8"></script>
+  <script src="../assets/js/data.js?v=2.9"></script>
+  <script src="../assets/js/admin.js?v=2.9"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       renderGaleriAdmin();

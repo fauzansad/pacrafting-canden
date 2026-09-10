@@ -204,13 +204,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const galleryGrid = document.querySelector('#galeri .gallery-grid');
     if (!galleryGrid || typeof DataStore === 'undefined') return;
 
-    const galeriList = DataStore.getPublishedGaleri ? DataStore.getPublishedGaleri() : DataStore.getGaleri();
-    if (!galeriList || galeriList.length === 0) return;
+    const galeriList = DataStore.getPublishedGaleri ? DataStore.getPublishedGaleri() : DataStore.getGaleri().filter(g => g.status !== 'hidden');
+    if (!galeriList || galeriList.length === 0) {
+      galleryGrid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:3rem;">Belum ada foto galeri yang ditampilkan.</p>';
+      return;
+    }
 
     const displayList = galeriList;
     galleryGrid.innerHTML = displayList.map(function (g, idx) {
-      const isFirst = idx === 0;
-      const isWide = idx === 7 && displayList.length === 8;
+      const isFirst = (idx === 0 && displayList.length >= 4);
+      const isWide = (displayList.length === 8 && idx === 7) || (displayList.length === 6 && (idx === 4 || idx === 5));
       let spanClass = '';
       if (isFirst) spanClass = 'span-2-row span-2-col';
       else if (isWide) spanClass = 'span-2-col';
