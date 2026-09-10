@@ -2,6 +2,20 @@
    ADMIN.JS - PACKRAFTING CANDEN ADMIN PANEL
    ============================================ */
 
+// Helper to normalize image URLs for admin views (supporting both web server / and local file:// ../)
+function formatAdminAssetUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  url = url.trim();
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  const clean = url.replace(/^\/+/, '').replace(/^\.\.\/+/, '');
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    return '/' + clean;
+  }
+  return '../' + clean;
+}
+
 function checkAuth() {
   if (window.location.pathname.includes('login')) {
     return true;
@@ -221,12 +235,9 @@ function renderBannerList() {
 
   container.innerHTML = banners.map(function (b) {
     const hasImg = b.gambar && b.gambar.trim() !== '';
-    let previewSrc = b.gambar;
-    if (previewSrc && !previewSrc.startsWith('http') && !previewSrc.startsWith('data:')) {
-      previewSrc = '../' + previewSrc.replace(/^\/+/, '');
-    }
+    const previewSrc = formatAdminAssetUrl(b.gambar);
     const imgPreview = hasImg 
-      ? `<img src="${previewSrc}" alt="Banner" style="width:110px;height:75px;object-fit:cover;object-position:${b.position || 'center'};border-radius:8px;border:1px solid #cbd5e1;">`
+      ? `<img src="${previewSrc}" alt="Banner" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="width:110px;height:75px;object-fit:cover;object-position:${b.position || 'center'};border-radius:8px;border:1px solid #cbd5e1;">`
       : `<div style="width:110px;height:75px;border-radius:8px;background:linear-gradient(135deg, #091a11 0%, #164e32 60%, #0d4653 100%);display:flex;align-items:center;justify-content:center;color:#67e8f9;font-size:1.5rem;"><i class="fa-solid fa-water"></i></div>`;
 
     return `
@@ -335,10 +346,7 @@ function showBannerImagePreview(src) {
   const pos = document.getElementById('banner-position') ? document.getElementById('banner-position').value : 'center';
 
   if (img && empty) {
-    let displaySrc = src;
-    if (displaySrc && !displaySrc.startsWith('http') && !displaySrc.startsWith('data:')) {
-      displaySrc = '../' + displaySrc.replace(/^\/+/, '');
-    }
+    let displaySrc = formatAdminAssetUrl(src);
     img.src = displaySrc;
     img.style.display = 'block';
     img.style.objectPosition = pos;
@@ -728,12 +736,8 @@ function renderGaleriAdmin() {
   }
 
   container.innerHTML = galeriList.map(function (g) {
-    let imgSrc = g.gambar && g.gambar.trim() !== '' ? g.gambar.trim() : '';
-    if (imgSrc) {
-      if (!imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
-        imgSrc = '../' + imgSrc.replace(/^\/+/, '');
-      }
-    } else {
+    let imgSrc = formatAdminAssetUrl(g.gambar);
+    if (!imgSrc) {
       imgSrc = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';
     }
     return `
@@ -786,10 +790,7 @@ function editGaleriAdmin(id) {
     
     const prev = document.getElementById('galeri-preview-img');
     if (prev && galeri.gambar) {
-      let prevSrc = galeri.gambar.trim();
-      if (!prevSrc.startsWith('http') && !prevSrc.startsWith('data:')) {
-        prevSrc = '../' + prevSrc.replace(/^\/+/, '');
-      }
+      let prevSrc = formatAdminAssetUrl(galeri.gambar);
       prev.innerHTML = `<img src="${prevSrc}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="max-height:120px;border-radius:8px;margin-top:0.75rem;">`;
     }
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
@@ -909,12 +910,8 @@ function renderMediaLibrary() {
   }
 
   grid.innerHTML = mediaList.map(function(m) {
-    let src = m.url ? m.url.trim() : '';
-    if (src) {
-      if (!src.startsWith('http') && !src.startsWith('data:')) {
-        src = '../' + src.replace(/^\/+/, '');
-      }
-    } else {
+    let src = formatAdminAssetUrl(m.url);
+    if (!src) {
       src = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';
     }
     const sizeStr = m.size ? Math.round(m.size / 1024) + ' KB' : 'File Foto';
@@ -922,7 +919,7 @@ function renderMediaLibrary() {
       <div class="media-item">
         <img src="${src}" alt="${m.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop&q=60';" style="height:140px;width:100%;object-fit:cover;">
         <div class="media-item-info">
-          <h4 class="media-item-title" title="${m.name}">${m.name}</h4>
+          <h4 class="media-item-title" title="Klik untuk menyalin: ${m.name}" onclick="copyMediaUrl('${m.url || src}')" style="cursor:pointer;">${m.name}</h4>
           <div class="media-item-meta">
             <span>${sizeStr}</span>
             <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteMediaItem(${m.id})"><i class="fa-solid fa-trash"></i></button>
@@ -931,6 +928,19 @@ function renderMediaLibrary() {
       </div>
     `;
   }).join('');
+}
+
+function copyMediaUrl(url) {
+  if (!url) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      showToast('URL disalin: ' + url, 'info');
+    }).catch(function() {
+      showToast('URL: ' + url, 'info');
+    });
+  } else {
+    showToast('URL: ' + url, 'info');
+  }
 }
 
 function deleteMediaItem(id) {
@@ -994,4 +1004,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   initGaleriFileListener();
+
+  // Auto-refresh admin views when cloud database updates
+  window.addEventListener('packraft_data_updated', function () {
+    if (document.getElementById('media-grid')) renderMediaLibrary();
+    if (document.getElementById('banner-admin-list')) renderBannerList();
+    if (document.getElementById('paket-admin-list')) renderPaketAdmin();
+    if (document.getElementById('berita-admin-list')) renderBeritaAdmin();
+    if (document.getElementById('galeri-admin-list')) renderGaleriAdmin();
+  });
 });
