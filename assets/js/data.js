@@ -370,6 +370,85 @@ const PackraftData = {
    ============================================ */
 
 const DataStore = {
+  // ---- Supabase Cloud Database Configuration ----
+  SUPABASE_URL: 'https://fnyocuashzlrklduehzu.supabase.co',
+  SUPABASE_KEY: 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv',
+
+  // Save to localStorage immediately and sync to Supabase Cloud
+  async saveToCloud(key, data) {
+    const storageKey = 'packraft_' + key;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    } catch (e) {
+      console.warn('LocalStorage save failed:', e);
+    }
+
+    // Trigger local page update immediately
+    window.dispatchEvent(new CustomEvent('packraft_data_updated', { detail: { key, data } }));
+
+    // Send to Supabase Cloud
+    try {
+      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data`, {
+        method: 'POST',
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          key: key,
+          value: data,
+          updated_at: new Date().toISOString()
+        })
+      });
+      if (res.ok) {
+        console.log(`[Supabase Cloud] Berhasil sinkronisasi '${key}'`);
+      } else {
+        console.warn(`[Supabase Cloud] Status respon ${res.status} untuk '${key}'`);
+      }
+    } catch (err) {
+      console.warn(`[Supabase Cloud] Gagal sinkronisasi '${key}':`, err);
+    }
+  },
+
+  // Initial Sync from Supabase Cloud
+  async initCloudSync() {
+    try {
+      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data?select=*`, {
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`
+        }
+      });
+      if (!res.ok) return;
+      const records = await res.json();
+      if (!Array.isArray(records)) return;
+
+      let hasChanges = false;
+      records.forEach(item => {
+        if (!item.key || item.value === undefined) return;
+        const storageKey = 'packraft_' + item.key;
+        const currentLocal = localStorage.getItem(storageKey);
+        const remoteString = JSON.stringify(item.value);
+
+        if (currentLocal !== remoteString) {
+          try {
+            localStorage.setItem(storageKey, remoteString);
+            hasChanges = true;
+          } catch (e) {}
+        }
+      });
+
+      if (hasChanges) {
+        console.log('[Supabase Cloud] Data terbaru dimuat dari cloud, memperbarui tampilan...');
+        window.dispatchEvent(new CustomEvent('packraft_data_updated'));
+      }
+    } catch (e) {
+      console.warn('[Supabase Cloud] Sedang offline / gagal memuat data cloud, menggunakan cache lokal:', e);
+    }
+  },
+
   // Format nomor WhatsApp internasional (contoh 0812... -> 62812...)
   normalizePhone(phone) {
     if (!phone) return '';
@@ -395,7 +474,7 @@ const DataStore = {
     return PackraftData.brand;
   },
   saveBrandInfo(data) {
-    localStorage.setItem('packraft_brand', JSON.stringify(data));
+    this.saveToCloud('brand', data);
   },
 
   getBanners() {
@@ -414,7 +493,7 @@ const DataStore = {
     return PackraftData.banners;
   },
   saveBanners(data) {
-    localStorage.setItem('packraft_banners', JSON.stringify(data));
+    return this.saveToCloud('banners', data);
   },
   getActiveBanners() {
     return this.getBanners().filter(b => b.status === 'active').sort((a, b) => a.urutan - b.urutan);
@@ -435,7 +514,7 @@ const DataStore = {
     return PackraftData.paket;
   },
   savePaket(data) {
-    localStorage.setItem('packraft_paket', JSON.stringify(data));
+    return this.saveToCloud('paket', data);
   },
   getPaketById(id) {
     return this.getPaket().find(p => p.id === parseInt(id));
@@ -458,7 +537,7 @@ const DataStore = {
     return PackraftData.wisataInfo;
   },
   saveWisataInfo(data) {
-    localStorage.setItem('packraft_wisata_info', JSON.stringify(data));
+    return this.saveToCloud('wisata_info', data);
   },
 
   getBerita() {
@@ -469,7 +548,7 @@ const DataStore = {
     return this.getBerita().filter(b => b.status === 'published' || !b.status);
   },
   saveBerita(data) {
-    localStorage.setItem('packraft_berita', JSON.stringify(data));
+    return this.saveToCloud('berita', data);
   },
   getBeritaById(id) {
     return this.getBerita().find(b => b.id === parseInt(id));
@@ -495,7 +574,7 @@ const DataStore = {
     return this.getGaleri().filter(g => g.status !== 'inactive');
   },
   saveGaleri(data) {
-    localStorage.setItem('packraft_galeri', JSON.stringify(data));
+    return this.saveToCloud('galeri', data);
   },
   getGaleriById(id) {
     return this.getGaleri().find(g => g.id === parseInt(id));
@@ -506,7 +585,7 @@ const DataStore = {
     return stored ? JSON.parse(stored) : PackraftData.media;
   },
   saveMedia(data) {
-    localStorage.setItem('packraft_media', JSON.stringify(data));
+    return this.saveToCloud('media', data);
   },
 
   getVideo() {
@@ -514,7 +593,7 @@ const DataStore = {
     return stored ? JSON.parse(stored) : PackraftData.video;
   },
   saveVideo(data) {
-    localStorage.setItem('packraft_video', JSON.stringify(data));
+    return this.saveToCloud('video', data);
   },
 
   getTestimonials() {
@@ -522,7 +601,7 @@ const DataStore = {
     return stored ? JSON.parse(stored) : PackraftData.testimonials;
   },
   saveTestimonials(data) {
-    localStorage.setItem('packraft_testimonials', JSON.stringify(data));
+    return this.saveToCloud('testimonials', data);
   },
 
   getFAQ() {
@@ -530,7 +609,7 @@ const DataStore = {
     return stored ? JSON.parse(stored) : PackraftData.faq;
   },
   saveFAQ(data) {
-    localStorage.setItem('packraft_faq', JSON.stringify(data));
+    return this.saveToCloud('faq', data);
   },
 
   async hashPassword(password) {
@@ -651,5 +730,11 @@ if (typeof window !== 'undefined') {
   window.PackraftData = PackraftData;
   window.DataStore = DataStore;
   window.Security = Security;
+
+  // Start cloud sync immediately
+  DataStore.initCloudSync();
+  if (typeof document !== 'undefined' && document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => DataStore.initCloudSync());
+  }
 }
 

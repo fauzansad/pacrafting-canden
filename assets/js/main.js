@@ -258,12 +258,18 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Execute dynamic rendering
-  renderDynamicPaket();
-  renderDynamicHomepageGallery();
-  renderDynamicFaq();
-  syncHeroBanner();
-  syncBrandData();
-  syncWisataInfo();
+  function refreshAllDynamicContent() {
+    renderDynamicPaket();
+    renderDynamicHomepageGallery();
+    renderDynamicFaq();
+    syncHeroBanner();
+    syncBrandData();
+    syncWisataInfo();
+  }
+  refreshAllDynamicContent();
+
+  // Re-render automatically whenever Supabase Cloud syncs new data
+  window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
 
   // ---- 4. Navbar Scroll Effect ----
   const navbar = document.getElementById('navbar');

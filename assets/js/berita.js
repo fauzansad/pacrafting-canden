@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial render
     renderBerita();
+    window.addEventListener('packraft_data_updated', renderBerita);
   }
 
   // ---- Berita Homepage Preview ----

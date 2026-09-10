@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     renderGaleri();
+    window.addEventListener('packraft_data_updated', renderGaleri);
   }
 
   // ---- Homepage Galeri Preview ----
