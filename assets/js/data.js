@@ -102,8 +102,8 @@ const PackraftData = {
     {
       id: 1,
       judul: 'PACKRAFTING CANDEN',
-      subheading: 'Wellness Tourism: Packrafting Pertama di Yogyakarta',
-      lead: 'Nikmati sensasi packrafting pertama di Yogyakarta dengan konsep Wellness Tourism! Menggabungkan petualangan seru, kesehatan, edukasi, dan budaya lokal di sepanjang aliran Sungai Opak Canden.',
+      subheading: 'Adventure on the River',
+      lead: 'Rasakan sensasi menyusuri Sungai Opak dari Starting Point Canden hingga finish di Wisata Potrobayan. Petualangan air seru, alami, dan tak terlupakan!',
       lokasiTag: '📍 Rute Sungai Opak &bull; 4,5 KM (± 1,5 Jam) &bull; Canden ke Potrobayan',
       ctaText: 'BOOKING SEKARANG',
       ctaLink: '#booking',
