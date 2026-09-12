@@ -483,7 +483,7 @@ const DataStore = {
     return PackraftData.brand;
   },
   saveBrandInfo(data) {
-    this.saveToCloud('brand', data);
+    return this.saveToCloud('brand', data);
   },
 
   getBanners() {

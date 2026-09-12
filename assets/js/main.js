@@ -45,19 +45,29 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Update Start Point Maps links
+    // Update Start Point Maps links & text
     if (brand.startMapsUrl) {
       document.querySelectorAll('[data-start-maps]').forEach(function (el) {
         el.href = brand.startMapsUrl;
         el.target = '_blank';
       });
     }
+    if (brand.meetingPoint) {
+      document.querySelectorAll('[data-display-start-name]').forEach(function (el) {
+        el.textContent = brand.meetingPoint;
+      });
+    }
 
-    // Update Finish Point Maps links
+    // Update Finish Point Maps links & text
     if (brand.finishMapsUrl) {
       document.querySelectorAll('[data-finish-maps]').forEach(function (el) {
         el.href = brand.finishMapsUrl;
         el.target = '_blank';
+      });
+    }
+    if (brand.finishPoint) {
+      document.querySelectorAll('[data-display-finish-name]').forEach(function (el) {
+        el.textContent = brand.finishPoint;
       });
     }
 
@@ -65,6 +75,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (brand.whatsapp && !brand.whatsapp.includes('[NOMOR')) {
       document.querySelectorAll('[data-display-wa]').forEach(function (el) {
         el.textContent = brand.whatsapp;
+      });
+    }
+
+    // Update email text displays & mailto links
+    if (brand.email && !brand.email.includes('[EMAIL')) {
+      document.querySelectorAll('[data-display-email]').forEach(function (el) {
+        el.textContent = brand.email;
+      });
+      document.querySelectorAll('[data-social-email], a[href^="mailto:"]').forEach(function (el) {
+        el.href = 'mailto:' + brand.email;
       });
     }
   }
@@ -282,9 +302,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!info) return;
 
     document.querySelectorAll('[data-info-pengelola]').forEach(el => el.textContent = info.namaPengelola || '');
+    document.querySelectorAll('[data-info-deskripsi]').forEach(el => el.textContent = info.deskripsiPengelola || '');
+    document.querySelectorAll('[data-info-legalitas]').forEach(el => el.textContent = info.legalitas || '');
+    document.querySelectorAll('[data-info-titik-kumpul]').forEach(el => el.textContent = info.titikKumpul || '');
     document.querySelectorAll('[data-info-jam]').forEach(el => el.textContent = info.jamOperasional || '');
     document.querySelectorAll('[data-info-basecamp]').forEach(el => el.textContent = info.fasilitasBasecamp || '');
     document.querySelectorAll('[data-info-akses]').forEach(el => el.textContent = info.aksesRute || '');
+    document.querySelectorAll('[data-info-sekitar]').forEach(el => el.textContent = info.fasilitasSekitar || '');
   }
 
   // Execute dynamic rendering
@@ -295,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
     syncHeroBanner();
     syncBrandData();
     syncWisataInfo();
+    syncVideoSection();
   }
   refreshAllDynamicContent();
 
@@ -624,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .bindPopup(`
         <div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:210px;">
           <div style="background:#dcfce7;color:#16a34a;padding:3px 8px;border-radius:4px;display:inline-block;font-size:10px;font-weight:800;margin-bottom:5px;">TITIK START / MEETING POINT</div>
-          <strong style="display:block;font-size:13px;color:#081c15;">Starting Point Susur Sungai Opak</strong>
+          <strong style="display:block;font-size:13px;color:#081c15;">${brand.meetingPoint || 'Starting Point Susur Sungai Opak'}</strong>
           <p style="font-size:11px;color:#64748b;margin:3px 0 8px;">Canden, Kapanewon Jetis, Bantul</p>
           <a href="${brand.startMapsUrl || 'https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7'}" target="_blank" style="display:inline-block;background:#10b981;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:700;">
             Buka Google Maps &rarr;
@@ -637,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .bindPopup(`
         <div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:210px;">
           <div style="background:#fee2e2;color:#dc2626;padding:3px 8px;border-radius:4px;display:inline-block;font-size:10px;font-weight:800;margin-bottom:5px;">TITIK FINISH & BILAS</div>
-          <strong style="display:block;font-size:13px;color:#081c15;">Wisata Potrobayan</strong>
+          <strong style="display:block;font-size:13px;color:#081c15;">${brand.finishPoint || 'Wisata Potrobayan'}</strong>
           <p style="font-size:11px;color:#64748b;margin:3px 0 8px;">Pertemuan Sungai Opak &amp; Oya</p>
           <a href="${brand.finishMapsUrl || 'https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8'}" target="_blank" style="display:inline-block;background:#ef4444;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:700;">
             Buka Google Maps &rarr;

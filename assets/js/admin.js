@@ -457,10 +457,11 @@ function renderPaketAdmin() {
 
   const paketList = DataStore.getPaket();
   container.innerHTML = paketList.map(function (p) {
-    return `
+      const formattedHarga = p.harga ? (p.harga.startsWith('Rp') ? p.harga : 'Rp ' + p.harga) : '-';
+      return `
       <tr>
         <td><strong>${p.nama}</strong><br><small style="color:#64748b;">${p.level || ''}</small></td>
-        <td><span style="color:#ea580c;font-weight:700;">Rp ${p.harga}</span></td>
+        <td><span style="color:#ea580c;font-weight:700;">${formattedHarga}</span></td>
         <td>${p.durasi}</td>
         <td>${p.fasilitas ? p.fasilitas.length : 0} Fasilitas</td>
         <td>
@@ -643,6 +644,7 @@ function addBeritaAdmin() {
     document.getElementById('berita-kategori').value = 'Kegiatan Desa';
     document.getElementById('berita-tanggal').value = new Date().toISOString().split('T')[0];
     document.getElementById('berita-penulis').value = 'Admin Packrafting';
+    if (document.getElementById('berita-thumbnail')) document.getElementById('berita-thumbnail').value = '';
     document.getElementById('berita-ringkasan').value = '';
     document.getElementById('berita-isi').innerHTML = '';
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
@@ -662,6 +664,7 @@ function editBeritaAdmin(id) {
     document.getElementById('berita-kategori').value = berita.kategori || 'Kegiatan Desa';
     document.getElementById('berita-tanggal').value = berita.tanggal || '';
     document.getElementById('berita-penulis').value = berita.penulis || '';
+    if (document.getElementById('berita-thumbnail')) document.getElementById('berita-thumbnail').value = berita.thumbnail || '';
     document.getElementById('berita-ringkasan').value = berita.ringkasan || '';
     document.getElementById('berita-isi').innerHTML = berita.isi || '';
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
@@ -675,6 +678,7 @@ function saveBeritaAdmin() {
   const kategori = document.getElementById('berita-kategori').value;
   const tanggal = document.getElementById('berita-tanggal').value;
   const penulis = document.getElementById('berita-penulis').value.trim() || 'Admin';
+  const thumbnail = document.getElementById('berita-thumbnail') ? document.getElementById('berita-thumbnail').value.trim() : '';
   const ringkasan = document.getElementById('berita-ringkasan').value.trim();
   const isi = document.getElementById('berita-isi').innerHTML.trim();
 
@@ -690,6 +694,7 @@ function saveBeritaAdmin() {
       item.kategori = kategori;
       item.tanggal = tanggal;
       item.penulis = penulis;
+      if (thumbnail) item.thumbnail = thumbnail;
       item.ringkasan = ringkasan;
       item.isi = isi;
       showToast('Berita berhasil diperbarui', 'success');
@@ -701,6 +706,7 @@ function saveBeritaAdmin() {
       kategori: kategori,
       tanggal: tanggal || new Date().toISOString().split('T')[0],
       penulis: penulis,
+      thumbnail: thumbnail || 'assets/images/hero/hero-packraft.jpg',
       ringkasan: ringkasan,
       isi: isi,
       status: 'published'
@@ -1033,9 +1039,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-refresh admin views when cloud database updates
   window.addEventListener('packraft_data_updated', function () {
-    if (document.getElementById('banner-admin-list')) renderBannerList();
+    if (document.getElementById('banner-list') || document.getElementById('banner-admin-list')) renderBannerList();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
     if (document.getElementById('berita-admin-list')) renderBeritaAdmin();
-    if (document.getElementById('galeri-admin-list')) renderGaleriAdmin();
+    if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();
+    if (document.getElementById('stat-paket')) renderDashboardStats();
+    if (document.getElementById('kontak-wa') && typeof loadKontakAdmin === 'function') loadKontakAdmin();
+    if (document.getElementById('info-nama-pengelola') && typeof loadWisataInfoAdmin === 'function') loadWisataInfoAdmin();
+    if (document.getElementById('video-url') && typeof loadVideoAdmin === 'function') loadVideoAdmin();
   });
 });

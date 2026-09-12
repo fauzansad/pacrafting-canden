@@ -1,91 +1,85 @@
 /* ============================================
    GALERI.JS - Gallery Page Features
-   Filter, Grid, Lightbox
+   Filter, Dynamic Grid from DataStore, Lightbox
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ---- Galeri Page ----
-  const galeriContainer = document.getElementById('galeri-container');
+  // ---- Galeri Page Dynamic Rendering ----
+  const galeriContainer = document.getElementById('galeri-container') || document.querySelector('.gallery-grid');
   if (galeriContainer) {
     const filterTabs = document.querySelectorAll('.galeri-filter .filter-tab');
     let currentFilter = 'Semua';
 
     function renderGaleri() {
-      let galeri = DataStore.getPublishedGaleri();
+      if (typeof DataStore === 'undefined') return;
+      let galeri = DataStore.getPublishedGaleri ? DataStore.getPublishedGaleri() : DataStore.getGaleri().filter(g => g.status !== 'hidden');
 
       if (currentFilter !== 'Semua') {
         galeri = galeri.filter(function (g) {
-          return g.kategori === currentFilter;
+          return (g.kategori || '').toLowerCase() === currentFilter.toLowerCase();
         });
       }
 
       if (galeri.length === 0) {
         galeriContainer.innerHTML = `
-          <div class="no-results" style="grid-column: 1/-1;">
-            <i class="fa-solid fa-images"></i>
-            <h4>Belum ada foto</h4>
-            <p>Belum ada foto untuk kategori ini.</p>
+          <div class="no-results" style="grid-column: 1/-1;text-align:center;padding:3rem 1rem;color:var(--text-light,#64748b);">
+            <i class="fa-solid fa-images" style="font-size:2.5rem;margin-bottom:1rem;display:block;color:var(--primary-300,#94a3b8);"></i>
+            <h4>Belum ada foto untuk kategori "${currentFilter}"</h4>
+            <p style="font-size:0.9rem;">Foto akan muncul saat admin menambahkan dokumentasi baru.</p>
           </div>
         `;
         return;
       }
 
-      galeriContainer.innerHTML = galeri.map(function (g) {
-        const imgSrc = g.gambar || '';
-        return `
-          <div class="galeri-item" 
-               ${imgSrc ? `data-lightbox="${imgSrc}" data-caption="${g.judul}"` : ''}>
-            ${imgSrc
-            ? `<img src="${imgSrc}" alt="${g.judul}" loading="lazy">`
-            : `<div class="galeri-item-placeholder">
-                <i class="fa-solid fa-image"></i>
-                <span>${g.judul}</span>
-              </div>`
-          }
-            <div class="galeri-item-overlay">
+      galeriContainer.innerHTML = galeri.map(function (g, idx) {
+        let imgSrc = g.gambar ? g.gambar.trim() : '';
+        if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
+          imgSrc = imgSrc.replace(/^\/+/, '');
+        }
+        const hasImg = Boolean(imgSrc);
+
+        const isFirst = (idx === 0 && galeri.length >= 4);
+        const isWide = (galeri.length === 8 && idx === 7) || (galeri.length === 6 && (idx === 4 || idx === 5));
+        let spanClass = '';
+        if (isFirst) spanClass = 'span-2-row span-2-col';
+        else if (isWide) spanClass = 'span-2-col';
+
+        const content = hasImg
+          ? `<img src="${imgSrc}" alt="${g.judul}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
+          : `
+            <div class="gallery-card-placeholder">
+              <i class="fa-solid fa-water"></i>
               <h5>${g.judul}</h5>
-              <span>${g.kategori}</span>
+              <span>${g.kategori || 'Packrafting Canden'}</span>
+            </div>
+          `;
+
+        return `
+          <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${imgSrc}" data-caption="${g.caption || g.judul}">
+            ${content}
+            <div class="gallery-card-overlay">
+              <h5>${g.judul}</h5>
+              <span>${g.kategori || 'Dokumentasi'}</span>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // Filter
+    // Filter Tabs Click Handling
     filterTabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         filterTabs.forEach(function (t) { t.classList.remove('active'); });
         this.classList.add('active');
-        currentFilter = this.getAttribute('data-filter');
+        currentFilter = this.getAttribute('data-filter') || 'Semua';
         renderGaleri();
       });
     });
 
     renderGaleri();
     window.addEventListener('packraft_data_updated', renderGaleri);
-  }
-
-  // ---- Homepage Galeri Preview ----
-  const galeriPreview = document.getElementById('galeri-preview');
-  if (galeriPreview) {
-    const galeri = DataStore.getPublishedGaleri().slice(0, 5);
-
-    galeriPreview.innerHTML = galeri.map(function (g) {
-      const imgSrc = g.gambar || '';
-      return `
-        <div class="galeri-preview-item"
-             ${imgSrc ? `data-lightbox="${imgSrc}" data-caption="${g.judul}"` : ''}>
-          ${imgSrc
-          ? `<img class="galeri-img" src="${imgSrc}" alt="${g.judul}" loading="lazy">`
-          : `<div class="galeri-placeholder"><i class="fa-solid fa-image"></i></div>`
-        }
-          <div class="galeri-overlay">
-            <i class="fa-solid fa-expand"></i>
-          </div>
-        </div>
-      `;
-    }).join('');
+    window.addEventListener('storage', renderGaleri);
   }
 
 });

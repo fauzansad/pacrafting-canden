@@ -61,7 +61,17 @@
   <!-- Gallery Grid -->
   <section class="section">
     <div class="container">
-      <div class="gallery-grid">
+      <!-- Filter Tabs -->
+      <div class="galeri-filter" style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem;margin-bottom:2.5rem;">
+        <button class="filter-tab active" data-filter="Semua">Semua</button>
+        <button class="filter-tab" data-filter="Aktivitas">Aktivitas</button>
+        <button class="filter-tab" data-filter="Pemandangan">Pemandangan</button>
+        <button class="filter-tab" data-filter="Komunitas">Komunitas</button>
+        <button class="filter-tab" data-filter="Keluarga">Keluarga</button>
+        <button class="filter-tab" data-filter="Persiapan">Persiapan</button>
+      </div>
+
+      <div class="gallery-grid" id="galeri-container">
         <div class="gallery-card span-2-row span-2-col" data-lightbox="assets/images/galeri/1.jpg" data-caption="Menembus Jeram Sungai Opak">
           <img src="assets/images/galeri/1.jpg" alt="Aksi Menembus Jeram Sungai" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">
           <div class="gallery-card-overlay">
