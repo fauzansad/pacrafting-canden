@@ -71,6 +71,19 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
+    // Update Rest Area Maps links & text
+    if (brand.restAreaMapsUrl) {
+      document.querySelectorAll('[data-rest-maps]').forEach(function (el) {
+        el.href = brand.restAreaMapsUrl;
+        el.target = '_blank';
+      });
+    }
+    if (brand.restAreaPoint) {
+      document.querySelectorAll('[data-display-rest-name]').forEach(function (el) {
+        el.textContent = brand.restAreaPoint;
+      });
+    }
+
     // Update phone text displays
     if (brand.whatsapp && !brand.whatsapp.includes('[NOMOR')) {
       document.querySelectorAll('[data-display-wa]').forEach(function (el) {
@@ -97,11 +110,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const paketList = DataStore.getPaket().filter(p => p.status !== 'inactive');
     if (!paketList || paketList.length === 0) return;
 
-    container.innerHTML = paketList.map(function (p, index) {
-      const isFeatured = p.featured || index === 0;
-      const ribbonText = p.badge ? p.badge : (isFeatured ? 'Populer' : '');
+    container.innerHTML = paketList.map(function (p) {
+      const ribbonText = p.badge || '';
       const ribbonHtml = ribbonText ? `<div class="paket-badge-row"><span class="paket-ribbon">${ribbonText}</span></div>` : '';
-      const btnClass = isFeatured ? 'btn btn-accent' : 'btn btn-outline';
+      const btnClass = 'btn btn-primary';
       const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join('');
       const waUrl = DataStore.getBookingWhatsAppUrl(p.nama);
 
@@ -122,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       return `
-        <div class="paket-card ${isFeatured ? 'featured' : ''} reveal revealed">
+        <div class="paket-card reveal revealed">
           <div class="paket-header">
             ${ribbonHtml}
             <h3>${p.nama}</h3>
@@ -154,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <div class="paket-footer">
               <a href="${waUrl}" target="_blank" data-booking-wa="${p.nama}" class="${btnClass}">
-                <i class="fa-brands fa-whatsapp"></i> PILIH PAKET INI
+                <i class="fa-brands fa-whatsapp"></i> PILIH ${p.nama.toUpperCase()}
               </a>
             </div>
           </div>
@@ -632,6 +644,18 @@ document.addEventListener('DOMContentLoaded', function () {
       iconAnchor: [20, 20]
     });
 
+    // Custom Rest Area Pin Icon
+    const restIcon = L.divIcon({
+      className: 'custom-map-marker',
+      html: `
+        <div style="background:#f59e0b;color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(245,158,11,0.7);border:3px solid #fff;font-weight:bold;font-size:15px;cursor:pointer;">
+          <i class="fa-solid fa-mug-hot"></i>
+        </div>
+      `,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
+    });
+
     // Custom Finish Pin Icon
     const finishIcon = L.divIcon({
       className: 'custom-map-marker',
@@ -644,6 +668,8 @@ document.addEventListener('DOMContentLoaded', function () {
       iconAnchor: [20, 20]
     });
 
+    const restCoord = brand.restAreaCoordinates || { lat: -7.9423004, lng: 110.366292 };
+
     // Start Marker
     L.marker([startCoord.lat, startCoord.lng], { icon: startIcon }).addTo(map)
       .bindPopup(`
@@ -652,6 +678,19 @@ document.addEventListener('DOMContentLoaded', function () {
           <strong style="display:block;font-size:13px;color:#081c15;">${brand.meetingPoint || 'Starting Point Susur Sungai Opak'}</strong>
           <p style="font-size:11px;color:#64748b;margin:3px 0 8px;">Canden, Kapanewon Jetis, Bantul</p>
           <a href="${brand.startMapsUrl || 'https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7'}" target="_blank" style="display:inline-block;background:#10b981;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:700;">
+            Buka Google Maps &rarr;
+          </a>
+        </div>
+      `);
+
+    // Rest Area Marker
+    L.marker([restCoord.lat, restCoord.lng], { icon: restIcon }).addTo(map)
+      .bindPopup(`
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:215px;">
+          <div style="background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:4px;display:inline-block;font-size:10px;font-weight:800;margin-bottom:5px;">REST AREA &amp; OUTBOUND</div>
+          <strong style="display:block;font-size:13px;color:#081c15;">${brand.restAreaPoint || 'Rest Area Packrafting Canden &amp; Outbound Area'}</strong>
+          <p style="font-size:11px;color:#64748b;margin:3px 0 8px;">Spot istirahat tengah rute, kelapa muda &amp; area outbound</p>
+          <a href="${brand.restAreaMapsUrl || 'https://maps.app.goo.gl/9zPZVeSV58w2fNMF7'}" target="_blank" style="display:inline-block;background:#f59e0b;color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;text-decoration:none;font-weight:700;">
             Buka Google Maps &rarr;
           </a>
         </div>
@@ -674,5 +713,455 @@ document.addEventListener('DOMContentLoaded', function () {
     const bounds = L.latLngBounds(riverRoute);
     map.fitBounds(bounds, { padding: [45, 45] });
   }
+
+  // ---- 15. Dynamic Testimonials & Interactive Review Submission ----
+  function initTestimonialSection() {
+    const testiContainer = document.getElementById('testi-container');
+    if (!testiContainer) return;
+
+    // Helper: Show User Toast Notification
+    function showUserToast(message, type = 'success') {
+      let container = document.getElementById('user-toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        container.id = 'user-toast-container';
+        document.body.appendChild(container);
+      }
+      const icons = {
+        success: 'fa-circle-check',
+        warning: 'fa-triangle-exclamation',
+        error: 'fa-circle-xmark',
+        info: 'fa-circle-info'
+      };
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<i class="fa-solid ${icons[type] || 'fa-circle-info'}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Star rating description labels
+    const ratingLabels = {
+      1: '1/5 — Perlu Banyak Peningkatan',
+      2: '2/5 — Kurang Memuaskan',
+      3: '3/5 — Cukup Baik & Standar',
+      4: '4/5 — Sangat Bagus & Seru!',
+      5: '5/5 — Luar Biasa & Tak Terlupakan!'
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Render Testimonials Grid
+    function renderTestimonials(highlightId = null) {
+      if (typeof DataStore === 'undefined') return;
+      const list = DataStore.getTestimonials() || [];
+      if (list.length === 0) {
+        testiContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: var(--radius-lg); border: 1px dashed #cbd5e1;">
+            <i class="fa-regular fa-comment-dots" style="font-size: 2.5rem; margin-bottom: 0.75rem; color: #94a3b8; display: block;"></i>
+            <h4 style="color: #334155; margin-bottom: 0.25rem;">Belum ada ulasan wisatawan</h4>
+            <p style="margin: 0; font-size: 0.9rem;">Jadilah yang pertama memberikan ulasan seru petualangan Packrafting di Sungai Opak Canden!</p>
+          </div>
+        `;
+        return;
+      }
+
+      testiContainer.innerHTML = list.map(item => {
+        const rating = Math.max(1, Math.min(5, parseInt(item.rating) || 5));
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starsHtml += i <= rating 
+            ? '<i class="fa-solid fa-star"></i>' 
+            : '<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>';
+        }
+
+        const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'W')).toUpperCase();
+        const isHighlight = highlightId && String(item.id) === String(highlightId);
+
+        // Gradient color for avatar circle
+        const charCode = avatarInitial.charCodeAt(0) || 65;
+        const hue = (charCode * 47) % 360;
+        const avatarBg = `linear-gradient(135deg, hsl(${hue}, 70%, 85%), hsl(${(hue + 40) % 360}, 75%, 70%))`;
+        const avatarColor = `hsl(${hue}, 80%, 25%)`;
+
+        const displayDate = item.tanggal 
+          ? (typeof formatTanggal === 'function' ? formatTanggal(item.tanggal) : item.tanggal) 
+          : '';
+
+        return `
+          <div class="testi-card reveal revealed ${isHighlight ? 'new-highlight' : ''}" id="testi-card-${item.id}">
+            <div>
+              <div class="testi-rating" aria-label="${rating} dari 5 bintang">
+                ${starsHtml}
+              </div>
+              <p class="testi-quote">
+                "${escapeHtml(item.pesan || '')}"
+              </p>
+            </div>
+            <div class="testi-author">
+              <div class="testi-avatar" style="background:${avatarBg}; color:${avatarColor};">${avatarInitial}</div>
+              <div style="flex:1;">
+                <div class="testi-name">${escapeHtml(item.nama || 'Wisatawan')}</div>
+                <div class="testi-role">${escapeHtml(item.asal || 'Wisatawan Canden')}</div>
+                ${displayDate ? `<div class="testi-date"><i class="fa-regular fa-clock" style="font-size:0.65rem;margin-right:0.25rem;"></i>${displayDate}</div>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle Form Collapse
+    const btnToggle = document.getElementById('btn-toggle-ulasan');
+    const formWrapper = document.getElementById('ulasan-form-wrapper');
+    const btnTutup = document.getElementById('btn-tutup-ulasan');
+    const btnCancel = document.getElementById('btn-cancel-ulasan');
+
+    function openForm() {
+      if (formWrapper) {
+        formWrapper.style.display = 'block';
+        setTimeout(() => {
+          formWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const namaInput = document.getElementById('ulasan-nama');
+          if (namaInput) namaInput.focus();
+        }, 100);
+      }
+    }
+
+    function closeForm() {
+      if (formWrapper) {
+        formWrapper.style.display = 'none';
+      }
+    }
+
+    if (btnToggle) btnToggle.addEventListener('click', openForm);
+    if (btnTutup) btnTutup.addEventListener('click', closeForm);
+    if (btnCancel) btnCancel.addEventListener('click', closeForm);
+
+    // Interactive Star Rating Picker
+    const starBtns = document.querySelectorAll('#rating-stars .star-btn');
+    const ratingInput = document.getElementById('ulasan-rating-val');
+    const ratingText = document.getElementById('rating-text');
+
+    function updateStarsUI(val) {
+      starBtns.forEach(btn => {
+        const starVal = parseInt(btn.dataset.rating);
+        if (starVal <= val) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      if (ratingText && ratingLabels[val]) {
+        ratingText.textContent = ratingLabels[val];
+      }
+    }
+
+    starBtns.forEach(btn => {
+      // Hover: highlight stars up to current hovered star
+      btn.addEventListener('mouseenter', function () {
+        const hoverVal = parseInt(this.dataset.rating);
+        starBtns.forEach(b => {
+          const bVal = parseInt(b.dataset.rating);
+          if (bVal <= hoverVal) {
+            b.classList.add('hover');
+          } else {
+            b.classList.remove('hover');
+          }
+        });
+        if (ratingText && ratingLabels[hoverVal]) {
+          ratingText.textContent = ratingLabels[hoverVal];
+        }
+      });
+
+      // Leave: restore current chosen rating
+      btn.addEventListener('mouseleave', function () {
+        starBtns.forEach(b => b.classList.remove('hover'));
+        const currentVal = parseInt(ratingInput ? ratingInput.value : 5) || 5;
+        updateStarsUI(currentVal);
+      });
+
+      // Click: lock the chosen rating
+      btn.addEventListener('click', function () {
+        const chosenVal = parseInt(this.dataset.rating);
+        if (ratingInput) ratingInput.value = chosenVal;
+        updateStarsUI(chosenVal);
+      });
+    });
+
+    // Handle Form Submit
+    const formUlasan = document.getElementById('form-ulasan');
+    if (formUlasan) {
+      formUlasan.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const namaEl = document.getElementById('ulasan-nama');
+        const asalEl = document.getElementById('ulasan-asal');
+        const pesanEl = document.getElementById('ulasan-pesan');
+        const ratingVal = parseInt(ratingInput ? ratingInput.value : 5) || 5;
+
+        const nama = namaEl ? namaEl.value.trim() : '';
+        const asal = asalEl ? asalEl.value.trim() : '';
+        const pesan = pesanEl ? pesanEl.value.trim() : '';
+
+        // Validation
+        if (!nama) {
+          showUserToast('Mohon masukkan nama Anda terlebih dahulu.', 'warning');
+          if (namaEl) namaEl.focus();
+          return;
+        }
+
+        if (ratingVal < 1 || ratingVal > 5) {
+          showUserToast('Silakan pilih rating bintang antara 1 sampai 5.', 'warning');
+          return;
+        }
+
+        if (!pesan) {
+          showUserToast('Mohon tuliskan ulasan pengalaman Anda.', 'warning');
+          if (pesanEl) pesanEl.focus();
+          return;
+        }
+
+        if (pesan.length < 5) {
+          showUserToast('Ulasan terlalu singkat. Mohon tulis minimal 5 karakter.', 'warning');
+          if (pesanEl) pesanEl.focus();
+          return;
+        }
+
+        // Create new testimonial object
+        const newId = Date.now();
+        const newReview = {
+          id: newId,
+          nama: nama,
+          asal: asal || 'Wisatawan',
+          rating: ratingVal,
+          pesan: pesan,
+          avatar: nama.charAt(0).toUpperCase() || 'W',
+          tanggal: new Date().toISOString().split('T')[0]
+        };
+
+        // Save into DataStore (localStorage & cloud sync)
+        const currentList = DataStore.getTestimonials() || [];
+        currentList.unshift(newReview);
+        DataStore.saveTestimonials(currentList);
+
+        // Immediately re-render with highlight!
+        renderTestimonials(newId);
+
+        // Reset form
+        namaEl.value = '';
+        if (asalEl) asalEl.value = '';
+        pesanEl.value = '';
+        if (ratingInput) ratingInput.value = '5';
+        updateStarsUI(5);
+
+        // Close form & show success toast
+        closeForm();
+        showUserToast(`Terima kasih, ${nama}! Ulasan & rating Anda telah berhasil ditampilkan.`, 'success');
+
+        // Smooth scroll to the new card
+        setTimeout(() => {
+          const newCard = document.getElementById(`testi-card-${newId}`);
+          if (newCard) {
+            newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 200);
+      });
+    }
+
+    // Initial render
+    renderTestimonials();
+
+    // Re-render when data updates from cloud or other tabs
+    window.addEventListener('packraft_data_updated', function () {
+      renderTestimonials();
+    });
+  }
+
+  // Initialize Testimonial Feature
+  initTestimonialSection();
+
+  // ---- Hero Auto-Slide Carousel (Geser Kanan ke Kiri Mulus Tak Terbatas) ----
+  function initHeroSlider() {
+    const slider = document.getElementById('hero-slider');
+    const track = document.getElementById('hero-slider-track');
+    const dotsContainer = document.getElementById('hero-slider-dots');
+    if (!slider || !track) return;
+
+    // Fetch 3 slides from DataStore or fallback
+    let slidesData = (typeof DataStore !== 'undefined' && typeof DataStore.getHeroSlides === 'function')
+      ? DataStore.getHeroSlides()
+      : [
+          { id: 1, gambar: 'assets/images/galeri/1.jpg', judul: 'Aksi Menyusuri Arus Sungai Opak' },
+          { id: 2, gambar: 'assets/images/galeri/2.jpg', judul: 'Rimbun Alami Tepian Sungai' },
+          { id: 3, gambar: 'assets/images/galeri/3.jpg', judul: 'Keseruan Bersama Teman' }
+        ];
+
+    if (!slidesData || slidesData.length === 0) return;
+    slidesData = slidesData.slice(0, 3);
+    const totalRealSlides = slidesData.length;
+
+    // Render slides into track + clone of slide 0 for seamless forward loop
+    let slidesHtml = slidesData.map((s, idx) => {
+      const imgSrc = (s.gambar && s.gambar.trim() !== '') ? s.gambar.trim().replace(/^\/+/, '') : 'assets/images/galeri/1.jpg';
+      return `
+        <div class="hero-slide" data-slide="${idx}">
+          <img src="${imgSrc}" alt="${s.judul || 'Packrafting Canden'}" class="hero-slide-img" onerror="this.onerror=null;this.src='assets/images/galeri/1.jpg';">
+        </div>
+      `;
+    }).join('');
+
+    // Append clone of first slide to allow right-to-left seamless transition from last to first
+    const firstImg = (slidesData[0].gambar && slidesData[0].gambar.trim() !== '') ? slidesData[0].gambar.trim().replace(/^\/+/, '') : 'assets/images/galeri/1.jpg';
+    slidesHtml += `
+      <div class="hero-slide hero-slide-clone" data-slide="clone">
+        <img src="${firstImg}" alt="${slidesData[0].judul || 'Packrafting Canden'}" class="hero-slide-img">
+      </div>
+    `;
+
+    track.innerHTML = slidesHtml;
+
+    // Render dots (exactly 3 dots)
+    if (dotsContainer) {
+      dotsContainer.innerHTML = slidesData.map((_, idx) => `
+        <button type="button" class="hero-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" aria-label="Slide ${idx + 1}"></button>
+      `).join('');
+    }
+
+    let currentIndex = 0;
+    let timer = null;
+    let isTransitioning = false;
+    const transitionStyle = 'transform 0.85s cubic-bezier(0.25, 1, 0.5, 1)';
+
+    const dots = dotsContainer ? dotsContainer.querySelectorAll('.hero-dot') : [];
+
+    function updateDots(activeIdx) {
+      dots.forEach((dot, i) => {
+        if (i === activeIdx) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+
+    function moveToSlide(index, animate = true) {
+      if (animate) {
+        track.style.transition = transitionStyle;
+        isTransitioning = true;
+      } else {
+        track.style.transition = 'none';
+      }
+
+      currentIndex = index;
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+      updateDots(currentIndex % totalRealSlides);
+    }
+
+    // Handle seamless reset when reaching clone
+    track.addEventListener('transitionend', () => {
+      isTransitioning = false;
+      if (currentIndex === totalRealSlides) {
+        // Jump back to real slide 0 without animation
+        moveToSlide(0, false);
+      }
+    });
+
+    function nextSlide() {
+      if (isTransitioning) return;
+      if (currentIndex >= totalRealSlides) {
+        moveToSlide(0, false);
+        void track.offsetWidth;
+      }
+      moveToSlide(currentIndex + 1, true);
+    }
+
+    function prevSlide() {
+      if (isTransitioning) return;
+      if (currentIndex === 0) {
+        moveToSlide(totalRealSlides, false);
+        void track.offsetWidth;
+        moveToSlide(totalRealSlides - 1, true);
+      } else {
+        moveToSlide(currentIndex - 1, true);
+      }
+    }
+
+    function startAutoSlide() {
+      stopAutoSlide();
+      timer = setInterval(nextSlide, 4500);
+    }
+
+    function stopAutoSlide() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    // Dot click listeners
+    dots.forEach((dot) => {
+      dot.addEventListener('click', function () {
+        const targetIndex = parseInt(this.getAttribute('data-index'), 10);
+        if (!isNaN(targetIndex)) {
+          moveToSlide(targetIndex, true);
+          startAutoSlide();
+        }
+      });
+    });
+
+    // Pause on hover
+    slider.addEventListener('mouseenter', stopAutoSlide);
+    slider.addEventListener('mouseleave', startAutoSlide);
+
+    // Touch swipe support (Swipe left -> next slide right-to-left)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    slider.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      stopAutoSlide();
+    }, { passive: true });
+
+    slider.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 40) {
+        if (diff < 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      }
+      startAutoSlide();
+    }, { passive: true });
+
+    // Initialize track position
+    moveToSlide(0, false);
+    startAutoSlide();
+  }
+
+  // Initialize Hero Auto Slider
+  initHeroSlider();
+
+  // Re-initialize slider whenever admin updates data
+  window.addEventListener('packraft_data_updated', function (e) {
+    if (!e.detail || e.detail.key === 'hero_slides' || e.detail.source === 'cloud') {
+      initHeroSlider();
+    }
+  });
 
 });

@@ -222,56 +222,280 @@ function renderDashboardStats() {
   setEl('stat-faq', faq.length);
 }
 
-// ---- 4. Banner Homepage Management ----
-function renderBannerList() {
-  const container = document.getElementById('banner-list');
+// ---- 4. Hero Banner & 3 Photo Slots Management ----
+let adminHeroSlidesState = [];
+let currentPickerSlotIndex = null;
+
+function initBannerAdminPage() {
+  renderHeroSlotsAdmin();
+  loadBannerHeadlineAdmin();
+}
+
+function renderHeroSlotsAdmin() {
+  const container = document.getElementById('hero-slots-container');
   if (!container) return;
 
-  const banners = DataStore.getBanners();
-  if (banners.length === 0) {
-    container.innerHTML = '<p style="color:var(--admin-text-light);text-align:center;padding:2rem;">Belum ada banner hero.</p>';
-    return;
+  adminHeroSlidesState = (typeof DataStore !== 'undefined' && typeof DataStore.getHeroSlides === 'function')
+    ? DataStore.getHeroSlides()
+    : [
+        { id: 1, gambar: 'assets/images/galeri/1.jpg', judul: 'Aksi Menyusuri Arus Sungai Opak' },
+        { id: 2, gambar: 'assets/images/galeri/2.jpg', judul: 'Rimbun Alami Tepian Sungai' },
+        { id: 3, gambar: 'assets/images/galeri/3.jpg', judul: 'Keseruan Bersama Teman' }
+      ];
+
+  if (!Array.isArray(adminHeroSlidesState) || adminHeroSlidesState.length < 3) {
+    adminHeroSlidesState = [
+      { id: 1, gambar: 'assets/images/galeri/1.jpg', judul: 'Aksi Menyusuri Arus Sungai Opak' },
+      { id: 2, gambar: 'assets/images/galeri/2.jpg', judul: 'Rimbun Alami Tepian Sungai' },
+      { id: 3, gambar: 'assets/images/galeri/3.jpg', judul: 'Keseruan Bersama Teman' }
+    ];
   }
+  adminHeroSlidesState = adminHeroSlidesState.slice(0, 3);
 
-  container.innerHTML = banners.map(function (b) {
-    const hasImg = b.gambar && b.gambar.trim() !== '';
-    const previewSrc = formatAdminAssetUrl(b.gambar);
-    const imgPreview = hasImg 
-      ? `<img src="${previewSrc}" alt="Banner" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="width:110px;height:75px;object-fit:cover;object-position:${b.position || 'center'};border-radius:8px;border:1px solid #cbd5e1;">`
-      : `<div style="width:110px;height:75px;border-radius:8px;background:linear-gradient(135deg, #091a11 0%, #164e32 60%, #0d4653 100%);display:flex;align-items:center;justify-content:center;color:#67e8f9;font-size:1.5rem;"><i class="fa-solid fa-water"></i></div>`;
+  const slotLabels = ['Slot 1 • Tampil Pertama', 'Slot 2 • Tampil Kedua', 'Slot 3 • Tampil Ketiga'];
+  const badgeClasses = ['slot-badge-1', 'slot-badge-2', 'slot-badge-3'];
 
+  container.innerHTML = adminHeroSlidesState.map((slide, idx) => {
+    const previewSrc = formatAdminAssetUrl(slide.gambar || 'assets/images/galeri/1.jpg');
     return `
-      <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1.25rem;box-shadow:0 2px 6px rgba(0,0,0,0.03);">
-        <div style="display:flex;align-items:center;gap:1.25rem;flex:1;">
-          ${imgPreview}
-          <div>
-            <h4 style="margin:0 0 0.35rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem;color:#0f172a;">${b.judul}</h4>
-            <p style="margin:0 0 0.35rem;font-size:0.875rem;color:#64748b;">${b.subheading || 'Tanpa Subheading'} &bull; Posisi: <strong style="color:#0e7490;">${b.position || 'center'}</strong></p>
-            <span style="font-size:0.75rem;color:${hasImg ? '#16a34a' : '#ea580c'};font-weight:600;">
-              <i class="fa-solid ${hasImg ? 'fa-image' : 'fa-wand-magic-sparkles'}"></i> ${hasImg ? 'Foto Kustom Aktif' : 'Background Efek Gradasi Default'}
-            </span>
-          </div>
+      <div class="banner-slot-card" id="slot-card-${idx}">
+        <div class="slot-header">
+          <strong style="font-size:0.92rem;color:#0f172a;">Slide #${idx + 1}</strong>
+          <span class="slot-badge ${badgeClasses[idx]}">${slotLabels[idx]}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:0.6rem;">
-          <span class="badge" style="background:#dcfce7;color:#16a34a;padding:0.35rem 0.85rem;border-radius:999px;font-size:0.75rem;font-weight:700;">${b.status === 'active' ? 'Aktif di Web' : 'Nonaktif'}</span>
-          <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="editBanner(${b.id})"><i class="fa-solid fa-pen-to-square"></i> Edit Banner</button>
+        <div class="slot-preview-box">
+          <img src="${previewSrc}" id="slot-img-preview-${idx}" class="slot-preview-img" alt="Slide ${idx + 1}" onerror="this.onerror=null;this.src='../assets/images/galeri/1.jpg';">
+        </div>
+        <div class="slot-body">
+          <div class="slot-btn-group">
+            <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="openGaleriPickerModal(${idx})">
+              <i class="fa-solid fa-photo-film"></i> Pilih dari Galeri
+            </button>
+            <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="document.getElementById('slot-file-input-${idx}').click()">
+              <i class="fa-solid fa-upload"></i> Upload
+            </button>
+            <input type="file" id="slot-file-input-${idx}" accept="image/*" style="display:none;" onchange="handleSlotFileUpload(${idx}, this)">
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:0.75rem;margin-bottom:0.25rem;display:block;">Path / URL Gambar:</label>
+            <input type="text" id="slot-url-input-${idx}" value="${slide.gambar || ''}" placeholder="assets/images/..." oninput="updateSlotImageUrl(${idx}, this.value)" style="font-size:0.8rem;padding:0.45rem 0.65rem;">
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:0.75rem;margin-bottom:0.25rem;display:block;">Keterangan Foto (Alt):</label>
+            <input type="text" id="slot-title-input-${idx}" value="${slide.judul || ''}" placeholder="Keterangan foto" oninput="updateSlotTitle(${idx}, this.value)" style="font-size:0.8rem;padding:0.45rem 0.65rem;">
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
 
-let currentBannerImageData = '';
-
-function updatePreviewPosition(pos) {
-  const imgEl = document.getElementById('banner-img-preview');
-  if (imgEl) {
-    imgEl.style.objectPosition = pos || 'center';
+function updateSlotImageUrl(slotIdx, url) {
+  if (!adminHeroSlidesState[slotIdx]) return;
+  adminHeroSlidesState[slotIdx].gambar = url.trim();
+  const imgEl = document.getElementById(`slot-img-preview-${slotIdx}`);
+  if (imgEl && url.trim()) {
+    imgEl.src = formatAdminAssetUrl(url.trim());
   }
 }
 
+function updateSlotTitle(slotIdx, title) {
+  if (!adminHeroSlidesState[slotIdx]) return;
+  adminHeroSlidesState[slotIdx].judul = title.trim();
+}
+
+function handleSlotFileUpload(slotIdx, input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    showToast(`Mengompres foto untuk Slot ${slotIdx + 1}...`, 'info');
+    compressImage(file, 1600, 900, 0.78)
+      .then(dataUrl => {
+        adminHeroSlidesState[slotIdx].gambar = dataUrl;
+        const imgEl = document.getElementById(`slot-img-preview-${slotIdx}`);
+        const urlInput = document.getElementById(`slot-url-input-${slotIdx}`);
+        if (imgEl) imgEl.src = dataUrl;
+        if (urlInput) urlInput.value = '(Foto Hasil Upload Tersimpan)';
+        showToast(`Foto berhasil dimuat pada Slot ${slotIdx + 1}. Klik "Simpan 3 Foto Banner" untuk menerapkan!`, 'success');
+      })
+      .catch(err => {
+        console.error(err);
+        showToast('Gagal memproses foto: ' + err.message, 'error');
+      });
+  }
+}
+
+// Modal Galeri Picker
+function openGaleriPickerModal(slotIdx) {
+  currentPickerSlotIndex = slotIdx;
+  const modal = document.getElementById('modal-galeri-picker');
+  const grid = document.getElementById('picker-gallery-grid');
+  const subtitle = document.getElementById('picker-modal-subtitle');
+  if (!modal || !grid) return;
+
+  if (subtitle) {
+    subtitle.innerHTML = `Pilih salah satu foto dari galeri untuk dimasukkan ke <strong>Slot #${slotIdx + 1}</strong>.`;
+  }
+
+  const galeriList = DataStore.getGaleri();
+  if (!galeriList || galeriList.length === 0) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:2rem;">Belum ada foto di Galeri Foto. Anda dapat mengunggah foto baru lewat tombol Upload.</p>';
+  } else {
+    grid.innerHTML = galeriList.map(g => {
+      const imgSrc = formatAdminAssetUrl(g.gambar || 'assets/images/galeri/1.jpg');
+      const safeTitle = (g.judul || 'Foto Galeri').replace(/"/g, '&quot;');
+      const safeImg = (g.gambar || '').replace(/'/g, "\\'");
+      const safeJsTitle = (g.judul || '').replace(/'/g, "\\'");
+      return `
+        <div class="picker-photo-card" onclick="selectPhotoFromGallery('${safeImg}', '${safeJsTitle}')">
+          <img src="${imgSrc}" class="picker-photo-img" alt="${safeTitle}" onerror="this.onerror=null;this.src='../assets/images/galeri/1.jpg';">
+          <div class="picker-photo-info">
+            <h5 class="picker-photo-title" title="${safeTitle}">${safeTitle}</h5>
+            <span class="picker-photo-tag"><i class="fa-solid fa-check-circle"></i> Gunakan Foto Ini</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  modal.classList.add('active');
+}
+
+function closeGaleriPickerModal() {
+  const modal = document.getElementById('modal-galeri-picker');
+  if (modal) modal.classList.remove('active');
+  currentPickerSlotIndex = null;
+}
+
+function selectPhotoFromGallery(imgUrl, title) {
+  if (currentPickerSlotIndex === null || !adminHeroSlidesState[currentPickerSlotIndex]) return;
+
+  adminHeroSlidesState[currentPickerSlotIndex].gambar = imgUrl;
+  if (title) adminHeroSlidesState[currentPickerSlotIndex].judul = title;
+
+  // Update DOM elements
+  const imgEl = document.getElementById(`slot-img-preview-${currentPickerSlotIndex}`);
+  const urlInput = document.getElementById(`slot-url-input-${currentPickerSlotIndex}`);
+  const titleInput = document.getElementById(`slot-title-input-${currentPickerSlotIndex}`);
+
+  if (imgEl) imgEl.src = formatAdminAssetUrl(imgUrl);
+  if (urlInput) urlInput.value = imgUrl;
+  if (titleInput && title) titleInput.value = title;
+
+  closeGaleriPickerModal();
+  showToast(`Foto berhasil dipilih untuk Slot #${currentPickerSlotIndex + 1}! Klik "Simpan 3 Foto Banner".`, 'success');
+}
+
+async function saveAllHeroSlides() {
+  const btn = document.getElementById('btn-save-hero-slides');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
+  }
+
+  // Ensure current inputs are synced
+  for (let i = 0; i < 3; i++) {
+    const urlInput = document.getElementById(`slot-url-input-${i}`);
+    const titleInput = document.getElementById(`slot-title-input-${i}`);
+    if (urlInput && urlInput.value.trim() && !urlInput.value.startsWith('(Foto Hasil')) {
+      adminHeroSlidesState[i].gambar = urlInput.value.trim().replace(/^\/+/, '');
+    }
+    if (titleInput) {
+      adminHeroSlidesState[i].judul = titleInput.value.trim();
+    }
+    adminHeroSlidesState[i].id = i + 1;
+  }
+
+  try {
+    showToast('Menyimpan 3 foto banner ke cloud database...', 'info');
+    await DataStore.saveHeroSlides(adminHeroSlidesState);
+    showToast('3 Foto banner berhasil diperbarui dan aktif di website!', 'success');
+  } catch (err) {
+    console.error('Gagal menyimpan hero slides:', err);
+    showToast('Gagal menyimpan: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
+async function resetHeroSlidesToDefault() {
+  if (!confirm('Apakah Anda yakin ingin mereset 3 banner ke foto default galeri Canden?')) return;
+  adminHeroSlidesState = [
+    { id: 1, gambar: 'assets/images/galeri/1.jpg', judul: 'Aksi Menyusuri Arus Sungai Opak' },
+    { id: 2, gambar: 'assets/images/galeri/2.jpg', judul: 'Rimbun Alami Tepian Sungai' },
+    { id: 3, gambar: 'assets/images/galeri/3.jpg', judul: 'Keseruan Bersama Teman' }
+  ];
+  await saveAllHeroSlides();
+  renderHeroSlotsAdmin();
+}
+
+// Headline Text Admin Sync
+function loadBannerHeadlineAdmin() {
+  const banners = DataStore.getBanners();
+  if (!banners || banners.length === 0) return;
+  const b = banners[0];
+
+  const judulInput = document.getElementById('banner-judul');
+  const subInput = document.getElementById('banner-sub');
+  const leadInput = document.getElementById('banner-lead');
+  const ctaInput = document.getElementById('banner-cta');
+  const lokasiInput = document.getElementById('banner-lokasi');
+
+  if (judulInput) judulInput.value = b.judul || 'PACKRAFTING CANDEN';
+  if (subInput) subInput.value = b.subheading || 'Adventure on the River';
+  if (leadInput) leadInput.value = b.lead || '';
+  if (ctaInput) ctaInput.value = b.ctaText || 'JELAJAHI PAKET WISATA';
+  if (lokasiInput) lokasiInput.value = b.lokasiTag || 'Rute Sungai Opak • 4,5 KM (± 1,5 Jam) • Canden ke Potrobayan';
+}
+
+async function saveBannerHeadlineText() {
+  const btn = document.getElementById('btn-save-banner-text');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  }
+
+  const banners = DataStore.getBanners();
+  const b = banners[0] || { id: 1, status: 'active', urutan: 1 };
+
+  b.judul = (document.getElementById('banner-judul') ? document.getElementById('banner-judul').value.trim() : '') || 'PACKRAFTING CANDEN';
+  b.subheading = document.getElementById('banner-sub') ? document.getElementById('banner-sub').value.trim() : 'Adventure on the River';
+  b.lead = document.getElementById('banner-lead') ? document.getElementById('banner-lead').value.trim() : '';
+  b.ctaText = document.getElementById('banner-cta') ? document.getElementById('banner-cta').value.trim() : 'JELAJAHI PAKET WISATA';
+  b.lokasiTag = document.getElementById('banner-lokasi') ? document.getElementById('banner-lokasi').value.trim() : '';
+
+  try {
+    showToast('Menyimpan teks headline banner...', 'info');
+    await DataStore.saveBanners([b]);
+    showToast('Teks headline banner berhasil disimpan!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal menyimpan teks: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
+// Backward compatibility helper
+function renderBannerList() {
+  if (document.getElementById('hero-slots-container')) {
+    initBannerAdminPage();
+  }
+}
+
+let currentBannerImageData = '';
+
 // ---- Helper: Client-side Image Resizing & Compression ----
-function compressImage(file, maxWidth = 960, maxHeight = 720, quality = 0.70) {
+function compressImage(file, maxWidth = 1600, maxHeight = 900, quality = 0.78) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type.startsWith('image/')) {
       return reject(new Error('File bukan gambar yang valid'));
@@ -308,146 +532,6 @@ function compressImage(file, maxWidth = 960, maxHeight = 720, quality = 0.70) {
     reader.onerror = () => reject(new Error('Gagal membaca file'));
     reader.readAsDataURL(file);
   });
-}
-
-function handleBannerFileUpload(input) {
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    showToast('Mengompres dan memuat foto...', 'info');
-
-    compressImage(file, 1400, 800, 0.75)
-      .then(dataUrl => {
-        currentBannerImageData = dataUrl;
-        document.getElementById('banner-img-url').value = '';
-        showBannerImagePreview(currentBannerImageData);
-        showToast('Foto berhasil dimuat, klik Simpan untuk menerapkan!', 'success');
-      })
-      .catch(err => {
-        console.error(err);
-        showToast('Gagal memuat foto: ' + err.message, 'error');
-      });
-  }
-}
-
-function handleBannerUrlInput(url) {
-  const trimmed = url.trim();
-  currentBannerImageData = trimmed;
-  if (trimmed) {
-    showBannerImagePreview(trimmed);
-  } else {
-    removeBannerImage(false);
-  }
-}
-
-function showBannerImagePreview(src) {
-  const img = document.getElementById('banner-img-preview');
-  const empty = document.getElementById('banner-img-empty');
-  const removeBtn = document.getElementById('btn-remove-banner-img');
-  const pos = document.getElementById('banner-position') ? document.getElementById('banner-position').value : 'center';
-
-  if (img && empty) {
-    let displaySrc = formatAdminAssetUrl(src);
-    img.src = displaySrc;
-    img.style.display = 'block';
-    img.style.objectPosition = pos;
-    empty.style.display = 'none';
-  }
-  if (removeBtn) removeBtn.style.display = 'inline-flex';
-}
-
-function removeBannerImage(notify = true) {
-  currentBannerImageData = '';
-  const img = document.getElementById('banner-img-preview');
-  const empty = document.getElementById('banner-img-empty');
-  const removeBtn = document.getElementById('btn-remove-banner-img');
-  const urlInput = document.getElementById('banner-img-url');
-  const fileInput = document.getElementById('banner-file-input');
-
-  if (img) { img.src = ''; img.style.display = 'none'; }
-  if (empty) { empty.style.display = 'block'; }
-  if (removeBtn) { removeBtn.style.display = 'none'; }
-  if (urlInput) { urlInput.value = ''; }
-  if (fileInput) { fileInput.value = ''; }
-
-  if (notify) {
-    showToast('Foto latar dihapus (kembali ke efek gradasi default). Klik Simpan.', 'info');
-  }
-}
-
-function editBanner(id) {
-  const banners = DataStore.getBanners();
-  const banner = banners.find(b => b.id === id) || banners[0];
-  if (!banner) return;
-
-  const form = document.getElementById('banner-form');
-  if (form) {
-    form.style.display = 'block';
-    form.dataset.editId = banner.id;
-
-    document.getElementById('banner-judul').value = banner.judul || '';
-    document.getElementById('banner-sub').value = banner.subheading || '';
-    document.getElementById('banner-lead').value = banner.lead || '';
-    document.getElementById('banner-cta').value = banner.ctaText || '';
-    document.getElementById('banner-position').value = banner.position || 'center';
-
-    currentBannerImageData = banner.gambar || '';
-    if (banner.gambar && banner.gambar.trim() !== '') {
-      document.getElementById('banner-img-url').value = banner.gambar.startsWith('data:') ? '' : banner.gambar;
-      showBannerImagePreview(banner.gambar);
-    } else {
-      removeBannerImage(false);
-    }
-
-    window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
-  }
-}
-
-async function saveBanner() {
-  const form = document.getElementById('banner-form');
-  const id = parseInt(form.dataset.editId) || 1;
-  const banners = DataStore.getBanners();
-  const banner = banners.find(b => b.id === id) || banners[0];
-
-  if (banner) {
-    const saveBtn = form.querySelector('button.btn-admin-primary');
-    const originalHtml = saveBtn ? saveBtn.innerHTML : '';
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
-    }
-
-    banner.judul = document.getElementById('banner-judul').value.trim();
-    banner.subheading = document.getElementById('banner-sub').value.trim();
-    banner.lead = document.getElementById('banner-lead').value.trim();
-    banner.ctaText = document.getElementById('banner-cta').value.trim();
-    banner.position = document.getElementById('banner-position').value;
-
-    const urlInput = document.getElementById('banner-img-url');
-    const urlVal = urlInput ? urlInput.value.trim() : '';
-    if (urlVal && (!currentBannerImageData || !currentBannerImageData.startsWith('data:'))) {
-      currentBannerImageData = urlVal;
-    }
-    if (currentBannerImageData && !currentBannerImageData.startsWith('http') && !currentBannerImageData.startsWith('data:')) {
-      currentBannerImageData = currentBannerImageData.replace(/^\/+/, '');
-    }
-    banner.gambar = currentBannerImageData;
-
-    try {
-      showToast('Menyimpan perubahan ke cloud database...', 'info');
-      await DataStore.saveBanners(banners);
-      showToast('Banner hero & gambar latar berhasil disimpan ke cloud!', 'success');
-      form.style.display = 'none';
-      renderBannerList();
-    } catch (err) {
-      console.error('Gagal menyimpan banner:', err);
-      showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
-    } finally {
-      if (saveBtn) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalHtml;
-      }
-    }
-  }
 }
 
 // ---- 5. Paket Wisata Management ----
@@ -576,6 +660,8 @@ function loadKontakAdmin() {
 
   setVal('kontak-start-name', brand.meetingPoint);
   setVal('kontak-start-url', brand.startMapsUrl);
+  setVal('kontak-rest-name', brand.restAreaPoint);
+  setVal('kontak-rest-url', brand.restAreaMapsUrl);
   setVal('kontak-finish-name', brand.finishPoint);
   setVal('kontak-finish-url', brand.finishMapsUrl);
   setVal('kontak-wa', brand.whatsapp);
@@ -589,6 +675,12 @@ function saveKontakAdmin() {
   const brand = DataStore.getBrandInfo();
   brand.meetingPoint = document.getElementById('kontak-start-name').value.trim();
   brand.startMapsUrl = document.getElementById('kontak-start-url').value.trim();
+  if (document.getElementById('kontak-rest-name')) {
+    brand.restAreaPoint = document.getElementById('kontak-rest-name').value.trim();
+  }
+  if (document.getElementById('kontak-rest-url')) {
+    brand.restAreaMapsUrl = document.getElementById('kontak-rest-url').value.trim();
+  }
   brand.finishPoint = document.getElementById('kontak-finish-name').value.trim();
   brand.finishMapsUrl = document.getElementById('kontak-finish-url').value.trim();
   brand.whatsapp = document.getElementById('kontak-wa').value.trim();
@@ -601,134 +693,7 @@ function saveKontakAdmin() {
   showToast('Pengaturan rute sungai, kontak & WhatsApp berhasil disimpan!', 'success');
 }
 
-// ---- 7. Berita Desa Management ----
-function execCmd(command, value = null) {
-  document.execCommand(command, false, value);
-}
-
-function renderBeritaAdmin() {
-  const container = document.getElementById('berita-admin-list');
-  if (!container) return;
-
-  const beritaList = DataStore.getBerita();
-  if (beritaList.length === 0) {
-    container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">Belum ada berita/artikel. Klik "Tambah Berita" untuk membuat.</td></tr>';
-    return;
-  }
-
-  container.innerHTML = beritaList.map(function (b) {
-    return `
-      <tr>
-        <td><strong>${b.judul}</strong><br><small style="color:#64748b;">${b.penulis || 'Admin'}</small></td>
-        <td><span class="badge" style="background:#e0f2fe;color:#0284c7;padding:0.25rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:600;">${b.kategori || 'Umum'}</span></td>
-        <td>${b.tanggal || '-'}</td>
-        <td><span class="badge" style="background:#dcfce7;color:#16a34a;padding:0.25rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:700;">${b.status === 'published' ? 'Terbit' : 'Draft'}</span></td>
-        <td>
-          <div style="display:flex;gap:0.4rem;">
-            <button class="btn-admin btn-admin-outline btn-admin-sm" onclick="editBeritaAdmin(${b.id})"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteBeritaAdmin(${b.id})"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function addBeritaAdmin() {
-  const form = document.getElementById('berita-form');
-  if (form) {
-    form.style.display = 'block';
-    form.dataset.mode = 'add';
-    form.dataset.editId = '';
-    document.getElementById('berita-judul').value = '';
-    document.getElementById('berita-kategori').value = 'Kegiatan Desa';
-    document.getElementById('berita-tanggal').value = new Date().toISOString().split('T')[0];
-    document.getElementById('berita-penulis').value = 'Admin Packrafting';
-    if (document.getElementById('berita-thumbnail')) document.getElementById('berita-thumbnail').value = '';
-    document.getElementById('berita-ringkasan').value = '';
-    document.getElementById('berita-isi').innerHTML = '';
-    window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
-  }
-}
-
-function editBeritaAdmin(id) {
-  const berita = DataStore.getBeritaById(id);
-  if (!berita) return;
-
-  const form = document.getElementById('berita-form');
-  if (form) {
-    form.style.display = 'block';
-    form.dataset.mode = 'edit';
-    form.dataset.editId = id;
-    document.getElementById('berita-judul').value = berita.judul || '';
-    document.getElementById('berita-kategori').value = berita.kategori || 'Kegiatan Desa';
-    document.getElementById('berita-tanggal').value = berita.tanggal || '';
-    document.getElementById('berita-penulis').value = berita.penulis || '';
-    if (document.getElementById('berita-thumbnail')) document.getElementById('berita-thumbnail').value = berita.thumbnail || '';
-    document.getElementById('berita-ringkasan').value = berita.ringkasan || '';
-    document.getElementById('berita-isi').innerHTML = berita.isi || '';
-    window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
-  }
-}
-
-function saveBeritaAdmin() {
-  const form = document.getElementById('berita-form');
-  const mode = form.dataset.mode;
-  const judul = document.getElementById('berita-judul').value.trim();
-  const kategori = document.getElementById('berita-kategori').value;
-  const tanggal = document.getElementById('berita-tanggal').value;
-  const penulis = document.getElementById('berita-penulis').value.trim() || 'Admin';
-  const thumbnail = document.getElementById('berita-thumbnail') ? document.getElementById('berita-thumbnail').value.trim() : '';
-  const ringkasan = document.getElementById('berita-ringkasan').value.trim();
-  const isi = document.getElementById('berita-isi').innerHTML.trim();
-
-  if (!judul) { showToast('Judul berita harus diisi!', 'error'); return; }
-
-  const list = DataStore.getBerita();
-
-  if (mode === 'edit') {
-    const id = parseInt(form.dataset.editId);
-    const item = list.find(b => b.id === id);
-    if (item) {
-      item.judul = judul;
-      item.kategori = kategori;
-      item.tanggal = tanggal;
-      item.penulis = penulis;
-      if (thumbnail) item.thumbnail = thumbnail;
-      item.ringkasan = ringkasan;
-      item.isi = isi;
-      showToast('Berita berhasil diperbarui', 'success');
-    }
-  } else {
-    list.unshift({
-      id: DataStore.generateId(list),
-      judul: judul,
-      kategori: kategori,
-      tanggal: tanggal || new Date().toISOString().split('T')[0],
-      penulis: penulis,
-      thumbnail: thumbnail || 'assets/images/hero/hero-packraft.jpg',
-      ringkasan: ringkasan,
-      isi: isi,
-      status: 'published'
-    });
-    showToast('Berita baru berhasil ditambahkan', 'success');
-  }
-
-  DataStore.saveBerita(list);
-  form.style.display = 'none';
-  renderBeritaAdmin();
-}
-
-function deleteBeritaAdmin(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-    let list = DataStore.getBerita().filter(b => b.id !== id);
-    DataStore.saveBerita(list);
-    showToast('Berita berhasil dihapus', 'success');
-    renderBeritaAdmin();
-  }
-}
-
-// ---- 8. Galeri Foto Management ----
+// ---- 7. Galeri Foto Management -----
 let currentGaleriImageData = '';
 let currentGaleriFilter = 'all';
 
@@ -1039,9 +1004,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-refresh admin views when cloud database updates
   window.addEventListener('packraft_data_updated', function () {
+    if (document.getElementById('hero-slots-container')) renderHeroSlotsAdmin();
     if (document.getElementById('banner-list') || document.getElementById('banner-admin-list')) renderBannerList();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
-    if (document.getElementById('berita-admin-list')) renderBeritaAdmin();
     if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();
     if (document.getElementById('stat-paket')) renderDashboardStats();
     if (document.getElementById('kontak-wa') && typeof loadKontakAdmin === 'function') loadKontakAdmin();

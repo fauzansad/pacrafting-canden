@@ -51,7 +51,6 @@
         <li><a href="#galeri" class="nav-link">Galeri</a></li>
         <li><a href="#lokasi" class="nav-link">Rute &amp; Peta</a></li>
         <li><a href="#faq" class="nav-link">FAQ</a></li>
-        <li><a href="berita.html" class="nav-link">Berita</a></li>
       </ul>
 
       <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu">
@@ -65,10 +64,24 @@
   <!-- ================= 2. HERO SECTION ================= -->
   <section class="hero" id="home">
     <div class="hero-media">
-      <div class="hero-slider">
-        <div class="hero-slide active">
-          <div class="hero-slide-art"></div>
+      <div class="hero-slider" id="hero-slider">
+        <div class="hero-slider-track" id="hero-slider-track">
+          <div class="hero-slide" data-slide="0">
+            <img src="assets/images/galeri/1.jpg" alt="Aksi Menyusuri Arus Sungai Opak" class="hero-slide-img">
+          </div>
+          <div class="hero-slide" data-slide="1">
+            <img src="assets/images/galeri/2.jpg" alt="Rimbun Alami Tepian Sungai" class="hero-slide-img">
+          </div>
+          <div class="hero-slide" data-slide="2">
+            <img src="assets/images/galeri/3.jpg" alt="Keseruan Bersama Teman" class="hero-slide-img">
+          </div>
         </div>
+      </div>
+      <!-- Hero Dots Indicator -->
+      <div class="hero-slider-dots" id="hero-slider-dots">
+        <button type="button" class="hero-dot active" data-index="0" aria-label="Slide 1"></button>
+        <button type="button" class="hero-dot" data-index="1" aria-label="Slide 2"></button>
+        <button type="button" class="hero-dot" data-index="2" aria-label="Slide 3"></button>
       </div>
     </div>
     <div class="hero-overlay"></div>
@@ -187,10 +200,10 @@
 
       <div class="paket-grid" id="paket-container">
         <!-- Paket 1: Wellness Adventure -->
-        <div class="paket-card featured reveal">
+        <div class="paket-card reveal">
           <div class="paket-header">
             <div class="paket-badge-row">
-              <span class="paket-ribbon">PROMO SPESIAL</span>
+              <span class="paket-ribbon">PAKET ADVENTURE</span>
             </div>
             <h3>PAKET 1</h3>
             <div class="paket-subtitle">Sensasi Packrafting &amp; Minuman Kebugaran</div>
@@ -229,7 +242,7 @@
             </ul>
 
             <div class="paket-footer">
-              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%201%20(Rp%20110.000%2Forang)." target="_blank" data-booking-wa="PAKET 1" class="btn btn-accent">
+              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%201%20(Rp%20110.000%2Forang)." target="_blank" data-booking-wa="PAKET 1" class="btn btn-primary">
                 <i class="fa-brands fa-whatsapp"></i> PILIH PAKET 1
               </a>
             </div>
@@ -437,41 +450,83 @@
         <p>Simak tahapan seru petualangan packrafting dari Starting Point Canden hingga Finish Potrobayan.</p>
       </div>
 
-      <div class="timeline-grid">
-        <div class="timeline-card reveal">
-          <div class="timeline-step">01</div>
-          <h4>ARRIVAL</h4>
-          <p>Tiba di Starting Point Susur Sungai Opak (Canden), registrasi &amp; welcome drink.</p>
+      <div class="timeline-visual-grid">
+        <!-- Step 1 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/logo/logo-square.png" alt="Arrival & Registrasi" class="timeline-visual-logo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">01</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>ARRIVAL &amp; REGISTRASI</h4>
+            <p>Tiba di Starting Point Susur Sungai Opak (Canden), disambut tim guide, registrasi &amp; welcome herbal drink khas desa.</p>
+          </div>
         </div>
 
-        <div class="timeline-card reveal">
-          <div class="timeline-step">02</div>
-          <h4>BRIEFING</h4>
-          <p>Guide memberikan pengarahan keselamatan, rute arus, dan teknik dasar dayung.</p>
+        <!-- Step 2 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/galeri/4.jpg" alt="Safety Briefing" class="timeline-visual-photo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">02</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>SAFETY BRIEFING</h4>
+            <p>River guide bersertifikasi memberikan pengarahan keselamatan, teknik dasar mendayung paddle, dan simulasi arus sungai.</p>
+          </div>
         </div>
 
-        <div class="timeline-card reveal">
-          <div class="timeline-step">03</div>
-          <h4>PREPARATION</h4>
-          <p>Fitting life jacket, helm, dan persiapan menaiki perahu packraft.</p>
+        <!-- Step 3 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/galeri/tes.jpg" alt="Fitting Gear APD" class="timeline-visual-photo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">03</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>FITTING GEAR &amp; APD</h4>
+            <p>Pemasangan rompi pelampung (life jacket), helm pelindung bersertifikasi, dan penyerahan double blade paddle standar.</p>
+          </div>
         </div>
 
-        <div class="timeline-card reveal">
-          <div class="timeline-step">04</div>
-          <h4>START RIDE</h4>
-          <p>Petualangan dimulai! Perahu packraft meluncur ke aliran Sungai Opak.</p>
+        <!-- Step 4 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/galeri/1.jpg" alt="Start Peluncuran Perahu" class="timeline-visual-photo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">04</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>START PENGARUNGAN</h4>
+            <p>Perahu packraft meluncur ke aliran Sungai Opak! Mulai mendayung santai beradaptasi dengan segarnya air sungai.</p>
+          </div>
         </div>
 
-        <div class="timeline-card reveal">
-          <div class="timeline-step">05</div>
-          <h4>RIVER TRAIL</h4>
-          <p>Menyusuri rute 4,5 km (durasi ± 1,5 jam) dengan spot foto alami &amp; keseruan jeram bersama river guide.</p>
+        <!-- Step 5 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/galeri/2.jpg" alt="Jeram Seru & Rest Area" class="timeline-visual-photo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">05</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>JERAM SERU &amp; REST AREA</h4>
+            <p>Menaklukkan jeram-jeram ringan yang seru, rehat sejenak di Rest Area, dan menikmati keelokan tebing alam nan asri.</p>
+          </div>
         </div>
 
-        <div class="timeline-card reveal">
-          <div class="timeline-step">06</div>
-          <h4>FINISH</h4>
-          <p>Mendarat di Wisata Potrobayan, bilas bersih, dokumentasi &amp; transportasi kembali.</p>
+        <!-- Step 6 -->
+        <div class="timeline-visual-card reveal">
+          <div class="timeline-visual-img">
+            <img src="assets/images/galeri/7.jpg" alt="Finish di Potrobayan" class="timeline-visual-photo">
+            <div class="timeline-visual-overlay"></div>
+            <span class="timeline-step-pill">06</span>
+          </div>
+          <div class="timeline-visual-body">
+            <h4>FINISH DI POTROBAYAN</h4>
+            <p>Mendarat di Wisata Potrobayan (pertemuan Sungai Opak &amp; Oya), bilas bersih, dokumentasi, dan penjemputan shuttle kembali.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -799,6 +854,20 @@
             </a>
           </div>
 
+          <!-- Card Rest Area -->
+          <div class="location-info-card" style="border-left:4px solid #f59e0b;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+              <span class="badge" style="background:#fef3c7;color:#d97706;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;">TITIK REST AREA &amp; OUTBOUND</span>
+            </div>
+            <h4><i class="fa-solid fa-mug-hot" style="color:#f59e0b;"></i> <span data-display-rest-name>Rest Area Packrafting Canden &amp; Outbound Area</span></h4>
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+              Spot istirahat di pertengahan rute pengarungan susur sungai, rehat sejenak, menikmati kelapa muda segar, dan area outbound alam terbuka tepi kali.
+            </p>
+            <a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;" data-rest-maps>
+              <i class="fa-solid fa-location-dot"></i> Buka Google Maps Rest Area
+            </a>
+          </div>
+
           <!-- Card Finish -->
           <div class="location-info-card" style="border-left:4px solid #ef4444;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
@@ -831,8 +900,70 @@
           </div>
         </div>
 
-        <div class="location-map-wrap reveal">
-          <div id="map"></div>
+        <div class="location-right-column reveal">
+          <!-- Area Atas Peta: Route Summary & Metrics Bar -->
+          <div class="route-metrics-bar">
+            <div class="route-metric-item">
+              <i class="fa-solid fa-water"></i>
+              <div>
+                <strong>Sungai Opak</strong>
+                <span>Alur Alami Bantul</span>
+              </div>
+            </div>
+            <div class="route-metric-item">
+              <i class="fa-solid fa-arrows-left-right"></i>
+              <div>
+                <strong>4,5 KM</strong>
+                <span>Jarak Pengarungan</span>
+              </div>
+            </div>
+            <div class="route-metric-item">
+              <i class="fa-regular fa-clock"></i>
+              <div>
+                <strong>± 1,5 Jam</strong>
+                <span>Durasi Rata-rata</span>
+              </div>
+            </div>
+            <div class="route-metric-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div>
+                <strong>Grade I – II</strong>
+                <span>Aman &amp; Ramah Pemula</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div class="location-map-wrap">
+            <div id="map"></div>
+          </div>
+
+          <!-- Area Bawah Peta: Interactive Journey Guide & Direct Shortcuts -->
+          <div class="route-journey-guide">
+            <div class="journey-header">
+              <h4><i class="fa-solid fa-map-location-dot" style="color:#0891b2;margin-right:0.4rem;"></i> 3 Titik Kunci Pengarungan</h4>
+              <span class="journey-tag">Canden &rarr; Potrobayan</span>
+            </div>
+            <div class="journey-steps-row">
+              <a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" class="journey-step-box step-start" data-start-maps>
+                <div class="journey-step-badge"><i class="fa-solid fa-play"></i> 1. START</div>
+                <div class="journey-step-title">Starting Point Canden</div>
+                <div class="journey-step-desc">Meeting point &amp; briefing</div>
+              </a>
+              <div class="journey-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" class="journey-step-box step-rest" data-rest-maps>
+                <div class="journey-step-badge"><i class="fa-solid fa-mug-hot"></i> 2. REST AREA</div>
+                <div class="journey-step-title">Rest Area &amp; Outbound</div>
+                <div class="journey-step-desc">Rehat kelapa muda</div>
+              </a>
+              <div class="journey-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+              <a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" class="journey-step-box step-finish" data-finish-maps>
+                <div class="journey-step-badge"><i class="fa-solid fa-flag-checkered"></i> 3. FINISH</div>
+                <div class="journey-step-title">Wisata Potrobayan</div>
+                <div class="journey-step-desc">Bilas &amp; penjemputan</div>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -967,56 +1098,75 @@
         <div class="badge-tag">Ulasan Wisatawan</div>
         <h2>CERITA DARI MEREKA</h2>
         <p>Kesan dan pengalaman seru mereka yang telah menjajal petualangan Packrafting Canden.</p>
+        <div style="margin-top: 1.25rem;">
+          <button type="button" class="btn btn-primary" id="btn-toggle-ulasan">
+            <i class="fa-solid fa-pen-to-square"></i> Beri Ulasan Anda
+          </button>
+        </div>
       </div>
 
-      <div class="testi-grid">
-        <div class="testi-card reveal">
-          <div class="testi-rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="testi-quote">
-            "Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan. Wajib coba!"
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">A</div>
+      <!-- Form Ulasan Wisatawan (Hidden by default) -->
+      <div class="ulasan-form-wrapper" id="ulasan-form-wrapper" style="display: none;">
+        <div class="ulasan-form-card">
+          <div class="ulasan-form-header">
             <div>
-              <div class="testi-name">[Nama Peserta]</div>
-              <div class="testi-role">[Wisatawan / Komunitas]</div>
+              <h3><i class="fa-solid fa-star" style="color:#f59e0b;margin-right:0.5rem;"></i> Tulis Ulasan &amp; Rating Anda</h3>
+              <p>Bagikan kesan dan cerita petualangan Anda menyusuri Sungai Opak bersama kami.</p>
             </div>
+            <button type="button" class="ulasan-form-close" id="btn-tutup-ulasan" aria-label="Tutup form">&times;</button>
           </div>
-        </div>
 
-        <div class="testi-card reveal">
-          <div class="testi-rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="testi-quote">
-            "Seru banget buat liburan keluarga. Anak-anak senang dan merasa aman karena didampingi instruktur yang sabar. Titik finish di Potrobayan juga pemandangannya bagus!"
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">B</div>
-            <div>
-              <div class="testi-name">[Nama Peserta]</div>
-              <div class="testi-role">[Keluarga Wisatawan]</div>
+          <form id="form-ulasan" novalidate>
+            <!-- Rating Star Selector -->
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Rating Pengalaman Anda <span style="color:#ef4444;">*</span></label>
+              <div class="rating-picker-box">
+                <div class="rating-stars" id="rating-stars" role="radiogroup" aria-label="Rating Bintang">
+                  <button type="button" class="star-btn active" data-rating="1" aria-label="1 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="2" aria-label="2 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="3" aria-label="3 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="4" aria-label="4 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="5" aria-label="5 Bintang"><i class="fa-solid fa-star"></i></button>
+                </div>
+                <input type="hidden" id="ulasan-rating-val" value="5">
+                <span class="rating-label" id="rating-text">5/5 &mdash; Luar Biasa &amp; Tak Terlupakan!</span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div class="testi-card reveal">
-          <div class="testi-rating">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="testi-quote">
-            "Spot wisata adventure baru di Bantul yang fresh! Jeram sungainya menantang tapi tetap aman. Cocok banget buat refreshing bareng teman kantor."
-          </p>
-          <div class="testi-author">
-            <div class="testi-avatar">C</div>
-            <div>
-              <div class="testi-name">[Nama Peserta]</div>
-              <div class="testi-role">[Komunitas Outdoor]</div>
+            <div class="ulasan-inputs-grid">
+              <!-- Nama -->
+              <div class="form-group">
+                <label for="ulasan-nama" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Nama Lengkap / Panggilan <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="ulasan-nama" class="form-control" placeholder="Contoh: Rian Pratama" required>
+              </div>
+
+              <!-- Asal / Komunitas -->
+              <div class="form-group">
+                <label for="ulasan-asal" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Asal Kota / Kategori <small style="color:#64748b;font-weight:normal;">(Opsional)</small></label>
+                <input type="text" id="ulasan-asal" class="form-control" placeholder="Contoh: Wisatawan Jakarta / Rombongan Kantor">
+              </div>
             </div>
-          </div>
+
+            <!-- Ulasan Pesan -->
+            <div class="form-group">
+              <label for="ulasan-pesan" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Ulasan &amp; Kesan Pengalaman <span style="color:#ef4444;">*</span></label>
+              <textarea id="ulasan-pesan" class="form-control" rows="3" placeholder="Ceritakan bagaimana keseruan jeram, keramahan pemandu, pemandangan, atau suasana asri Sungai Opak Canden..." required></textarea>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="ulasan-form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit-ulasan">
+                <i class="fa-solid fa-paper-plane"></i> Kirim Ulasan Sekarang
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-cancel-ulasan">Batal</button>
+            </div>
+          </form>
         </div>
+      </div>
+
+      <!-- Testimoni Grid (Dikelola dinamis oleh main.js) -->
+      <div class="testi-grid" id="testi-container">
+        <!-- Rendered dynamically by main.js -->
       </div>
     </div>
   </section>
@@ -1105,7 +1255,6 @@
             <li><a href="#home"><i class="fa-solid fa-chevron-right"></i> Home</a></li>
             <li><a href="#tentang"><i class="fa-solid fa-chevron-right"></i> Tentang Kami</a></li>
             <li><a href="#paket"><i class="fa-solid fa-chevron-right"></i> Paket Wisata</a></li>
-            <li><a href="berita.html"><i class="fa-solid fa-chevron-right"></i> Berita &amp; Artikel</a></li>
             <li><a href="galeri.html"><i class="fa-solid fa-chevron-right"></i> Galeri Dokumentasi</a></li>
             <li><a href="kontak.html"><i class="fa-solid fa-chevron-right"></i> Rute &amp; Kontak</a></li>
             <li><a href="#safety"><i class="fa-solid fa-chevron-right"></i> SOP &amp; Safety</a></li>
@@ -1116,6 +1265,7 @@
           <h4>Lokasi &amp; Peta</h4>
           <ul class="footer-links">
             <li><a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" data-start-maps><i class="fa-solid fa-play text-accent"></i> Starting Point Canden</a></li>
+            <li><a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" data-rest-maps><i class="fa-solid fa-mug-hot" style="color:#f59e0b;"></i> Rest Area &amp; Outbound</a></li>
             <li><a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" data-finish-maps><i class="fa-solid fa-flag-checkered" style="color:#ef4444;"></i> Finish Potrobayan</a></li>
             <li><a href="#galeri"><i class="fa-solid fa-chevron-right"></i> Galeri Foto</a></li>
             <li><a href="#faq"><i class="fa-solid fa-chevron-right"></i> FAQ</a></li>
@@ -1150,6 +1300,9 @@
       </div>
     </div>
   </footer>
+
+  <!-- Toast Container untuk Notifikasi Pengunjung -->
+  <div class="toast-container" id="user-toast-container"></div>
 
   <!-- Floating WhatsApp Button -->
   <a href="https://wa.me/6281260092044" class="float-wa-btn" id="float-wa-btn" aria-label="Chat WhatsApp Booking" data-social-wa>

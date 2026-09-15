@@ -19,6 +19,11 @@ const PackraftData = {
     startMapsUrl: 'https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7',
     startCoordinates: { lat: -7.932815, lng: 110.364526 },
 
+    // Titik Rest Area & Outbound
+    restAreaPoint: 'Rest Area Packrafting Canden & Outbound Area',
+    restAreaMapsUrl: 'https://maps.app.goo.gl/9zPZVeSV58w2fNMF7',
+    restAreaCoordinates: { lat: -7.9423004, lng: 110.366292 },
+
     // Titik Finish
     finishPoint: 'Wisata Potrobayan (Sriharjo, Pundong / Pertemuan Sungai Opak)',
     finishMapsUrl: 'https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8',
@@ -113,6 +118,28 @@ const PackraftData = {
       position: 'center',
       status: 'active',
       urutan: 1
+    }
+  ],
+
+  // ---- 3 Foto Banner Slider Hero (Dapat Diatur di Admin) ----
+  heroSlides: [
+    {
+      id: 1,
+      gambar: 'assets/images/galeri/1.jpg',
+      judul: 'Aksi Menyusuri Arus Sungai Opak',
+      caption: 'Keseruan packrafting menembus aliran Sungai Opak'
+    },
+    {
+      id: 2,
+      gambar: 'assets/images/galeri/2.jpg',
+      judul: 'Rimbun Alami Tepian Sungai',
+      caption: 'Pemandangan hijau asri di sepanjang rute susur sungai'
+    },
+    {
+      id: 3,
+      gambar: 'assets/images/galeri/3.jpg',
+      judul: 'Keseruan Bersama Teman',
+      caption: 'Momen petualangan seru bersama sahabat'
     }
   ],
 
@@ -250,51 +277,30 @@ const PackraftData = {
   testimonials: [
     {
       id: 1,
-      nama: '[Nama Peserta]',
-      asal: '[Asal Kota / Komunitas]',
+      nama: 'Bima Arya Pratama',
+      asal: 'Wisatawan Jakarta',
       rating: 5,
-      pesan: 'Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan.',
-      avatar: 'A'
+      pesan: 'Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan. Wajib coba!',
+      avatar: 'B',
+      tanggal: '2026-08-25'
     },
     {
       id: 2,
-      nama: '[Nama Peserta]',
-      asal: '[Keluarga Wisatawan]',
+      nama: 'Siti Rahmawati',
+      asal: 'Keluarga Wisatawan (Sleman)',
       rating: 5,
       pesan: 'Seru banget buat liburan keluarga. Anak-anak senang dan merasa aman karena didampingi instruktur yang sabar. Titik finish di Potrobayan juga pemandangannya bagus!',
-      avatar: 'B'
+      avatar: 'S',
+      tanggal: '2026-08-20'
     },
     {
       id: 3,
-      nama: '[Nama Peserta]',
-      asal: '[Komunitas Outdoor]',
+      nama: 'Dimas Setiawan',
+      asal: 'Komunitas Outdoor Jogja',
       rating: 5,
       pesan: 'Spot wisata adventure baru di Bantul yang fresh! Jeram sungainya menantang tapi tetap aman. Cocok banget buat refreshing bareng teman kantor.',
-      avatar: 'C'
-    }
-  ],
-
-  // ---- Berita & Artikel Petualangan ----
-  berita: [
-    {
-      id: 1,
-      judul: 'Panduan Lengkap Packrafting Pemula di Sungai Opak Canden',
-      kategori: 'Kegiatan Desa',
-      tanggal: '2026-08-20',
-      penulis: 'Tim Instruktur Canden',
-      ringkasan: 'Tips penting dan hal-hal yang perlu disiapkan sebelum pertama kali mencoba petualangan susur sungai dengan packraft.',
-      isi: '<p>Packrafting adalah aktivitas pengarungan sungai menggunakan perahu karet portable berbobot ringan namun berdaya tahan tinggi. Bagi Anda yang baru pertama kali ingin mencoba rute susur Sungai Opak di Desa Canden, tidak perlu khawatir karena aktivitas ini sangat ramah untuk pemula.</p><p>Sebelum memulai, seluruh peserta akan mendapatkan safety briefing mengenai teknik mengayuh paddle, menjaga keseimbangan perahu, serta panduan keselamatan dari instruktur bersertifikasi.</p>',
-      status: 'published'
-    },
-    {
-      id: 2,
-      judul: 'Eksplorasi Keindahan Sungai Opak hingga Wisata Potrobayan',
-      kategori: 'Pariwisata',
-      tanggal: '2026-08-15',
-      penulis: 'Admin Desa',
-      ringkasan: 'Melihat pemandangan hijau nan asri dan segarnya aliran air sepanjang 3,5 km rute petualangan air.',
-      isi: '<p>Rute petualangan Packrafting Canden menyajikan kombinasi jeram-jeram ringan yang mengasyikkan serta ketenangan pemandangan alam tepi sungai yang asri.</p><p>Perjalanan diakhiri di Wisata Potrobayan, titik pertemuan Sungai Opak dan Sungai Oya yang terkenal dengan hamparan rumput luas dan udara sejuk.</p>',
-      status: 'published'
+      avatar: 'D',
+      tanggal: '2026-08-15'
     }
   ],
 
@@ -505,6 +511,24 @@ const DataStore = {
     return this.getBanners().filter(b => b.status === 'active').sort((a, b) => a.urutan - b.urutan);
   },
 
+  // ---- Manajemen 3 Foto Banner Slider Hero ----
+  getHeroSlides() {
+    const stored = localStorage.getItem('packraft_hero_slides');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length >= 3) {
+          return parsed.slice(0, 3);
+        }
+      } catch (e) {}
+    }
+    return PackraftData.heroSlides;
+  },
+  saveHeroSlides(data) {
+    const validSlides = Array.isArray(data) ? data.slice(0, 3) : PackraftData.heroSlides;
+    return this.saveToCloud('hero_slides', validSlides);
+  },
+
   getPaket() {
     const stored = localStorage.getItem('packraft_paket');
     if (stored) {
@@ -544,20 +568,6 @@ const DataStore = {
   },
   saveWisataInfo(data) {
     return this.saveToCloud('wisata_info', data);
-  },
-
-  getBerita() {
-    const stored = localStorage.getItem('packraft_berita');
-    return stored ? JSON.parse(stored) : PackraftData.berita;
-  },
-  getPublishedBerita() {
-    return this.getBerita().filter(b => b.status === 'published' || !b.status);
-  },
-  saveBerita(data) {
-    return this.saveToCloud('berita', data);
-  },
-  getBeritaById(id) {
-    return this.getBerita().find(b => b.id === parseInt(id));
   },
 
   getGaleri() {
