@@ -472,9 +472,9 @@ document.addEventListener('DOMContentLoaded', function () {
           for (var i = 0; i < children.length; i++) {
             (function (child, index) {
               child.style.opacity = '0';
-              child.style.transform = 'translateY(30px)';
-              child.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)';
-              child.style.transitionDelay = (index * 0.09) + 's';
+              child.style.transform = 'translateY(20px)';
+              child.style.transition = 'opacity 1.1s cubic-bezier(0.25,0.46,0.45,0.94), transform 1.1s cubic-bezier(0.25,0.46,0.45,0.94)';
+              child.style.transitionDelay = (index * 0.15) + 's';
               requestAnimationFrame(function () {
                 requestAnimationFrame(function () {
                   child.style.opacity = '1';
@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var ch = grid.children;
       for (var j = 0; j < ch.length; j++) {
         ch[j].style.opacity = '0';
-        ch[j].style.transform = 'translateY(30px)';
+        ch[j].style.transform = 'translateY(20px)';
       }
       staggerObserver.observe(grid);
     });
