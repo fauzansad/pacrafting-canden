@@ -2152,6 +2152,7 @@ p {
   transition: all var(--transition);
   cursor: pointer;
   border: none;
+  position: relative;
 }
 
 .video-play-btn:hover {
@@ -3060,13 +3061,217 @@ a.cta-booking-meta-pill:hover {
 /* ---- REVEAL ANIMATIONS ---- */
 .reveal {
   opacity: 0;
-  transform: translateY(35px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(40px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .reveal.revealed {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1) rotate(0);
+}
+
+/* Directional variants */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.88);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-left.revealed,
+.reveal-right.revealed,
+.reveal-scale.revealed {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* Stagger delays for grid children */
+.reveal-stagger > *:nth-child(1) { transition-delay: 0s; }
+.reveal-stagger > *:nth-child(2) { transition-delay: 0.1s; }
+.reveal-stagger > *:nth-child(3) { transition-delay: 0.2s; }
+.reveal-stagger > *:nth-child(4) { transition-delay: 0.25s; }
+.reveal-stagger > *:nth-child(5) { transition-delay: 0.3s; }
+.reveal-stagger > *:nth-child(6) { transition-delay: 0.35s; }
+.reveal-stagger > *:nth-child(7) { transition-delay: 0.38s; }
+.reveal-stagger > *:nth-child(8) { transition-delay: 0.42s; }
+
+/* ---- HERO ENTRANCE SEQUENCE ---- */
+.hero-content .hero-location,
+.hero-content .hero-title,
+.hero-content .hero-sub,
+.hero-content .hero-lead,
+.hero-content .hero-actions {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-content .hero-location { animation-delay: 0.3s; }
+.hero-content .hero-title   { animation-delay: 0.5s; }
+.hero-content .hero-sub     { animation-delay: 0.7s; }
+.hero-content .hero-lead    { animation-delay: 0.85s; }
+.hero-content .hero-actions { animation-delay: 1.05s; }
+
+@keyframes heroEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- SCROLL INDICATOR BOUNCE ---- */
+.hero-scroll-indicator {
+  animation: scrollBounce 2.2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ---- FLOATING BADGE ---- */
+.intro-badge-float {
+  animation: floatBadge 3.5s ease-in-out infinite;
+}
+
+@keyframes floatBadge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ---- WHATSAPP BUTTON PULSE ---- */
+.float-wa-btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-full);
+  background: rgba(37, 211, 102, 0.35);
+  animation: waPulse 2s ease-out infinite;
+  z-index: -1;
+}
+
+@keyframes waPulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ---- VIDEO PLAY BUTTON RIPPLE ---- */
+.video-play-btn::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 84, 2, 0.3);
+  animation: playRipple 2s ease-out infinite;
+  z-index: -1;
+}
+
+@keyframes playRipple {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ---- CTA SHIMMER EFFECT ---- */
+.cta-booking-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-booking-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  animation: ctaShimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ctaShimmer {
+  0% { left: -60%; }
+  40%, 100% { left: 120%; }
+}
+
+/* ---- CARD HOVER LIFT (universal) ---- */
+.why-card,
+.wellness-card,
+.booking-step-card,
+.timeline-card,
+.timeline-visual-card,
+.sop-card,
+.sop-pillar-card,
+.addon-card,
+.testi-card,
+.faq-item {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              background 0.35s ease;
+}
+
+/* ---- ACCESSIBILITY: REDUCED MOTION ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-content .hero-location,
+  .hero-content .hero-title,
+  .hero-content .hero-sub,
+  .hero-content .hero-lead,
+  .hero-content .hero-actions {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .intro-badge-float,
+  .hero-scroll-indicator {
+    animation: none;
+  }
+
+  .float-wa-btn::before,
+  .video-play-btn::before,
+  .cta-booking-card::after {
+    animation: none;
+    display: none;
+  }
 }
 
 /* ---- RESPONSIVE BREAKPOINTS ---- */

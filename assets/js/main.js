@@ -438,9 +438,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ---- 6. Scroll Reveal Animation ----
-  const reveals = document.querySelectorAll('.reveal');
+  var revealSelectors = '.reveal, .reveal-left, .reveal-right, .reveal-scale';
+  var reveals = document.querySelectorAll(revealSelectors);
   if (reveals.length > 0 && typeof IntersectionObserver !== 'undefined') {
-    const revealObserver = new IntersectionObserver(function (entries) {
+    var revealObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('revealed');
@@ -448,12 +449,56 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     }, {
-      threshold: 0.12,
-      rootMargin: '0px 0px -40px 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
     });
 
     reveals.forEach(function (el) {
       revealObserver.observe(el);
+    });
+  }
+
+  // Stagger children inside grid containers
+  var staggerGrids = document.querySelectorAll(
+    '.why-grid, .wellness-grid, .timeline-grid, .timeline-visual-grid, ' +
+    '.sop-grid, .sop-pillars-grid, .booking-steps-grid, .testi-grid, ' +
+    '.addons-grid, .gallery-grid'
+  );
+  if (staggerGrids.length > 0 && typeof IntersectionObserver !== 'undefined') {
+    var staggerObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var children = entry.target.children;
+          for (var i = 0; i < children.length; i++) {
+            (function (child, index) {
+              child.style.opacity = '0';
+              child.style.transform = 'translateY(30px)';
+              child.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+              child.style.transitionDelay = (index * 0.09) + 's';
+              requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                  child.style.opacity = '1';
+                  child.style.transform = 'translateY(0)';
+                });
+              });
+            })(children[i], i);
+          }
+          staggerObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -30px 0px'
+    });
+
+    staggerGrids.forEach(function (grid) {
+      // Set initial hidden state
+      var ch = grid.children;
+      for (var j = 0; j < ch.length; j++) {
+        ch[j].style.opacity = '0';
+        ch[j].style.transform = 'translateY(30px)';
+      }
+      staggerObserver.observe(grid);
     });
   }
 
