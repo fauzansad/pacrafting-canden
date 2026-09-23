@@ -214,9 +214,7 @@ p {
 /* Category Eyebrows (Replacing AI capsule pills with editorial village label) */
 .badge-tag,
 .section-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
+  display: inline-block;
   padding: 0;
   background: transparent;
   color: var(--nature);
@@ -229,32 +227,13 @@ p {
   border-radius: 0;
 }
 
-.badge-tag::before,
-.section-eyebrow::before {
-  content: '';
-  display: inline-block;
-  width: 22px;
-  height: 2px;
-  background: var(--nature);
-  border-radius: 2px;
-}
-
 .badge-tag-orange {
   color: var(--accent);
-}
-
-.badge-tag-orange::before {
-  background: var(--accent);
 }
 
 .section-dark .badge-tag,
 .section-dark .section-eyebrow {
   color: var(--nature-light);
-}
-
-.section-dark .badge-tag::before,
-.section-dark .section-eyebrow::before {
-  background: var(--nature-light);
 }
 
 .section-header h2 {
@@ -462,10 +441,6 @@ p {
   font-weight: 800;
 }
 
-.navbar.scrolled .nav-link.active::after {
-  background: var(--nature);
-}
-
 .navbar.scrolled .nav-toggle span {
   background: var(--text);
 }
@@ -599,12 +574,11 @@ p {
 }
 
 .nav-link {
-  position: relative;
   color: rgba(255,255,255,0.85);
   font-family: var(--font-heading);
   font-size: var(--fs-sm);
   font-weight: 700;
-  padding: 0.52rem 1rem 0.65rem;
+  padding: 0.55rem 1.05rem;
   border-radius: var(--radius-full);
   transition: all var(--transition-fast);
   display: inline-flex;
@@ -612,35 +586,10 @@ p {
   justify-content: center;
 }
 
-/* Penanda Bulet (Circular Bullet Dot) */
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--nature);
-  opacity: 0;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-  pointer-events: none;
-}
-
-.nav-link.active::after {
-  transform: translateX(-50%) scale(1);
-  opacity: 1;
-}
-
 .nav-link:hover,
 .nav-link.active {
   color: var(--white);
-  background: rgba(255,255,255,0.15);
-}
-
-.navbar:not(.scrolled) .nav-link.active::after {
-  background: #f59e0b;
+  background: rgba(255,255,255,0.16);
 }
 
 .nav-toggle {
@@ -3427,17 +3376,6 @@ a.cta-booking-meta-pill:hover {
     width: 100%;
     padding: 0.85rem 1rem;
     font-size: var(--fs-base);
-    justify-content: space-between;
-  }
-
-  .nav-link::after {
-    position: static;
-    transform: scale(0);
-    margin-left: auto;
-  }
-
-  .nav-link.active::after {
-    transform: scale(1);
   }
 
   .nav-cta {
