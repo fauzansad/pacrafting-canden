@@ -110,37 +110,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const paketList = DataStore.getPaket().filter(p => p.status !== 'inactive');
     if (!paketList || paketList.length === 0) return;
 
-    container.innerHTML = paketList.map(function (p) {
-      const ribbonText = p.badge || '';
-      const ribbonHtml = ribbonText ? `<div class="paket-badge-row"><span class="paket-ribbon">${ribbonText}</span></div>` : '';
-      const btnClass = 'btn btn-primary';
+    container.innerHTML = paketList.map(function (p, idx) {
+      const ribbonText = p.badge || (idx === 0 ? 'Trip Favorit' : 'Lengkap + Makan');
+      const ribbonHtml = ribbonText ? `<span class="paket-ribbon">${ribbonText}</span>` : '';
+      const defaultImg = idx === 0 ? 'assets/images/galeri/3.jpg' : 'assets/images/galeri/6.jpg';
+      const imgSrc = p.gambar || defaultImg;
+      const btnClass = idx === 0 ? 'btn btn-primary' : 'btn btn-accent';
       const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join('');
       const waUrl = DataStore.getBookingWhatsAppUrl(p.nama);
 
       // Handle price formatting
-      let displayPrice = p.harga || '[HARGA]';
+      let displayPrice = p.harga || '110.000';
       if (!displayPrice.startsWith('Rp') && !displayPrice.startsWith('Mulai') && !displayPrice.includes('[')) {
         displayPrice = 'Rp ' + displayPrice;
       }
 
-      let normalPriceHtml = '';
-      if (p.hargaNormal) {
-        normalPriceHtml = `
-          <div class="paket-price-normal">
-            <span>Harga Normal: <s>${p.hargaNormal}</s></span>
-            <span class="badge-promo-tag">PROMO</span>
-          </div>
-        `;
-      }
-
       return `
         <div class="paket-card reveal revealed">
-          <div class="paket-header">
+          <div class="paket-img-header">
+            <img src="${imgSrc}" alt="${p.nama}" loading="lazy">
             ${ribbonHtml}
+          </div>
+          <div class="paket-header">
             <h3>${p.nama}</h3>
-            <div class="paket-subtitle">${p.deskripsi || 'Sensasi Packrafting Wellness Tourism'}</div>
+            <div class="paket-subtitle">${p.deskripsi || 'Sensasi Packrafting Wellness Tourism Canden'}</div>
             <div class="paket-price-box">
-              ${normalPriceHtml}
               <div class="paket-price">
                 <span class="amount">${displayPrice}</span>
                 <span class="unit">${p.unit || '/ orang'}</span>
@@ -151,11 +145,11 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="paket-meta-list">
               <div class="paket-meta-item">
                 <i class="fa-regular fa-clock"></i>
-                <div><strong>Durasi</strong>${p.durasi || '± 1,5 Jam (4,5 km)'}</div>
+                <div><strong>Durasi Trip</strong>${p.durasi || '± 1,5 Jam (4,5 km)'}</div>
               </div>
               <div class="paket-meta-item">
-                <i class="fa-solid fa-person-swimming"></i>
-                <div><strong>Kapasitas</strong>1 Orang / Perahu</div>
+                <i class="fa-solid fa-sailboat"></i>
+                <div><strong>Perahu</strong>1 Orang / Packraft</div>
               </div>
             </div>
 
@@ -166,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <div class="paket-footer">
               <a href="${waUrl}" target="_blank" data-booking-wa="${p.nama}" class="${btnClass}">
-                <i class="fa-brands fa-whatsapp"></i> PILIH ${p.nama.toUpperCase()}
+                <i class="fa-brands fa-whatsapp"></i> Reservasi ${p.nama}
               </a>
             </div>
           </div>
