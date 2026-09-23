@@ -1377,6 +1377,17 @@
         <p>Pilih akun Google Anda untuk publikasi ulasan &amp; rating otomatis di Packrafting Canden</p>
       </div>
       <div class="google-auth-body">
+        <!-- Tombol Resmi Google 1-Click Sign-In SDK -->
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:0.75rem;">
+          <div id="gsi-modal-button-slot" style="min-height:44px;display:flex;justify-content:center;width:100%;"></div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.75rem;margin:0.85rem 0 1.15rem;color:#94a3b8;font-size:0.8rem;">
+          <span style="flex:1;height:1px;background:#e2e8f0;"></span>
+          <span>atau lengkapi langsung</span>
+          <span style="flex:1;height:1px;background:#e2e8f0;"></span>
+        </div>
+
         <form id="form-connect-google" novalidate>
           <div style="text-align:center;margin-bottom:1.25rem;">
             <div style="position:relative;display:inline-block;cursor:pointer;" id="modal-avatar-preview-wrap" title="Klik untuk pasang foto profil Google Anda">
@@ -1426,8 +1437,9 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=4.0"></script>
-  <script src="assets/js/main.js?v=4.0"></script>
+  <script src="assets/js/data.js?v=4.1"></script>
+  <script src="assets/js/main.js?v=4.1"></script>
 </body>
 </html>

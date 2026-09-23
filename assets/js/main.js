@@ -900,6 +900,94 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+    // Official Google OAuth Client ID provided by user
+    const GOOGLE_CLIENT_ID = '782413984770-3vlvs6ifijmps9lolfmjd5lsj2u2e9pi.apps.googleusercontent.com';
+
+    // Helper to decode Base64Url JWT token from Google Identity Services
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        console.error('Failed to parse Google JWT token', e);
+        return null;
+      }
+    }
+
+    // Callback when user signs in via official Google Sign-In SDK
+    function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const payload = parseJwt(response.credential);
+      if (payload && payload.email) {
+        const user = {
+          nama: payload.name || payload.given_name || 'Pengguna Google',
+          email: payload.email,
+          foto: payload.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name || 'G')}&background=1b4332&color=fff&size=120`,
+          isGoogleVerified: true
+        };
+        setActiveGoogleUser(user);
+        closeGoogleModal();
+        showUserToast(`Berhasil masuk dengan akun Google: ${user.nama}!`, 'success');
+      }
+    }
+
+    function renderGsiButtonInModal() {
+      if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) return;
+      const slot = document.getElementById('gsi-modal-button-slot');
+      if (slot) {
+        slot.innerHTML = '';
+        try {
+          window.google.accounts.id.renderButton(slot, {
+            type: 'standard',
+            theme: 'filled_blue',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: 300
+          });
+        } catch (e) {
+          console.warn('GSI renderButton error:', e);
+        }
+      }
+    }
+
+    function initGoogleIdentityServices() {
+      if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) {
+        setTimeout(initGoogleIdentityServices, 350);
+        return;
+      }
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        renderGsiButtonInModal();
+
+        // Prompt Google One-Tap automatically if user is unlinked
+        if (!getActiveGoogleUser()) {
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed()) {
+              console.log('Google One Tap suppressed:', notification.getNotDisplayedReason());
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Google Identity Services initialization warning:', err);
+      }
+    }
+
     // Google Account State Management for Reviews (Dynamic per Browser Profile)
     function getActiveGoogleUser() {
       try {
@@ -951,6 +1039,9 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.style.display = 'flex';
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // Render official Google button inside modal
+        renderGsiButtonInModal();
       }
     }
 
@@ -1172,8 +1263,9 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Run initial UI sync
+    // Run initial UI sync & Google Identity Services SDK
     syncGoogleUserUI();
+    initGoogleIdentityServices();
 
     // Interactive Star Rating Picker
     const starBtns = document.querySelectorAll('#rating-stars .star-btn');
