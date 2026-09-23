@@ -1144,24 +1144,25 @@
           </div>
 
           <!-- Active Google Account Bar (Otomatis Terintegrasi) -->
-          <div class="google-active-account-bar" id="google-active-account-bar">
+          <div class="google-active-account-bar unlinked" id="google-active-account-bar">
             <div class="g-account-info">
-              <div class="g-account-avatar-wrap" id="g-avatar-click-trigger" title="Klik untuk ganti / sesuaikan foto profil Google Anda">
-                <img id="g-active-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Akun Google" class="g-account-avatar">
-                <span class="g-avatar-camera-icon" title="Ganti Foto Profil"><i class="fa-solid fa-camera"></i></span>
-                <input type="file" id="g-avatar-file-input" accept="image/*" style="display:none;">
+              <div class="g-account-avatar-placeholder">
+                <i class="fa-brands fa-google"></i>
               </div>
               <div class="g-account-details">
-                <div class="g-account-name">
-                  <span id="g-active-name">Fauzan Sadida Ramadhan</span>
-                  <span class="g-badge-pill"><i class="fa-brands fa-google"></i> Terhubung</span>
+                <div class="g-account-name" style="color:#1e293b;">
+                  <span>Masuk dengan Google</span>
                 </div>
-                <div class="g-account-email" id="g-active-email">fauzansadidaramadhan@gmail.com &bull; <a href="javascript:void(0)" id="link-ganti-foto" style="color:#0284c7;text-decoration:underline;">Ganti Foto</a></div>
+                <div class="g-account-email" style="color:#64748b;">
+                  Hubungkan akun Google resmi Anda untuk identitas ulasan
+                </div>
               </div>
             </div>
-            <button type="button" class="btn btn-outline btn-sm g-switch-btn" id="btn-switch-google" title="Ganti Akun Google">
-              <i class="fa-solid fa-arrow-right-arrow-left"></i> Ganti Akun
-            </button>
+            <div id="gsi-bar-button-slot" style="min-height:40px;display:flex;align-items:center;">
+              <button type="button" class="btn btn-primary btn-sm g-switch-btn" id="btn-switch-google">
+                <i class="fa-brands fa-google"></i> Masuk dengan Google
+              </button>
+            </div>
           </div>
 
           <form id="form-ulasan" novalidate>
@@ -1363,75 +1364,30 @@
     </div>
   </div>
 
-  <!-- Modal Pilih / Ganti Akun Google -->
+  <!-- Modal Login Google -->
   <div class="modal-overlay" id="modal-google-auth" style="display: none;">
     <div class="modal-card google-auth-card">
       <div class="google-auth-header">
-        <svg viewBox="0 0 48 48" width="40" height="40" style="display:block;margin:0 auto 0.5rem;">
+        <svg viewBox="0 0 48 48" width="44" height="44" style="display:block;margin:0 auto 0.75rem;">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        <h4>Login dengan Google</h4>
-        <p>Pilih akun Google Anda untuk publikasi ulasan &amp; rating otomatis di Packrafting Canden</p>
+        <h4 style="font-size:1.25rem;font-weight:700;margin-bottom:0.35rem;color:#1e293b;">Login dengan Google</h4>
+        <p style="font-size:0.88rem;color:#64748b;margin:0;">Hubungkan akun Google resmi Anda untuk publikasi ulasan &amp; foto profil otomatis</p>
       </div>
-      <div class="google-auth-body">
-        <!-- Tombol Resmi Google 1-Click Sign-In SDK -->
-        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:0.75rem;">
-          <div id="gsi-modal-button-slot" style="min-height:44px;display:flex;justify-content:center;width:100%;"></div>
-        </div>
 
-        <div style="display:flex;align-items:center;gap:0.75rem;margin:0.85rem 0 1.15rem;color:#94a3b8;font-size:0.8rem;">
-          <span style="flex:1;height:1px;background:#e2e8f0;"></span>
-          <span>atau lengkapi langsung</span>
-          <span style="flex:1;height:1px;background:#e2e8f0;"></span>
-        </div>
-
-        <form id="form-connect-google" novalidate>
-          <div style="text-align:center;margin-bottom:1.25rem;">
-            <div style="position:relative;display:inline-block;cursor:pointer;" id="modal-avatar-preview-wrap" title="Klik untuk pasang foto profil Google Anda">
-              <img id="modal-avatar-preview" src="https://ui-avatars.com/api/?name=Google+User&background=1b4332&color=fff&size=120" alt="Preview Foto" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #1a73e8;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
-              <span style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:#1a73e8;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;border:2px solid #fff;"><i class="fa-solid fa-camera"></i></span>
-            </div>
-            <input type="file" id="modal-avatar-file" accept="image/*" style="display:none;">
-            <div style="margin-top:0.35rem;">
-              <button type="button" class="btn-link" id="btn-modal-browse-foto" style="font-size:0.8rem;color:#1a73e8;background:none;border:none;cursor:pointer;font-weight:600;">
-                <i class="fa-solid fa-camera"></i> Pasang Foto Profil Google Anda
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom:0.85rem;">
-            <label for="input-google-name" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.35rem;color:#334155;">
-              Nama Akun Google Anda <span style="color:#ef4444;">*</span>
-            </label>
-            <input type="text" id="input-google-name" class="form-control" placeholder="Masukkan nama Google Anda..." required>
-          </div>
-
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label for="input-google-email" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.35rem;color:#334155;">
-              Email Gmail (@gmail.com) <span style="color:#ef4444;">*</span>
-            </label>
-            <input type="email" id="input-google-email" class="form-control" placeholder="contoh: akunanda@gmail.com" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="btn-submit-google-auth" style="width:100%;padding:0.75rem;font-weight:700;">
-            <i class="fa-brands fa-google"></i> Simpan &amp; Hubungkan Akun Google
-          </button>
-        </form>
-
-        <div style="margin-top:1.15rem;padding-top:0.85rem;border-top:1px solid #f1f5f9;text-align:center;">
-          <a href="https://maps.google.com/?q=Desa+Wisata+Canden+Jetis+Bantul" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="width:100%;font-size:0.8rem;display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;">
-            <i class="fa-brands fa-google" style="color:#ea4335;"></i> Tulis Ulasan Langsung di Google Maps Resmi
-          </a>
-        </div>
+      <div class="google-auth-body" style="padding:1.25rem 0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <!-- Tombol Resmi Google Identity Services SDK -->
+        <div id="gsi-modal-button-slot" style="min-height:48px;display:flex;justify-content:center;width:100%;"></div>
       </div>
-      <div class="google-auth-footer" style="display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;">
-        <button type="button" class="btn btn-outline btn-sm" id="btn-logout-google" style="color:#ef4444;border-color:#fca5a5;font-size:0.78rem;padding:0.35rem 0.75rem;">
+
+      <div class="google-auth-footer" style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-logout-google" style="color:#ef4444;border-color:#fca5a5;font-size:0.8rem;padding:0.4rem 0.85rem;display:none;">
           <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar / Lepas Akun
         </button>
-        <button type="button" class="btn btn-outline btn-sm" id="btn-close-google-modal">Tutup</button>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-close-google-modal" style="margin-left:auto;">Tutup</button>
       </div>
     </div>
   </div>
@@ -1439,7 +1395,7 @@
   <!-- Scripts -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=4.1"></script>
-  <script src="assets/js/main.js?v=4.1"></script>
+  <script src="assets/js/data.js?v=4.2"></script>
+  <script src="assets/js/main.js?v=4.2"></script>
 </body>
 </html>

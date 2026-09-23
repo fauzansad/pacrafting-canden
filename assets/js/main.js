@@ -938,23 +938,41 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    function renderGsiButtonInModal() {
+    function renderGsiButtons() {
       if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.id) return;
-      const slot = document.getElementById('gsi-modal-button-slot');
-      if (slot) {
-        slot.innerHTML = '';
+      
+      const modalSlot = document.getElementById('gsi-modal-button-slot');
+      if (modalSlot) {
+        modalSlot.innerHTML = '';
         try {
-          window.google.accounts.id.renderButton(slot, {
+          window.google.accounts.id.renderButton(modalSlot, {
             type: 'standard',
             theme: 'filled_blue',
             size: 'large',
             text: 'continue_with',
             shape: 'rectangular',
             logo_alignment: 'left',
-            width: 300
+            width: 320
           });
         } catch (e) {
-          console.warn('GSI renderButton error:', e);
+          console.warn('GSI renderButton modal error:', e);
+        }
+      }
+
+      const barSlot = document.getElementById('gsi-bar-button-slot');
+      if (barSlot && !getActiveGoogleUser()) {
+        barSlot.innerHTML = '';
+        try {
+          window.google.accounts.id.renderButton(barSlot, {
+            type: 'standard',
+            theme: 'filled_blue',
+            size: 'medium',
+            text: 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
+          });
+        } catch (e) {
+          console.warn('GSI renderButton bar error:', e);
         }
       }
     }
@@ -973,7 +991,7 @@ document.addEventListener('DOMContentLoaded', function () {
           cancel_on_tap_outside: true
         });
 
-        renderGsiButtonInModal();
+        renderGsiButtons();
 
         // Prompt Google One-Tap automatically if user is unlinked
         if (!getActiveGoogleUser()) {
@@ -994,9 +1012,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const stored = localStorage.getItem('packraft_google_user');
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (parsed && parsed.email) {
-            return parsed;
+          // Pembersihan otomatis: Hapus semua template dummy / akun lama yang tidak terverifikasi Google resmi
+          if (
+            !parsed ||
+            !parsed.isGoogleVerified ||
+            !parsed.email ||
+            parsed.email.toLowerCase().includes('anisa') ||
+            parsed.email.toLowerCase().includes('rian') ||
+            parsed.email.toLowerCase().includes('contoh') ||
+            parsed.email.toLowerCase() === 'fauzansad@gmail.com' ||
+            (parsed.nama && (parsed.nama.includes('Anisa') || parsed.nama.includes('Rian')))
+          ) {
+            localStorage.removeItem('packraft_google_user');
+            return null;
           }
+          return parsed;
         }
       } catch (e) {}
       return null;
@@ -1013,27 +1043,14 @@ document.addEventListener('DOMContentLoaded', function () {
       syncGoogleUserUI(user);
     }
 
-    let currentModalAvatarData = null;
-
     // Google Modal Helpers
     function openGoogleModal() {
       const modal = document.getElementById('modal-google-auth');
       if (modal) {
         const u = getActiveGoogleUser();
-        const nameInput = document.getElementById('input-google-name');
-        const emailInput = document.getElementById('input-google-email');
-        const avatarPreview = document.getElementById('modal-avatar-preview');
-
-        if (u) {
-          if (nameInput) nameInput.value = u.nama || '';
-          if (emailInput) emailInput.value = u.email || '';
-          if (avatarPreview && u.foto) avatarPreview.src = u.foto;
-          currentModalAvatarData = u.foto || null;
-        } else {
-          if (nameInput) nameInput.value = '';
-          if (emailInput) emailInput.value = '';
-          if (avatarPreview) avatarPreview.src = 'https://ui-avatars.com/api/?name=Google+User&background=1b4332&color=fff&size=120';
-          currentModalAvatarData = null;
+        const btnLogout = document.getElementById('btn-logout-google');
+        if (btnLogout) {
+          btnLogout.style.display = u ? 'inline-flex' : 'none';
         }
 
         modal.style.display = 'flex';
@@ -1041,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.overflow = 'hidden';
 
         // Render official Google button inside modal
-        renderGsiButtonInModal();
+        renderGsiButtons();
       }
     }
 
@@ -1064,58 +1081,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const photoSrc = u.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nama || 'User')}&background=1b4332&color=fff&size=120`;
         container.innerHTML = `
           <div class="g-account-info">
-            <div class="g-account-avatar-wrap" id="g-avatar-click-trigger" title="Klik untuk ganti / sesuaikan foto profil Google Anda">
+            <div class="g-account-avatar-wrap" title="Akun Google Terverifikasi">
               <img id="g-active-avatar" src="${photoSrc}" alt="Akun Google" class="g-account-avatar">
-              <span class="g-avatar-camera-icon" title="Ganti Foto Profil"><i class="fa-solid fa-camera"></i></span>
-              <input type="file" id="g-avatar-file-input" accept="image/*" style="display:none;">
             </div>
             <div class="g-account-details">
               <div class="g-account-name">
                 <span id="g-active-name">${escapeHtml(u.nama)}</span>
                 <span class="g-badge-pill"><i class="fa-brands fa-google"></i> Terhubung</span>
               </div>
-              <div class="g-account-email" id="g-active-email">${escapeHtml(u.email)} &bull; <a href="javascript:void(0)" id="link-ganti-foto" style="color:#0284c7;text-decoration:underline;">Ganti Foto</a></div>
+              <div class="g-account-email" id="g-active-email">${escapeHtml(u.email)}</div>
             </div>
           </div>
-          <button type="button" class="btn btn-outline btn-sm g-switch-btn" id="btn-switch-google" title="Ganti Akun Google">
+          <button type="button" class="btn btn-outline btn-sm g-switch-btn" id="btn-switch-google" title="Ganti / Keluar Akun Google">
             <i class="fa-solid fa-arrow-right-arrow-left"></i> Ganti Akun
           </button>
         `;
-
-        // Bind photo pickers on dynamic elements
-        const trigger = document.getElementById('g-avatar-click-trigger');
-        const fileInput = document.getElementById('g-avatar-file-input');
-        const linkFoto = document.getElementById('link-ganti-foto');
-
-        if (trigger && fileInput) {
-          trigger.addEventListener('click', () => fileInput.click());
-        }
-        if (linkFoto && fileInput) {
-          linkFoto.addEventListener('click', (e) => {
-            e.preventDefault();
-            fileInput.click();
-          });
-        }
-        if (fileInput) {
-          fileInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (file) {
-              if (file.size > 3 * 1024 * 1024) {
-                showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
-                return;
-              }
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                const dataUrl = e.target.result;
-                const currentUser = getActiveGoogleUser() || u;
-                currentUser.foto = dataUrl;
-                setActiveGoogleUser(currentUser);
-                showUserToast(`Foto profil akun Google (${currentUser.nama}) berhasil diperbarui!`, 'success');
-              };
-              reader.readAsDataURL(file);
-            }
-          });
-        }
       } else {
         container.className = 'google-active-account-bar unlinked';
         container.innerHTML = `
@@ -1124,18 +1104,21 @@ document.addEventListener('DOMContentLoaded', function () {
               <i class="fa-brands fa-google"></i>
             </div>
             <div class="g-account-details">
-              <div class="g-account-name" style="color:#92400e;">
-                <span>Belum Terhubung dengan Google</span>
+              <div class="g-account-name" style="color:#1e293b;">
+                <span>Masuk dengan Google</span>
               </div>
-              <div class="g-account-email" style="color:#b45309;">
-                Pilih atau masukkan akun Google Anda untuk publikasi ulasan &amp; foto profil
+              <div class="g-account-email" style="color:#64748b;">
+                Hubungkan akun Google resmi Anda untuk identitas ulasan &amp; foto otomatis
               </div>
             </div>
           </div>
-          <button type="button" class="btn btn-primary btn-sm g-switch-btn" id="btn-switch-google">
-            <i class="fa-brands fa-google"></i> Masuk dengan Google
-          </button>
+          <div id="gsi-bar-button-slot" style="min-height:40px;display:flex;align-items:center;">
+            <button type="button" class="btn btn-primary btn-sm g-switch-btn" id="btn-switch-google">
+              <i class="fa-brands fa-google"></i> Masuk dengan Google
+            </button>
+          </div>
         `;
+        renderGsiButtons();
       }
     }
 
@@ -1194,72 +1177,6 @@ document.addEventListener('DOMContentLoaded', function () {
         setActiveGoogleUser(null);
         closeGoogleModal();
         showUserToast('Akun Google berhasil dilepas dari browser ini.', 'info');
-      });
-    }
-
-    // Modal Photo Picker Handlers
-    const modalAvatarWrap = document.getElementById('modal-avatar-preview-wrap');
-    const btnModalBrowse = document.getElementById('btn-modal-browse-foto');
-    const modalAvatarFile = document.getElementById('modal-avatar-file');
-    const modalAvatarPreview = document.getElementById('modal-avatar-preview');
-
-    function triggerModalAvatarPicker() {
-      if (modalAvatarFile) modalAvatarFile.click();
-    }
-    if (modalAvatarWrap) modalAvatarWrap.addEventListener('click', triggerModalAvatarPicker);
-    if (btnModalBrowse) btnModalBrowse.addEventListener('click', triggerModalAvatarPicker);
-
-    if (modalAvatarFile) {
-      modalAvatarFile.addEventListener('change', function () {
-        const file = this.files[0];
-        if (file) {
-          if (file.size > 3 * 1024 * 1024) {
-            showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            currentModalAvatarData = e.target.result;
-            if (modalAvatarPreview) modalAvatarPreview.src = currentModalAvatarData;
-            showUserToast('Foto profil Google dipilih.', 'info');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    // Modal Connect Google Form Submit
-    const formConnectGoogle = document.getElementById('form-connect-google');
-    if (formConnectGoogle) {
-      formConnectGoogle.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const nameInput = document.getElementById('input-google-name');
-        const emailInput = document.getElementById('input-google-email');
-        const nameVal = nameInput ? nameInput.value.trim() : '';
-        const emailVal = emailInput ? emailInput.value.trim() : '';
-
-        if (!nameVal) {
-          showUserToast('Masukkan nama akun Google Anda.', 'warning');
-          if (nameInput) nameInput.focus();
-          return;
-        }
-
-        if (!emailVal || !emailVal.includes('@')) {
-          showUserToast('Masukkan alamat email Gmail yang valid (@gmail.com).', 'warning');
-          if (emailInput) emailInput.focus();
-          return;
-        }
-
-        const photoVal = currentModalAvatarData || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal)}&background=1b4332&color=fff&size=120`;
-        const newUser = {
-          nama: nameVal,
-          email: emailVal,
-          foto: photoVal
-        };
-
-        setActiveGoogleUser(newUser);
-        closeGoogleModal();
-        showUserToast(`Akun Google berhasil terhubung: ${nameVal}`, 'success');
       });
     }
 

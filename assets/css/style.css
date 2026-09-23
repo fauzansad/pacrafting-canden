@@ -2664,98 +2664,38 @@ p {
 
 /* Modal Google Auth Account Chooser */
 .google-auth-card {
-  max-width: 440px;
-  width: 95%;
-  background: #fff;
-  border-radius: 8px;
-  padding: 1.75rem;
-  border: 1px solid #dadce0;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  max-width: 420px;
+  width: 92%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
   margin: auto;
+  overflow: visible;
 }
 
 .google-auth-header {
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .google-auth-header h4 {
   font-size: 1.25rem;
-  margin: 0.25rem 0 0.25rem;
-  color: #202124;
+  margin: 0.25rem 0 0.35rem;
+  color: #1e293b;
+  font-weight: 700;
 }
 
 .google-auth-header p {
   font-size: 0.85rem;
-  color: #5f6368;
+  color: #64748b;
   margin: 0;
-}
-
-.google-account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.google-acc-item {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid #e8eaed;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #fff;
-}
-
-.google-acc-item:hover {
-  background: #f8f9fa;
-  border-color: #dadce0;
-}
-
-.google-acc-item.active {
-  border-color: #1a73e8;
-  background: #f0f7ff;
-}
-
-.g-item-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.g-item-meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.g-item-name {
-  font-size: 0.9rem;
-  color: #202124;
-}
-
-.g-item-email {
-  font-size: 0.78rem;
-  color: #5f6368;
-}
-
-.g-item-check {
-  color: #1a73e8;
-  font-size: 0.9rem;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.google-acc-item.active .g-item-check {
-  opacity: 1;
+  line-height: 1.4;
 }
 
 .google-auth-footer {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
 }
