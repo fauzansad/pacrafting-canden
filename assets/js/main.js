@@ -898,6 +898,50 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
+
+
+    // Google Account State Management for Reviews
+    const DEFAULT_GOOGLE_USER = {
+      nama: 'Fauzan Sadida',
+      email: 'fauzansad@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'
+    };
+
+    function getActiveGoogleUser() {
+      try {
+        const stored = localStorage.getItem('packraft_google_user');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+      return DEFAULT_GOOGLE_USER;
+    }
+
+    function setActiveGoogleUser(user) {
+      try {
+        localStorage.setItem('packraft_google_user', JSON.stringify(user));
+      } catch (e) {}
+      syncGoogleUserUI(user);
+    }
+
+    function syncGoogleUserUI(user) {
+      const u = user || getActiveGoogleUser();
+      const elAvatar = document.getElementById('g-active-avatar');
+      const elName = document.getElementById('g-active-name');
+      const elEmail = document.getElementById('g-active-email');
+      if (elAvatar) elAvatar.src = u.foto || DEFAULT_GOOGLE_USER.foto;
+      if (elName) elName.textContent = u.nama || DEFAULT_GOOGLE_USER.nama;
+      if (elEmail) elEmail.textContent = `${u.email || DEFAULT_GOOGLE_USER.email} • Foto Profil Google`;
+
+      document.querySelectorAll('.google-acc-item').forEach(item => {
+        if (item.dataset.email === u.email) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    syncGoogleUserUI();
+
     // Toggle Form Collapse
     const btnToggle = document.getElementById('btn-toggle-ulasan');
     const formWrapper = document.getElementById('ulasan-form-wrapper');
@@ -909,8 +953,8 @@ document.addEventListener('DOMContentLoaded', function () {
         formWrapper.style.display = 'block';
         setTimeout(() => {
           formWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          const namaInput = document.getElementById('ulasan-nama');
-          if (namaInput) namaInput.focus();
+          const pesanEl = document.getElementById('ulasan-pesan');
+          if (pesanEl) pesanEl.focus();
         }, 100);
       }
     }
@@ -925,49 +969,80 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnTutup) btnTutup.addEventListener('click', closeForm);
     if (btnCancel) btnCancel.addEventListener('click', closeForm);
 
-    // Foto Profil Picker & File Upload Preview Handler
-    const btnBrowseFoto = document.getElementById('btn-browse-foto');
-    const fotoFileInput = document.getElementById('ulasan-foto-file');
-    const previewAvatar = document.getElementById('ulasan-preview-avatar');
-    const fotoValInput = document.getElementById('ulasan-foto-val');
-    const presetBtns = document.querySelectorAll('.preset-avatar-btn');
+    // Google Account Switcher Modal Handlers
+    const btnSwitchGoogle = document.getElementById('btn-switch-google');
+    const modalGoogleAuth = document.getElementById('modal-google-auth');
+    const btnCloseGoogleModal = document.getElementById('btn-close-google-modal');
+    const btnCustomGoogleToggle = document.getElementById('btn-custom-google-toggle');
+    const customGoogleForm = document.getElementById('google-custom-login-form');
+    const btnSaveCustomGoogle = document.getElementById('btn-save-custom-google');
 
-    if (btnBrowseFoto && fotoFileInput) {
-      btnBrowseFoto.addEventListener('click', function () {
-        fotoFileInput.click();
+    if (btnSwitchGoogle && modalGoogleAuth) {
+      btnSwitchGoogle.addEventListener('click', function () {
+        modalGoogleAuth.style.display = 'flex';
       });
     }
 
-    if (fotoFileInput) {
-      fotoFileInput.addEventListener('change', function () {
-        const file = this.files[0];
-        if (file) {
-          if (file.size > 2 * 1024 * 1024) {
-            showUserToast('Ukuran foto profil maksimal 2MB.', 'warning');
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const dataUrl = e.target.result;
-            if (previewAvatar) previewAvatar.src = dataUrl;
-            if (fotoValInput) fotoValInput.value = dataUrl;
-            presetBtns.forEach(b => b.classList.remove('active'));
-          };
-          reader.readAsDataURL(file);
+    if (btnCloseGoogleModal && modalGoogleAuth) {
+      btnCloseGoogleModal.addEventListener('click', function () {
+        modalGoogleAuth.style.display = 'none';
+      });
+    }
+
+    if (modalGoogleAuth) {
+      modalGoogleAuth.addEventListener('click', function (e) {
+        if (e.target === modalGoogleAuth) {
+          modalGoogleAuth.style.display = 'none';
         }
       });
     }
 
-    // Quick Preset Avatar selection
-    presetBtns.forEach(btn => {
-      btn.addEventListener('click', function () {
-        presetBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        const avatarUrl = this.dataset.avatar;
-        if (previewAvatar) previewAvatar.src = avatarUrl;
-        if (fotoValInput) fotoValInput.value = avatarUrl;
+    // Preset Google account items selection
+    document.querySelectorAll('.google-acc-item').forEach(item => {
+      item.addEventListener('click', function () {
+        const user = {
+          nama: this.dataset.name,
+          email: this.dataset.email,
+          foto: this.dataset.photo
+        };
+        setActiveGoogleUser(user);
+        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
+        showUserToast(`Akun Google beralih ke: ${user.nama}`, 'info');
       });
     });
+
+    if (btnCustomGoogleToggle && customGoogleForm) {
+      btnCustomGoogleToggle.addEventListener('click', function () {
+        customGoogleForm.style.display = (customGoogleForm.style.display === 'none' || !customGoogleForm.style.display) ? 'block' : 'none';
+      });
+    }
+
+    if (btnSaveCustomGoogle) {
+      btnSaveCustomGoogle.addEventListener('click', function () {
+        const nameInput = document.getElementById('custom-google-name');
+        const emailInput = document.getElementById('custom-google-email');
+        const customName = nameInput ? nameInput.value.trim() : '';
+        const customEmail = emailInput ? emailInput.value.trim() : '';
+
+        if (!customName) {
+          showUserToast('Masukkan nama akun Google Anda.', 'warning');
+          return;
+        }
+
+        const emailVal = (customEmail && customEmail.includes('@')) ? customEmail : `${customName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(customName)}&background=1b4332&color=fff&size=120`;
+
+        const user = {
+          nama: customName,
+          email: emailVal,
+          foto: avatarUrl
+        };
+
+        setActiveGoogleUser(user);
+        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
+        showUserToast(`Terhubung dengan Akun Google: ${customName}`, 'success');
+      });
+    }
 
     // Interactive Star Rating Picker
     const starBtns = document.querySelectorAll('#rating-stars .star-btn');
@@ -989,7 +1064,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     starBtns.forEach(btn => {
-      // Hover: highlight stars up to current hovered star
       btn.addEventListener('mouseenter', function () {
         const hoverVal = parseInt(this.dataset.rating);
         starBtns.forEach(b => {
@@ -1005,14 +1079,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
 
-      // Leave: restore current chosen rating
       btn.addEventListener('mouseleave', function () {
         starBtns.forEach(b => b.classList.remove('hover'));
         const currentVal = parseInt(ratingInput ? ratingInput.value : 5) || 5;
         updateStarsUI(currentVal);
       });
 
-      // Click: lock the chosen rating
       btn.addEventListener('click', function () {
         const chosenVal = parseInt(this.dataset.rating);
         if (ratingInput) ratingInput.value = chosenVal;
@@ -1020,37 +1092,17 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    // Handle Form Submit
+    // Handle Form Submit (Only stars & review text needed, Google account is auto-integrated!)
     const formUlasan = document.getElementById('form-ulasan');
     if (formUlasan) {
       formUlasan.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const namaEl = document.getElementById('ulasan-nama');
-        const emailEl = document.getElementById('ulasan-email');
-        const asalEl = document.getElementById('ulasan-asal');
         const pesanEl = document.getElementById('ulasan-pesan');
         const ratingVal = parseInt(ratingInput ? ratingInput.value : 5) || 5;
-
-        const nama = namaEl ? namaEl.value.trim() : '';
-        const email = emailEl ? emailEl.value.trim() : '';
-        const asal = asalEl ? asalEl.value.trim() : '';
         const pesan = pesanEl ? pesanEl.value.trim() : '';
-        const fotoVal = (fotoValInput && fotoValInput.value) ? fotoValInput.value : '';
 
-        // Validation
-        if (!nama) {
-          showUserToast('Mohon masukkan Nama Akun Google Anda.', 'warning');
-          if (namaEl) namaEl.focus();
-          return;
-        }
-
-        if (!email || !email.includes('@')) {
-          showUserToast('Mohon masukkan Email Akun Google yang valid.', 'warning');
-          if (emailEl) emailEl.focus();
-          return;
-        }
-
+        // Validation: Only checks star rating & review message
         if (ratingVal < 1 || ratingVal > 5) {
           showUserToast('Silakan pilih rating bintang antara 1 sampai 5.', 'warning');
           return;
@@ -1068,50 +1120,58 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        // Final photo url (fallback to UI Avatars if none chosen)
-        const finalPhoto = fotoVal || `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=1b4332&color=fff`;
+        const submitBtn = document.getElementById('btn-submit-ulasan');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan Google...';
+        }
 
-        // Create new testimonial object with Google verified metadata
-        const newId = Date.now();
-        const newReview = {
-          id: newId,
-          nama: nama,
-          email: email,
-          foto: finalPhoto,
-          asal: asal || 'Wisatawan Google',
-          rating: ratingVal,
-          pesan: pesan,
-          avatar: nama.charAt(0).toUpperCase() || 'G',
-          isGoogle: true,
-          tanggal: new Date().toISOString().split('T')[0]
-        };
-
-        // Save into DataStore (localStorage & cloud sync)
-        const currentList = DataStore.getTestimonials() || [];
-        currentList.unshift(newReview);
-        DataStore.saveTestimonials(currentList);
-
-        // Immediately re-render with highlight!
-        renderTestimonials(newId);
-
-        // Reset form
-        namaEl.value = '';
-        if (emailEl) emailEl.value = '';
-        if (asalEl) asalEl.value = '';
-        pesanEl.value = '';
-        if (ratingInput) ratingInput.value = '5';
-        updateStarsUI(5);
-
-        // Close form & show success toast
-        closeForm();
-        showUserToast(`Terima kasih, ${nama}! Ulasan & rating Google Anda telah berhasil dipublikasikan.`, 'success');
-
-        // Scroll horizontal slider to the new review card
         setTimeout(() => {
-          if (testiContainer) {
-            testiContainer.scrollTo({ left: 0, behavior: 'smooth' });
+          // Auto-integrate active Google user credentials & photo
+          const activeGoogleUser = getActiveGoogleUser();
+          const newId = Date.now();
+          const newReview = {
+            id: newId,
+            nama: activeGoogleUser.nama,
+            email: activeGoogleUser.email,
+            foto: activeGoogleUser.foto,
+            asal: 'Ulasan Google Maps',
+            rating: ratingVal,
+            pesan: pesan,
+            avatar: activeGoogleUser.nama.charAt(0).toUpperCase() || 'G',
+            isGoogle: true,
+            tanggal: new Date().toISOString().split('T')[0]
+          };
+
+          // Save into DataStore (localStorage & cloud sync)
+          const currentList = DataStore.getTestimonials() || [];
+          currentList.unshift(newReview);
+          DataStore.saveTestimonials(currentList);
+
+          // Re-render testimonials track with new card highlighted
+          renderTestimonials(newId);
+
+          // Reset form fields
+          pesanEl.value = '';
+          if (ratingInput) ratingInput.value = '5';
+          updateStarsUI(5);
+
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-brands fa-google"></i> Kirim Ulasan dengan Akun Google';
           }
-        }, 150);
+
+          // Close form & show success toast
+          closeForm();
+          showUserToast(`Terima kasih! Ulasan & rating Google Anda (${activeGoogleUser.nama}) telah berhasil dipublikasikan.`, 'success');
+
+          // Scroll horizontal slider to position 0 to show newly published review
+          setTimeout(() => {
+            if (testiContainer) {
+              testiContainer.scrollTo({ left: 0, behavior: 'smooth' });
+            }
+          }, 150);
+        }, 350);
       });
     }
 

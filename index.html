@@ -1160,75 +1160,50 @@
               </div>
             </div>
 
-            <!-- Foto Profil Selector & Preview -->
-            <div class="form-group">
-              <label class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Foto Profil Akun Google <span style="color:#ef4444;">*</span></label>
-              <div class="foto-profile-picker-wrap">
-                <img id="ulasan-preview-avatar" class="ulasan-preview-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Preview Foto Profil">
-                <div class="foto-profile-actions">
-                  <input type="file" id="ulasan-foto-file" accept="image/*" style="display:none;">
-                  <input type="hidden" id="ulasan-foto-val" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80">
-                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <button type="button" class="btn btn-outline btn-sm" id="btn-browse-foto">
-                      <i class="fa-solid fa-camera"></i> Upload Foto Sendiri
-                    </button>
-                    <span style="font-size:0.75rem;color:var(--text-light);">atau pilih avatar cepat:</span>
-                  </div>
-                  <div class="quick-avatar-presets">
-                    <button type="button" class="preset-avatar-btn active" data-avatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 1">
-                      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&auto=format&fit=crop&q=80" alt="Avatar 1">
-                    </button>
-                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80" title="Avatar Wanita 1">
-                      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" alt="Avatar 2">
-                    </button>
-                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 2">
-                      <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=60&auto=format&fit=crop&q=80" alt="Avatar 3">
-                    </button>
-                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80" title="Avatar Wanita 2">
-                      <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&auto=format&fit=crop&q=80" alt="Avatar 4">
-                    </button>
-                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 3">
-                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" alt="Avatar 5">
-                    </button>
-                  </div>
+          <!-- Active Google Account Bar (Otomatis Terintegrasi) -->
+          <div class="google-active-account-bar" id="google-active-account-bar">
+            <div class="g-account-info">
+              <img id="g-active-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Akun Google" class="g-account-avatar">
+              <div class="g-account-details">
+                <div class="g-account-name">
+                  <span id="g-active-name">Fauzan Sadida</span>
+                  <span class="g-badge-pill"><i class="fa-brands fa-google"></i> Terhubung</span>
                 </div>
+                <div class="g-account-email" id="g-active-email">fauzansad@gmail.com &bull; Foto Profil Google</div>
               </div>
             </div>
+            <button type="button" class="btn btn-outline btn-sm g-switch-btn" id="btn-switch-google" title="Ganti Akun Google">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i> Ganti Akun
+            </button>
+          </div>
 
-            <div class="ulasan-inputs-grid">
-              <!-- Nama Akun Google -->
-              <div class="form-group">
-                <label for="ulasan-nama" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">
-                  <i class="fa-brands fa-google" style="color:#ea4335;margin-right:0.3rem;"></i> Nama Akun Google <span style="color:#ef4444;">*</span>
-                </label>
-                <input type="text" id="ulasan-nama" class="form-control" placeholder="Contoh: Rian Pratama" required>
-              </div>
-
-              <!-- Email Akun Google -->
-              <div class="form-group">
-                <label for="ulasan-email" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">
-                  <i class="fa-solid fa-envelope" style="color:#ea4335;margin-right:0.3rem;"></i> Email Akun Google <span style="color:#ef4444;">*</span>
-                </label>
-                <input type="email" id="ulasan-email" class="form-control" placeholder="contoh: rian.pratama@gmail.com" required>
-              </div>
-            </div>
-
-            <!-- Asal / Komunitas (Opsional) -->
+          <form id="form-ulasan" novalidate>
+            <!-- Rating Star Selector -->
             <div class="form-group">
-              <label for="ulasan-asal" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Asal Kota / Kategori Wisatawan <small style="color:#64748b;font-weight:normal;">(Opsional)</small></label>
-              <input type="text" id="ulasan-asal" class="form-control" placeholder="Contoh: Wisatawan Jakarta / Rombongan Keluarga / Teman Kantor">
+              <label class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Rating Pengalaman Anda <span style="color:#ef4444;">*</span></label>
+              <div class="rating-picker-box">
+                <div class="rating-stars" id="rating-stars" role="radiogroup" aria-label="Rating Bintang">
+                  <button type="button" class="star-btn active" data-rating="1" aria-label="1 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="2" aria-label="2 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="3" aria-label="3 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="4" aria-label="4 Bintang"><i class="fa-solid fa-star"></i></button>
+                  <button type="button" class="star-btn active" data-rating="5" aria-label="5 Bintang"><i class="fa-solid fa-star"></i></button>
+                </div>
+                <input type="hidden" id="ulasan-rating-val" value="5">
+                <span class="rating-label" id="rating-text">5/5 &mdash; Luar Biasa &amp; Tak Terlupakan!</span>
+              </div>
             </div>
 
             <!-- Ulasan Pesan -->
             <div class="form-group">
               <label for="ulasan-pesan" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Ulasan &amp; Kesan Pengalaman <span style="color:#ef4444;">*</span></label>
-              <textarea id="ulasan-pesan" class="form-control" rows="3" placeholder="Ceritakan bagaimana keseruan jeram, keramahan pemandu, pemandangan, atau suasana asri Sungai Opak Canden..." required></textarea>
+              <textarea id="ulasan-pesan" class="form-control" rows="4" placeholder="Ceritakan bagaimana keseruan jeram, keramahan pemandu, pemandangan, atau suasana asri Sungai Opak Canden..." required></textarea>
             </div>
 
             <!-- Tombol Aksi -->
             <div class="ulasan-form-actions">
               <button type="submit" class="btn btn-primary" id="btn-submit-ulasan">
-                <i class="fa-brands fa-google"></i> Publikasikan Ulasan &amp; Rating Google
+                <i class="fa-brands fa-google"></i> Kirim Ulasan dengan Akun Google
               </button>
               <button type="button" class="btn btn-outline" id="btn-cancel-ulasan">Batal</button>
             </div>
@@ -1401,9 +1376,75 @@
     </div>
   </div>
 
+  <!-- Modal Pilih / Ganti Akun Google -->
+  <div class="modal-overlay" id="modal-google-auth" style="display: none;">
+    <div class="modal-card google-auth-card">
+      <div class="google-auth-header">
+        <svg viewBox="0 0 48 48" width="40" height="40" style="display:block;margin:0 auto 0.5rem;">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <h4>Login dengan Google</h4>
+        <p>Pilih akun Google Anda untuk publikasi ulasan &amp; rating otomatis di Packrafting Canden</p>
+      </div>
+      <div class="google-auth-body">
+        <div class="google-account-list">
+          <div class="google-acc-item active" data-name="Fauzan Sadida" data-email="fauzansad@gmail.com" data-photo="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" alt="Avatar Fauzan" class="g-item-avatar">
+            <div class="g-item-meta">
+              <strong class="g-item-name">Fauzan Sadida</strong>
+              <span class="g-item-email">fauzansad@gmail.com</span>
+            </div>
+            <i class="fa-solid fa-check g-item-check"></i>
+          </div>
+          <div class="google-acc-item" data-name="Rian Pratama" data-email="rian.pratama@gmail.com" data-photo="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80">
+            <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&auto=format&fit=crop&q=80" alt="Avatar Rian" class="g-item-avatar">
+            <div class="g-item-meta">
+              <strong class="g-item-name">Rian Pratama</strong>
+              <span class="g-item-email">rian.pratama@gmail.com</span>
+            </div>
+            <i class="fa-solid fa-check g-item-check"></i>
+          </div>
+          <div class="google-acc-item" data-name="Anisa Rahmawati" data-email="anisa.rahma@gmail.com" data-photo="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" alt="Avatar Anisa" class="g-item-avatar">
+            <div class="g-item-meta">
+              <strong class="g-item-name">Anisa Rahmawati</strong>
+              <span class="g-item-email">anisa.rahma@gmail.com</span>
+            </div>
+            <i class="fa-solid fa-check g-item-check"></i>
+          </div>
+        </div>
+
+        <div class="google-custom-login-toggle" style="margin-top:1rem;border-top:1px solid #f1f5f9;padding-top:0.85rem;">
+          <button type="button" class="btn-link" id="btn-custom-google-toggle" style="background:none;border:none;color:#1a73e8;font-weight:600;font-size:0.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;padding:0.25rem 0;">
+            <i class="fa-solid fa-user-plus"></i> Gunakan Akun Google Lainnya...
+          </button>
+          <div id="google-custom-login-form" style="display:none;margin-top:0.75rem;padding:0.85rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+            <div style="margin-bottom:0.6rem;">
+              <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Nama Google:</label>
+              <input type="text" id="custom-google-name" class="form-control" placeholder="Contoh: Budi Santoso" style="font-size:0.85rem;padding:0.45rem 0.65rem;">
+            </div>
+            <div style="margin-bottom:0.6rem;">
+              <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Email Google (@gmail.com):</label>
+              <input type="email" id="custom-google-email" class="form-control" placeholder="contoh@gmail.com" style="font-size:0.85rem;padding:0.45rem 0.65rem;">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-save-custom-google" style="width:100%;">
+              Gunakan Akun Ini
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="google-auth-footer">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-close-google-modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=3.5"></script>
-  <script src="assets/js/main.js?v=3.5"></script>
+  <script src="assets/js/data.js?v=3.6"></script>
+  <script src="assets/js/main.js?v=3.6"></script>
 </body>
 </html>
