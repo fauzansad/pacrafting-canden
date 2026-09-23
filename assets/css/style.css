@@ -84,11 +84,12 @@
   --container-px: 1.5rem;
   --container-max: 1200px;
 
-  /* Radius */
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* Radius - Tegas & Presisi (Ujung tidak terlalu tumpul) */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
   --radius-full: 9999px;
 
   /* Natural Shadows (No heavy colored glows) */
@@ -2192,36 +2193,142 @@ p {
   box-shadow: 0 15px 40px rgba(249, 115, 22, 0.7);
 }
 
-/* ---- TESTIMONIALS ---- */
-.testi-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+/* ---- TESTIMONIALS & GOOGLE RATING SLIDER KESAMPING ---- */
+.google-rating-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.google-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--white);
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--gray-300);
+  box-shadow: 0 4px 14px rgba(27, 40, 30, 0.05);
+}
+
+.google-badge-pill .google-icon {
+  font-size: 1.25rem;
+  color: #ea4335;
+}
+
+.google-badge-pill .google-rating-score {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+}
+
+.google-badge-pill .google-stars {
+  display: inline-flex;
+  gap: 0.15rem;
+  color: #f59e0b;
+  font-size: 0.9rem;
+}
+
+.google-badge-pill .google-reviews-count {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.testi-slider-wrapper {
+  position: relative;
+  margin-top: 2.25rem;
+}
+
+.testi-track {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 0.5rem 0.25rem 1.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.testi-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.testi-track::-webkit-scrollbar-track {
+  background: #ede8dc;
+  border-radius: 4px;
+}
+
+.testi-track::-webkit-scrollbar-thumb {
+  background: var(--nature);
+  border-radius: 4px;
 }
 
 .testi-card {
+  flex: 0 0 380px;
+  max-width: 380px;
+  scroll-snap-align: start;
   background: var(--white);
-  border-radius: var(--radius-lg);
-  padding: 2.25rem 2rem;
-  border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
+  border-radius: 8px;
+  padding: 1.75rem 1.75rem;
+  border: 1.5px solid var(--gray-300);
+  box-shadow: 0 4px 16px rgba(27, 40, 30, 0.06);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.testi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(27, 67, 50, 0.12);
+  border-color: var(--nature);
+}
+
+.testi-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .testi-rating {
-  color: var(--accent-yellow);
-  margin-bottom: 1.25rem;
-  font-size: 1.1rem;
+  color: #f59e0b;
+  font-size: 1.05rem;
+  display: flex;
+  gap: 0.2rem;
+  margin-bottom: 0;
+}
+
+.testi-google-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f8fafc;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.testi-google-badge i {
+  color: #ea4335;
 }
 
 .testi-quote {
-  font-size: var(--fs-base);
+  font-size: 0.95rem;
   color: var(--text);
-  line-height: 1.8;
-  font-style: italic;
-  margin-bottom: 1.75rem;
+  line-height: 1.65;
+  font-style: normal;
+  margin-bottom: 1.5rem;
   flex: 1;
 }
 
@@ -2229,40 +2336,115 @@ p {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-100);
+}
+
+.testi-avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--nature-50);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .testi-avatar {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--river-50);
-  color: var(--river-dark);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.testi-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1.2;
 }
 
 .testi-name {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--primary-dark);
   font-size: var(--fs-base);
-  line-height: 1.2;
+  font-family: var(--font-heading);
 }
 
 .testi-role {
   font-size: var(--fs-xs);
-  color: var(--text-lighter);
+  color: var(--text-light);
+  margin-top: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
 .testi-date {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #94a3b8;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
 }
 
-/* ---- ULASAN FORM & INTERACTIVE STAR RATING ---- */
+/* Nav Buttons for Horizontal Slider */
+.testi-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1.5px solid var(--gray-300);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+}
+
+.testi-nav-btn:hover {
+  background: var(--nature);
+  color: #fff;
+  border-color: var(--nature);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.testi-nav-btn.prev {
+  left: -20px;
+}
+
+.testi-nav-btn.next {
+  right: -20px;
+}
+
+.testi-slider-meta {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.testi-swipe-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+}
+
+/* ---- ULASAN FORM WITH GOOGLE PROFILE & FOTO ---- */
 .ulasan-form-wrapper {
   margin-bottom: 2.5rem;
   animation: slideDownFade 0.35s ease-out forwards;
@@ -2281,12 +2463,98 @@ p {
 
 .ulasan-form-card {
   background: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: 8px;
   padding: 2.25rem 2rem;
-  border: 2px solid #e2e8f0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  border: 1.5px solid var(--gray-300);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   max-width: 800px;
   margin: 0 auto;
+}
+
+.google-form-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  padding: 0.85rem 1.15rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.google-form-banner i {
+  font-size: 1.6rem;
+  color: #ea4335;
+}
+
+.google-form-banner strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #991b1b;
+}
+
+.google-form-banner span {
+  font-size: 0.8rem;
+  color: #b91c1c;
+}
+
+.foto-profile-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--gray-50);
+  border: 1.5px dashed var(--gray-300);
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.ulasan-preview-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.foto-profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.quick-avatar-presets {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.preset-avatar-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  background: none;
+}
+
+.preset-avatar-btn:hover,
+.preset-avatar-btn.active {
+  border-color: var(--nature);
+  transform: scale(1.15);
+}
+
+.preset-avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ulasan-form-header {
@@ -2338,7 +2606,7 @@ p {
   gap: 1.25rem;
   background: #f8fafc;
   padding: 0.85rem 1.25rem;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   flex-wrap: wrap;
 }
@@ -2575,11 +2843,11 @@ p {
 }
 
 .location-map-wrap {
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px rgba(27, 40, 30, 0.06);
   height: 380px;
-  border: 2px solid var(--gray-200);
+  border: 1.5px solid var(--gray-300);
   position: relative;
 }
 
@@ -2591,10 +2859,10 @@ p {
 /* Route Journey Transit Guide (Area Bawah Peta) */
 .route-journey-guide {
   background: var(--white);
-  border: 1px solid var(--gray-200);
+  border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-lg);
   padding: 1.1rem 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(27, 40, 30, 0.06);
 }
 
 .journey-header {
@@ -3296,8 +3564,12 @@ a.cta-booking-meta-pill:hover {
     width: 100%;
     justify-content: center;
   }
-  .testi-grid {
-    grid-template-columns: 1fr;
+  .testi-card {
+    flex: 0 0 85vw;
+    max-width: 85vw;
+  }
+  .testi-nav-btn {
+    display: none;
   }
   .location-grid {
     grid-template-columns: 1fr;

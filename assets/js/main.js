@@ -803,16 +803,16 @@ document.addEventListener('DOMContentLoaded', function () {
         .replace(/'/g, '&#039;');
     }
 
-    // Render Testimonials Grid
+    // Render Testimonials Horizontal Track
     function renderTestimonials(highlightId = null) {
-      if (typeof DataStore === 'undefined') return;
+      if (typeof DataStore === 'undefined' || !testiContainer) return;
       const list = DataStore.getTestimonials() || [];
       if (list.length === 0) {
         testiContainer.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: var(--radius-lg); border: 1px dashed #cbd5e1;">
+          <div style="flex: 1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: 8px; border: 1.5px dashed var(--gray-300);">
             <i class="fa-regular fa-comment-dots" style="font-size: 2.5rem; margin-bottom: 0.75rem; color: #94a3b8; display: block;"></i>
             <h4 style="color: #334155; margin-bottom: 0.25rem;">Belum ada ulasan wisatawan</h4>
-            <p style="margin: 0; font-size: 0.9rem;">Jadilah yang pertama memberikan ulasan seru petualangan Packrafting di Sungai Opak Canden!</p>
+            <p style="margin: 0; font-size: 0.9rem;">Jadilah yang pertama memberikan ulasan &amp; rating Google untuk petualangan Packrafting di Sungai Opak Canden!</p>
           </div>
         `;
         return;
@@ -824,13 +824,13 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 1; i <= 5; i++) {
           starsHtml += i <= rating 
             ? '<i class="fa-solid fa-star"></i>' 
-            : '<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>';
+            : '<i class="fa-regular fa-star" style="color:#d2ccbf;"></i>';
         }
 
-        const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'W')).toUpperCase();
         const isHighlight = highlightId && String(item.id) === String(highlightId);
-
-        // Gradient color for avatar circle
+        const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'G')).toUpperCase();
+        
+        // Gradient color for fallback avatar circle
         const charCode = avatarInitial.charCodeAt(0) || 65;
         const hue = (charCode * 47) % 360;
         const avatarBg = `linear-gradient(135deg, hsl(${hue}, 70%, 85%), hsl(${(hue + 40) % 360}, 75%, 70%))`;
@@ -838,29 +838,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const displayDate = item.tanggal 
           ? (typeof formatTanggal === 'function' ? formatTanggal(item.tanggal) : item.tanggal) 
-          : '';
+          : 'Ulasan Terverifikasi';
+
+        // Avatar: Image or Initials
+        const avatarHtml = item.foto 
+          ? `<img src="${escapeHtml(item.foto)}" alt="${escapeHtml(item.nama || 'Reviewer')}" class="testi-avatar-img" loading="lazy">` 
+          : `<div class="testi-avatar" style="background:${avatarBg}; color:${avatarColor};">${avatarInitial}</div>`;
+
+        // Account Handle/Role
+        const roleText = item.email ? item.email : (item.asal || 'Akun Google Terverifikasi');
 
         return `
-          <div class="testi-card reveal revealed ${isHighlight ? 'new-highlight' : ''}" id="testi-card-${item.id}">
+          <div class="testi-card ${isHighlight ? 'new-highlight' : ''}" id="testi-card-${item.id}">
             <div>
-              <div class="testi-rating" aria-label="${rating} dari 5 bintang">
-                ${starsHtml}
+              <div class="testi-card-top">
+                <div class="testi-rating" aria-label="${rating} dari 5 bintang">
+                  ${starsHtml}
+                </div>
+                <div class="testi-google-badge">
+                  <i class="fa-brands fa-google"></i>
+                  <span>Google Review</span>
+                </div>
               </div>
               <p class="testi-quote">
                 "${escapeHtml(item.pesan || '')}"
               </p>
             </div>
             <div class="testi-author">
-              <div class="testi-avatar" style="background:${avatarBg}; color:${avatarColor};">${avatarInitial}</div>
-              <div style="flex:1;">
-                <div class="testi-name">${escapeHtml(item.nama || 'Wisatawan')}</div>
-                <div class="testi-role">${escapeHtml(item.asal || 'Wisatawan Canden')}</div>
-                ${displayDate ? `<div class="testi-date"><i class="fa-regular fa-clock" style="font-size:0.65rem;margin-right:0.25rem;"></i>${displayDate}</div>` : ''}
+              ${avatarHtml}
+              <div style="flex:1;min-width:0;">
+                <div class="testi-name-row">
+                  <span class="testi-name">${escapeHtml(item.nama || 'Wisatawan')}</span>
+                  <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:0.85rem;" title="Reviewer Terverifikasi Google"></i>
+                </div>
+                <div class="testi-role" title="${escapeHtml(roleText)}">${escapeHtml(roleText)}</div>
+                <div class="testi-date"><i class="fa-regular fa-clock" style="font-size:0.65rem;margin-right:0.25rem;"></i>${displayDate}</div>
               </div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Horizontal Slider Controls (Kesamping ala Pentingsari)
+    const btnTestiPrev = document.getElementById('btn-testi-prev');
+    const btnTestiNext = document.getElementById('btn-testi-next');
+
+    if (btnTestiPrev && testiContainer) {
+      btnTestiPrev.addEventListener('click', function () {
+        const cardWidth = 390;
+        testiContainer.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+      });
+    }
+
+    if (btnTestiNext && testiContainer) {
+      btnTestiNext.addEventListener('click', function () {
+        const cardWidth = 390;
+        testiContainer.scrollBy({ left: cardWidth, behavior: 'smooth' });
+      });
     }
 
     // Toggle Form Collapse
@@ -889,6 +924,50 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnToggle) btnToggle.addEventListener('click', openForm);
     if (btnTutup) btnTutup.addEventListener('click', closeForm);
     if (btnCancel) btnCancel.addEventListener('click', closeForm);
+
+    // Foto Profil Picker & File Upload Preview Handler
+    const btnBrowseFoto = document.getElementById('btn-browse-foto');
+    const fotoFileInput = document.getElementById('ulasan-foto-file');
+    const previewAvatar = document.getElementById('ulasan-preview-avatar');
+    const fotoValInput = document.getElementById('ulasan-foto-val');
+    const presetBtns = document.querySelectorAll('.preset-avatar-btn');
+
+    if (btnBrowseFoto && fotoFileInput) {
+      btnBrowseFoto.addEventListener('click', function () {
+        fotoFileInput.click();
+      });
+    }
+
+    if (fotoFileInput) {
+      fotoFileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          if (file.size > 2 * 1024 * 1024) {
+            showUserToast('Ukuran foto profil maksimal 2MB.', 'warning');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const dataUrl = e.target.result;
+            if (previewAvatar) previewAvatar.src = dataUrl;
+            if (fotoValInput) fotoValInput.value = dataUrl;
+            presetBtns.forEach(b => b.classList.remove('active'));
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Quick Preset Avatar selection
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', function () {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const avatarUrl = this.dataset.avatar;
+        if (previewAvatar) previewAvatar.src = avatarUrl;
+        if (fotoValInput) fotoValInput.value = avatarUrl;
+      });
+    });
 
     // Interactive Star Rating Picker
     const starBtns = document.querySelectorAll('#rating-stars .star-btn');
@@ -948,18 +1027,27 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
 
         const namaEl = document.getElementById('ulasan-nama');
+        const emailEl = document.getElementById('ulasan-email');
         const asalEl = document.getElementById('ulasan-asal');
         const pesanEl = document.getElementById('ulasan-pesan');
         const ratingVal = parseInt(ratingInput ? ratingInput.value : 5) || 5;
 
         const nama = namaEl ? namaEl.value.trim() : '';
+        const email = emailEl ? emailEl.value.trim() : '';
         const asal = asalEl ? asalEl.value.trim() : '';
         const pesan = pesanEl ? pesanEl.value.trim() : '';
+        const fotoVal = (fotoValInput && fotoValInput.value) ? fotoValInput.value : '';
 
         // Validation
         if (!nama) {
-          showUserToast('Mohon masukkan nama Anda terlebih dahulu.', 'warning');
+          showUserToast('Mohon masukkan Nama Akun Google Anda.', 'warning');
           if (namaEl) namaEl.focus();
+          return;
+        }
+
+        if (!email || !email.includes('@')) {
+          showUserToast('Mohon masukkan Email Akun Google yang valid.', 'warning');
+          if (emailEl) emailEl.focus();
           return;
         }
 
@@ -980,15 +1068,21 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        // Create new testimonial object
+        // Final photo url (fallback to UI Avatars if none chosen)
+        const finalPhoto = fotoVal || `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=1b4332&color=fff`;
+
+        // Create new testimonial object with Google verified metadata
         const newId = Date.now();
         const newReview = {
           id: newId,
           nama: nama,
-          asal: asal || 'Wisatawan',
+          email: email,
+          foto: finalPhoto,
+          asal: asal || 'Wisatawan Google',
           rating: ratingVal,
           pesan: pesan,
-          avatar: nama.charAt(0).toUpperCase() || 'W',
+          avatar: nama.charAt(0).toUpperCase() || 'G',
+          isGoogle: true,
           tanggal: new Date().toISOString().split('T')[0]
         };
 
@@ -1002,6 +1096,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Reset form
         namaEl.value = '';
+        if (emailEl) emailEl.value = '';
         if (asalEl) asalEl.value = '';
         pesanEl.value = '';
         if (ratingInput) ratingInput.value = '5';
@@ -1009,15 +1104,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Close form & show success toast
         closeForm();
-        showUserToast(`Terima kasih, ${nama}! Ulasan & rating Anda telah berhasil ditampilkan.`, 'success');
+        showUserToast(`Terima kasih, ${nama}! Ulasan & rating Google Anda telah berhasil dipublikasikan.`, 'success');
 
-        // Smooth scroll to the new card
+        // Scroll horizontal slider to the new review card
         setTimeout(() => {
-          const newCard = document.getElementById(`testi-card-${newId}`);
-          if (newCard) {
-            newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (testiContainer) {
+            testiContainer.scrollTo({ left: 0, behavior: 'smooth' });
           }
-        }, 200);
+        }, 150);
       });
     }
 

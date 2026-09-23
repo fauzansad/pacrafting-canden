@@ -273,34 +273,67 @@ const PackraftData = {
     { id: 8, judul: 'Spot Foto Tepi Sungai', kategori: 'Pemandangan', gambar: 'assets/images/galeri/5.jpg', caption: 'Spot foto instagramable di aliran Sungai Opak', status: 'active' }
   ],
 
-  // ---- Testimonial ----
+  // ---- Testimonial (Google Reviews Terverifikasi) ----
   testimonials: [
     {
       id: 1,
       nama: 'Bima Arya Pratama',
       asal: 'Wisatawan Jakarta',
+      email: 'bima.aryapratama@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
       rating: 5,
-      pesan: 'Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan. Wajib coba!',
+      pesan: 'Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan. Wajib coba bareng keluarga atau teman!',
       avatar: 'B',
+      isGoogle: true,
       tanggal: '2026-08-25'
     },
     {
       id: 2,
       nama: 'Siti Rahmawati',
       asal: 'Keluarga Wisatawan (Sleman)',
+      email: 'siti.rahmawati.yk@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80',
       rating: 5,
-      pesan: 'Seru banget buat liburan keluarga. Anak-anak senang dan merasa aman karena didampingi instruktur yang sabar. Titik finish di Potrobayan juga pemandangannya bagus!',
+      pesan: 'Seru banget buat liburan keluarga. Anak-anak senang dan merasa aman karena didampingi instruktur yang sabar. Titik finish di Potrobayan juga pemandangannya bagus banget buat foto-foto!',
       avatar: 'S',
+      isGoogle: true,
       tanggal: '2026-08-20'
     },
     {
       id: 3,
       nama: 'Dimas Setiawan',
       asal: 'Komunitas Outdoor Jogja',
+      email: 'dimas.setiawan92@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80',
       rating: 5,
-      pesan: 'Spot wisata adventure baru di Bantul yang fresh! Jeram sungainya menantang tapi tetap aman. Cocok banget buat refreshing bareng teman kantor.',
+      pesan: 'Spot wisata adventure baru di Bantul yang fresh! Jeram sungainya pas menantang tapi tetap aman. Sangat cocok buat refreshing bareng rombongan kantor atau teman komunitas.',
       avatar: 'D',
+      isGoogle: true,
       tanggal: '2026-08-15'
+    },
+    {
+      id: 4,
+      nama: 'Anisa Putri Maharani',
+      asal: 'Traveler Solo & Mahasiswa',
+      email: 'anisa.maharani@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80',
+      rating: 5,
+      pesan: 'Pertama kali coba packrafting di Jogja dan langsung jatuh cinta! Pemandangannya alami dan asri. Rest area tepi kali juga nyaman banget ada kelapa mudanya.',
+      avatar: 'A',
+      isGoogle: true,
+      tanggal: '2026-08-08'
+    },
+    {
+      id: 5,
+      nama: 'Wahyu Hidayat',
+      asal: 'Rombongan Reuni Alumni',
+      email: 'wahyu.hidayat77@gmail.com',
+      foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
+      rating: 5,
+      pesan: 'Pelayanan pengelola desa Canden top markotop. Safety briefing detail, helm dan pelampung lengkap, pemandu sigap sepanjang 4,5 km sampai finish di Potrobayan. Sangat recommended!',
+      avatar: 'W',
+      isGoogle: true,
+      tanggal: '2026-08-02'
     }
   ],
 

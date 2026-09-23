@@ -23,7 +23,7 @@
   <meta property="og:image" content="assets/images/logo/logo-horizontal.png">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="assets/css/style.css?v=3.7">
+  <link rel="stylesheet" href="assets/css/style.css?v=3.8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
@@ -1101,12 +1101,26 @@
   <section class="section" id="testimoni">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Cerita Pengunjung</div>
+        <div class="section-eyebrow">Ulasan &amp; Rating Wisatawan</div>
         <h2>Kesan &amp; Cerita Wisatawan</h2>
-        <p>Pengalaman nyata mereka yang telah merasakan keseruan berpetualang di Packrafting Canden.</p>
-        <div style="margin-top: 1.25rem;">
-          <button type="button" class="btn btn-primary" id="btn-toggle-ulasan">
-            <i class="fa-solid fa-pen-to-square"></i> Tulis Ulasan Anda
+        <p>Ulasan jujur dari wisatawan yang telah merasakan sensasi petualangan Packrafting di Sungai Opak Canden.</p>
+        
+        <!-- Google Reviews Rating Summary Header -->
+        <div class="google-rating-summary">
+          <div class="google-badge-pill">
+            <i class="fa-brands fa-google google-icon"></i>
+            <span class="google-rating-score">5.0</span>
+            <div class="google-stars">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <span class="google-reviews-count">&bull; 85+ Ulasan Google Terverifikasi</span>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-ulasan">
+            <i class="fa-brands fa-google"></i> Beri Rating Google
           </button>
         </div>
       </div>
@@ -1116,7 +1130,14 @@
         <div class="ulasan-form-card">
           <div class="ulasan-form-header">
             <div>
-              <h3><i class="fa-solid fa-star" style="color:#f59e0b;margin-right:0.5rem;"></i> Tulis Ulasan &amp; Rating Anda</h3>
+              <div class="google-form-banner">
+                <i class="fa-brands fa-google"></i>
+                <div>
+                  <strong>Beri Rating dengan Akun Google</strong>
+                  <span>Ulasan Anda akan tampil dengan foto profil &amp; badge Google Terverifikasi</span>
+                </div>
+              </div>
+              <h3 style="margin-top:0.5rem;"><i class="fa-solid fa-star" style="color:#f59e0b;margin-right:0.4rem;"></i> Tulis Ulasan &amp; Rating Anda</h3>
               <p>Bagikan kesan dan cerita petualangan Anda menyusuri Sungai Opak bersama kami.</p>
             </div>
             <button type="button" class="ulasan-form-close" id="btn-tutup-ulasan" aria-label="Tutup form">&times;</button>
@@ -1139,18 +1160,63 @@
               </div>
             </div>
 
+            <!-- Foto Profil Selector & Preview -->
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Foto Profil Akun Google <span style="color:#ef4444;">*</span></label>
+              <div class="foto-profile-picker-wrap">
+                <img id="ulasan-preview-avatar" class="ulasan-preview-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Preview Foto Profil">
+                <div class="foto-profile-actions">
+                  <input type="file" id="ulasan-foto-file" accept="image/*" style="display:none;">
+                  <input type="hidden" id="ulasan-foto-val" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80">
+                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-outline btn-sm" id="btn-browse-foto">
+                      <i class="fa-solid fa-camera"></i> Upload Foto Sendiri
+                    </button>
+                    <span style="font-size:0.75rem;color:var(--text-light);">atau pilih avatar cepat:</span>
+                  </div>
+                  <div class="quick-avatar-presets">
+                    <button type="button" class="preset-avatar-btn active" data-avatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 1">
+                      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60&auto=format&fit=crop&q=80" alt="Avatar 1">
+                    </button>
+                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80" title="Avatar Wanita 1">
+                      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" alt="Avatar 2">
+                    </button>
+                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 2">
+                      <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=60&auto=format&fit=crop&q=80" alt="Avatar 3">
+                    </button>
+                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80" title="Avatar Wanita 2">
+                      <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&auto=format&fit=crop&q=80" alt="Avatar 4">
+                    </button>
+                    <button type="button" class="preset-avatar-btn" data-avatar="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" title="Avatar Pria 3">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" alt="Avatar 5">
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="ulasan-inputs-grid">
-              <!-- Nama -->
+              <!-- Nama Akun Google -->
               <div class="form-group">
-                <label for="ulasan-nama" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Nama Lengkap / Panggilan <span style="color:#ef4444;">*</span></label>
+                <label for="ulasan-nama" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">
+                  <i class="fa-brands fa-google" style="color:#ea4335;margin-right:0.3rem;"></i> Nama Akun Google <span style="color:#ef4444;">*</span>
+                </label>
                 <input type="text" id="ulasan-nama" class="form-control" placeholder="Contoh: Rian Pratama" required>
               </div>
 
-              <!-- Asal / Komunitas -->
+              <!-- Email Akun Google -->
               <div class="form-group">
-                <label for="ulasan-asal" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Asal Kota / Kategori <small style="color:#64748b;font-weight:normal;">(Opsional)</small></label>
-                <input type="text" id="ulasan-asal" class="form-control" placeholder="Contoh: Wisatawan Jakarta / Rombongan Kantor">
+                <label for="ulasan-email" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">
+                  <i class="fa-solid fa-envelope" style="color:#ea4335;margin-right:0.3rem;"></i> Email Akun Google <span style="color:#ef4444;">*</span>
+                </label>
+                <input type="email" id="ulasan-email" class="form-control" placeholder="contoh: rian.pratama@gmail.com" required>
               </div>
+            </div>
+
+            <!-- Asal / Komunitas (Opsional) -->
+            <div class="form-group">
+              <label for="ulasan-asal" class="form-label" style="font-weight:700;margin-bottom:0.5rem;display:block;">Asal Kota / Kategori Wisatawan <small style="color:#64748b;font-weight:normal;">(Opsional)</small></label>
+              <input type="text" id="ulasan-asal" class="form-control" placeholder="Contoh: Wisatawan Jakarta / Rombongan Keluarga / Teman Kantor">
             </div>
 
             <!-- Ulasan Pesan -->
@@ -1162,7 +1228,7 @@
             <!-- Tombol Aksi -->
             <div class="ulasan-form-actions">
               <button type="submit" class="btn btn-primary" id="btn-submit-ulasan">
-                <i class="fa-solid fa-paper-plane"></i> Kirim Ulasan Sekarang
+                <i class="fa-brands fa-google"></i> Publikasikan Ulasan &amp; Rating Google
               </button>
               <button type="button" class="btn btn-outline" id="btn-cancel-ulasan">Batal</button>
             </div>
@@ -1170,9 +1236,21 @@
         </div>
       </div>
 
-      <!-- Testimoni Grid (Dikelola dinamis oleh main.js) -->
-      <div class="testi-grid" id="testi-container">
-        <!-- Rendered dynamically by main.js -->
+      <!-- Testimoni Horizontal Slider Track (Kesamping seperti Pentingsari) -->
+      <div class="testi-slider-wrapper">
+        <button type="button" class="testi-nav-btn prev" id="btn-testi-prev" aria-label="Ulasan Sebelumnya">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="testi-track" id="testi-container">
+          <!-- Rendered dynamically by main.js -->
+        </div>
+        <button type="button" class="testi-nav-btn next" id="btn-testi-next" aria-label="Ulasan Selanjutnya">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="testi-slider-meta">
+        <span class="testi-swipe-hint"><i class="fa-solid fa-arrows-left-right"></i> Geser ke samping untuk melihat ulasan lainnya</span>
       </div>
     </div>
   </section>
@@ -1325,7 +1403,7 @@
 
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=3.1"></script>
-  <script src="assets/js/main.js?v=3.3"></script>
+  <script src="assets/js/data.js?v=3.5"></script>
+  <script src="assets/js/main.js?v=3.5"></script>
 </body>
 </html>
