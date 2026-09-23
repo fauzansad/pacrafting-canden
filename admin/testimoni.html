@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ulasan &amp; Rating | Admin Packrafting Canden</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=2.9">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../assets/images/logo/logo-square.png" alt="Logo" class="sidebar-brand-logo">
+      <div class="sidebar-brand">
+        <strong>PACKRAFTING CANDEN</strong>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Menu Utama</div>
+      <a href="index.html" class="sidebar-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="sidebar-nav-label">Wisata &amp; Konten</div>
+      <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
+      <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="testimoni.html" class="sidebar-link active"><i class="fa-solid fa-star"></i> Ulasan &amp; Rating</a>
+      <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
+      <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
+
+      <div class="sidebar-nav-label">Informasi &amp; Kontak</div>
+      <a href="informasi.html" class="sidebar-link"><i class="fa-solid fa-circle-info"></i> Panduan &amp; Info Wisata</a>
+      <a href="kontak.html" class="sidebar-link"><i class="fa-brands fa-whatsapp"></i> Kontak &amp; Booking</a>
+
+      <div class="sidebar-nav-label">Aksi &amp; Keamanan</div>
+      <a href="../index.html" class="sidebar-link" target="_blank"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+      <a href="javascript:void(0)" class="sidebar-link" onclick="openChangePasswordModal()"><i class="fa-solid fa-key"></i> Ganti Password</a>
+      <a href="#" class="sidebar-link" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sidebar-toggle" style="background:none;border:none;font-size:1.25rem;cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+        <h2>Manajemen Ulasan &amp; Rating</h2>
+      </div>
+      <button class="btn-admin btn-admin-primary" onclick="openAddTestimoniModal()">
+        <i class="fa-solid fa-plus"></i> Tambah Ulasan Manual
+      </button>
+    </div>
+
+    <div class="admin-content">
+      <!-- Summary Cards -->
+      <div class="dash-stats" style="margin-bottom:1.5rem;">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon yellow"><i class="fa-solid fa-star"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-avg-rating">5.0</h4>
+            <p>Rating Rata-Rata</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon green"><i class="fa-solid fa-comments"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-total-testi">0</h4>
+            <p>Total Ulasan Masuk</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon orange"><i class="fa-solid fa-award"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-star-5">0</h4>
+            <p>Ulasan Bintang 5</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon blue"><i class="fa-solid fa-thumbs-up"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-star-4">0</h4>
+            <p>Ulasan Bintang 4</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & Search Bar -->
+      <div class="testi-filter-bar">
+        <div class="testi-filter-tabs">
+          <button type="button" class="testi-filter-btn active" data-rating="all">Semua Ulasan</button>
+          <button type="button" class="testi-filter-btn" data-rating="5"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Bintang 5</button>
+          <button type="button" class="testi-filter-btn" data-rating="4"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Bintang 4</button>
+          <button type="button" class="testi-filter-btn" data-rating="3down">Bintang 3 ke Bawah</button>
+        </div>
+
+        <div class="testi-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-testi" placeholder="Cari nama atau ulasan...">
+        </div>
+      </div>
+
+      <!-- Testimonial Grid -->
+      <div class="admin-testi-grid" id="testimoni-admin-list">
+        <!-- Rendered dynamically by admin.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Tambah Ulasan Manual -->
+  <div id="modal-add-testi" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;animation:modalFadeIn 0.2s ease;">
+      <div style="background:linear-gradient(135deg,#0b1710,#1b4332);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="margin:0;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fa-solid fa-star" style="color:#f59e0b;"></i> Tambah Ulasan Wisatawan
+        </h3>
+        <button type="button" onclick="closeAddTestimoniModal()" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-add-testi" onsubmit="saveNewTestimoniAdmin(event)" style="padding:1.5rem;" class="admin-form">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="new-testi-nama" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Nama Wisatawan *</label>
+          <input type="text" id="new-testi-nama" class="form-control" placeholder="Contoh: Bima Arya Pratama" required style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="new-testi-asal" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Asal / Rombongan</label>
+          <input type="text" id="new-testi-asal" class="form-control" placeholder="Contoh: Komunitas Outdoor Jakarta" style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="new-testi-rating" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Rating Pengalaman *</label>
+          <select id="new-testi-rating" class="form-control" style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;">
+            <option value="5">⭐⭐⭐⭐⭐ 5 Bintang (Luar Biasa)</option>
+            <option value="4">⭐⭐⭐⭐ 4 Bintang (Sangat Baik)</option>
+            <option value="3">⭐⭐⭐ 3 Bintang (Cukup)</option>
+            <option value="2">⭐⭐ 2 Bintang (Kurang)</option>
+            <option value="1">⭐ 1 Bintang (Buruk)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="new-testi-pesan" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Isi Ulasan &amp; Kesan *</label>
+          <textarea id="new-testi-pesan" class="form-control" rows="4" placeholder="Ceritakan bagaimana pengalaman seru berwisata packrafting di Canden..." required style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;resize:vertical;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="new-testi-foto" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">URL Foto Profil (Opsional)</label>
+          <input type="url" id="new-testi-foto" class="form-control" placeholder="https://..." style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;">
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
+          <button type="button" class="btn-admin btn-admin-outline" onclick="closeAddTestimoniModal()">Batal</button>
+          <button type="submit" class="btn-admin btn-admin-primary"><i class="fa-solid fa-check"></i> Simpan Ulasan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="../assets/js/data.js?v=2.9"></script>
+  <script src="../assets/js/admin.js?v=2.9"></script>
+</body>
+</html>

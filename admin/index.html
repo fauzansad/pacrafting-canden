@@ -26,6 +26,7 @@
       <div class="sidebar-nav-label">Wisata &amp; Konten</div>
       <a href="banner.html" class="sidebar-link"><i class="fa-solid fa-image"></i> Banner Hero</a>
       <a href="paket.html" class="sidebar-link"><i class="fa-solid fa-compass"></i> Paket Wisata</a>
+      <a href="testimoni.html" class="sidebar-link"><i class="fa-solid fa-star"></i> Ulasan &amp; Rating</a>
       <a href="video.html" class="sidebar-link"><i class="fa-solid fa-circle-play"></i> Video Pengalaman</a>
       <a href="galeri.html" class="sidebar-link"><i class="fa-solid fa-photo-film"></i> Galeri Foto</a>
 
@@ -71,6 +72,14 @@
         </div>
 
         <div class="dash-stat-card">
+          <div class="dash-stat-icon yellow"><i class="fa-solid fa-star"></i></div>
+          <div class="dash-stat-info">
+            <h4 id="stat-testi">0</h4>
+            <p>Ulasan &amp; Rating</p>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
           <div class="dash-stat-icon green"><i class="fa-solid fa-camera"></i></div>
           <div class="dash-stat-info">
             <h4 id="stat-galeri">0</h4>
@@ -94,7 +103,10 @@
             <h3><i class="fa-solid fa-bolt" style="color:#ea580c;margin-right:0.4rem;"></i> Aksi Cepat Pengelolaan</h3>
           </div>
           <div class="admin-card-body dash-action-grid">
-            <a href="banner.html" class="btn-admin btn-admin-primary" style="padding:0.9rem;justify-content:center;">
+            <a href="testimoni.html" class="btn-admin btn-admin-primary" style="padding:0.9rem;justify-content:center;">
+              <i class="fa-solid fa-star"></i> Kelola Ulasan Wisatawan
+            </a>
+            <a href="banner.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
               <i class="fa-solid fa-image"></i> Ganti Hero Banner
             </a>
             <a href="paket.html" class="btn-admin btn-admin-outline" style="padding:0.9rem;justify-content:center;">
@@ -131,8 +143,8 @@
   </main>
 
   <div class="toast-container" id="toast-container"></div>
-  <script src="../assets/js/data.js?v=2.8"></script>
-  <script src="../assets/js/admin.js?v=2.8"></script>
+  <script src="../assets/js/data.js?v=2.9"></script>
+  <script src="../assets/js/admin.js?v=2.9"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => renderDashboardStats());
   </script>

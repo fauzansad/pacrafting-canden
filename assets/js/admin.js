@@ -949,6 +949,205 @@ function initGaleriFileListener() {
   }
 }
 
+// ---- 8.5 Testimonial / Ulasan & Rating Admin Management ----
+let adminTestiFilterRating = 'all';
+let adminTestiSearchQuery = '';
+
+function initTestimoniAdminPage() {
+  renderTestimoniAdmin();
+
+  const searchInput = document.getElementById('search-testi');
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      adminTestiSearchQuery = this.value.trim().toLowerCase();
+      renderTestimoniAdmin();
+    });
+  }
+
+  const filterBtns = document.querySelectorAll('.testi-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      adminTestiFilterRating = this.getAttribute('data-rating') || 'all';
+      renderTestimoniAdmin();
+    });
+  });
+}
+
+function renderTestimoniAdmin() {
+  const container = document.getElementById('testimoni-admin-list');
+  if (!container) return;
+
+  const rawList = DataStore.getTestimonials() || [];
+
+  // Update statistics
+  const totalCount = rawList.length;
+  const count5 = rawList.filter(t => (parseInt(t.rating) || 5) === 5).length;
+  const count4 = rawList.filter(t => (parseInt(t.rating) || 5) === 4).length;
+  const sumRating = rawList.reduce((acc, t) => acc + (parseInt(t.rating) || 5), 0);
+  const avgRating = totalCount > 0 ? (sumRating / totalCount).toFixed(1) : '5.0';
+
+  const setEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setEl('stat-total-testi', totalCount);
+  setEl('stat-avg-rating', avgRating);
+  setEl('stat-star-5', count5);
+  setEl('stat-star-4', count4);
+
+  let list = [...rawList];
+
+  // Filter by rating
+  if (adminTestiFilterRating !== 'all') {
+    const targetRating = parseInt(adminTestiFilterRating, 10);
+    if (adminTestiFilterRating === '3down') {
+      list = list.filter(t => (parseInt(t.rating) || 5) <= 3);
+    } else {
+      list = list.filter(t => (parseInt(t.rating) || 5) === targetRating);
+    }
+  }
+
+  // Filter by search query
+  if (adminTestiSearchQuery) {
+    list = list.filter(t => 
+      (t.nama && t.nama.toLowerCase().includes(adminTestiSearchQuery)) ||
+      (t.pesan && t.pesan.toLowerCase().includes(adminTestiSearchQuery)) ||
+      (t.asal && t.asal.toLowerCase().includes(adminTestiSearchQuery)) ||
+      (t.email && t.email.toLowerCase().includes(adminTestiSearchQuery))
+    );
+  }
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: 12px; border: 1.5px dashed var(--admin-border);">
+        <i class="fa-regular fa-comment-dots" style="font-size: 2.5rem; margin-bottom: 0.75rem; color: #94a3b8; display: block;"></i>
+        <h4 style="color: #334155; margin-bottom: 0.25rem;">Tidak ada ulasan ditemukan</h4>
+        <p style="margin: 0; font-size: 0.875rem;">Ubah kata kunci pencarian atau tab filter untuk melihat ulasan lainnya.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map(item => {
+    const rating = Math.max(1, Math.min(5, parseInt(item.rating) || 5));
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      starsHtml += i <= rating 
+        ? '<i class="fa-solid fa-star" style="color:#f59e0b;"></i>' 
+        : '<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>';
+    }
+
+    const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'G')).toUpperCase();
+    const photoHtml = item.foto 
+      ? `<img src="${item.foto}" alt="${item.nama}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;">` 
+      : `<div style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;color:#334155;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${avatarInitial}</div>`;
+
+    const isGoogle = item.isGoogle !== false;
+    const badgeHtml = isGoogle 
+      ? `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#e0f2fe;color:#0369a1;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;"><i class="fa-brands fa-google"></i> Google</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#f1f5f9;color:#475569;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;"><i class="fa-solid fa-user"></i> Pengunjung</span>`;
+
+    return `
+      <div class="admin-testi-card" id="admin-testi-${item.id}">
+        <div>
+          <div class="admin-testi-header">
+            <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+              ${photoHtml}
+              <div style="min-width:0;">
+                <div style="font-weight:700;color:var(--admin-text);font-size:0.95rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+                  <span>${item.nama}</span>
+                  ${badgeHtml}
+                </div>
+                <div style="font-size:0.78rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.email || item.asal || 'Wisatawan'} • ${item.tanggal || '-'}</div>
+              </div>
+            </div>
+            <button type="button" onclick="deleteTestimoniAdmin(${item.id})" title="Hapus Ulasan" style="background:#fee2e2;color:#ef4444;border:none;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+          <div style="margin:0.85rem 0 0.5rem;display:flex;align-items:center;gap:0.25rem;">
+            ${starsHtml}
+            <span style="font-size:0.82rem;font-weight:700;color:#f59e0b;margin-left:0.35rem;">${rating}.0</span>
+          </div>
+          <p style="margin:0 0 1rem 0;font-size:0.88rem;color:#334155;line-height:1.6;white-space:pre-line;">
+            ${item.pesan}
+          </p>
+        </div>
+        <div style="font-size:0.72rem;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:0.6rem;display:flex;justify-content:space-between;align-items:center;">
+          <span>ID: #${item.id}</span>
+          <span><i class="fa-regular fa-calendar" style="margin-right:0.25rem;"></i>${item.tanggal || 'Terkini'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function deleteTestimoniAdmin(id) {
+  if (confirm('Apakah Anda yakin ingin menghapus ulasan ini dari website?')) {
+    let list = DataStore.getTestimonials() || [];
+    list = list.filter(t => String(t.id) !== String(id));
+    DataStore.saveTestimonials(list);
+    showToast('Ulasan berhasil dihapus dari website!', 'success');
+    renderTestimoniAdmin();
+    renderDashboardStats();
+  }
+}
+
+function openAddTestimoniModal() {
+  const modal = document.getElementById('modal-add-testi');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeAddTestimoniModal() {
+  const modal = document.getElementById('modal-add-testi');
+  if (modal) {
+    modal.style.display = 'none';
+    const form = document.getElementById('form-add-testi');
+    if (form) form.reset();
+  }
+}
+
+function saveNewTestimoniAdmin(e) {
+  if (e) e.preventDefault();
+  const nama = document.getElementById('new-testi-nama').value.trim();
+  const asal = document.getElementById('new-testi-asal').value.trim() || 'Wisatawan';
+  const rating = parseInt(document.getElementById('new-testi-rating').value, 10) || 5;
+  const pesan = document.getElementById('new-testi-pesan').value.trim();
+  const foto = document.getElementById('new-testi-foto').value.trim();
+
+  if (!nama || !pesan) {
+    showToast('Nama dan isi ulasan wajib diisi!', 'warning');
+    return;
+  }
+
+  const newReview = {
+    id: Date.now(),
+    nama: nama,
+    asal: asal,
+    email: '',
+    foto: foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=1b4332&color=fff&size=120`,
+    rating: rating,
+    pesan: pesan,
+    avatar: nama.charAt(0).toUpperCase(),
+    isGoogle: true,
+    tanggal: new Date().toISOString().split('T')[0]
+  };
+
+  const list = DataStore.getTestimonials() || [];
+  list.unshift(newReview);
+  DataStore.saveTestimonials(list);
+
+  showToast('Ulasan baru berhasil ditambahkan!', 'success');
+  closeAddTestimoniModal();
+  renderTestimoniAdmin();
+  renderDashboardStats();
+}
+
 // ---- 9. Init Admin System ----
 document.addEventListener('DOMContentLoaded', function () {
   if (!window.location.pathname.includes('login')) {
@@ -1001,6 +1200,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   initGaleriFileListener();
+  if (document.getElementById('testimoni-admin-list')) initTestimoniAdminPage();
 
   // Auto-refresh admin views when cloud database updates
   window.addEventListener('packraft_data_updated', function () {
@@ -1009,6 +1209,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
     if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();
     if (document.getElementById('stat-paket')) renderDashboardStats();
+    if (document.getElementById('testimoni-admin-list')) renderTestimoniAdmin();
     if (document.getElementById('kontak-wa') && typeof loadKontakAdmin === 'function') loadKontakAdmin();
     if (document.getElementById('info-nama-pengelola') && typeof loadWisataInfoAdmin === 'function') loadWisataInfoAdmin();
     if (document.getElementById('video-url') && typeof loadVideoAdmin === 'function') loadVideoAdmin();

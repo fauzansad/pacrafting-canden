@@ -4304,19 +4304,151 @@ a.cta-booking-meta-pill:hover {
     font-size: 0.88rem;
   }
 
-  /* Ulasan Form */
+  /* Ulasan & Rating on Smartphone */
+  .google-rating-summary {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .google-rating-summary .google-badge-pill {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.85rem;
+  }
+
+  .google-rating-summary .btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+
+  .google-active-account-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .google-active-account-bar .g-account-info {
+    width: 100%;
+  }
+
+  .google-active-account-bar .g-account-details {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .google-active-account-bar .g-account-name {
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .google-active-account-bar .g-account-email {
+    font-size: 0.76rem;
+    word-break: break-all;
+  }
+
+  .google-active-account-bar .g-switch-btn,
+  .google-active-account-bar #gsi-bar-button-slot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .google-active-account-bar .g-switch-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+  }
+
   .ulasan-form-card {
     padding: 1.25rem 1rem;
+    border-radius: 12px;
+  }
+
+  .rating-picker-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .rating-stars {
+    gap: 0.35rem;
+  }
+
+  .star-btn {
+    font-size: 1.45rem;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .rating-label {
+    font-size: 0.8rem;
   }
 
   .ulasan-form-actions {
     flex-direction: column;
     width: 100%;
+    gap: 0.65rem;
   }
 
   .ulasan-form-actions .btn {
     width: 100%;
     justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .google-auth-card {
+    width: 94%;
+    max-width: 360px;
+    padding: 1.5rem 1.15rem 1.25rem;
+    border-radius: 14px;
+  }
+
+  .google-auth-header h4 {
+    font-size: 1.15rem;
+  }
+
+  .google-auth-header p {
+    font-size: 0.8rem;
+  }
+
+  .testi-track {
+    padding: 0.5rem 0 1.25rem;
+    gap: 1rem;
+  }
+
+  .testi-card {
+    flex: 0 0 86vw;
+    width: 86vw;
+    max-width: 86vw;
+    min-height: 330px;
+    padding: 1.35rem 1.2rem 1.25rem;
+  }
+
+  .testi-stars {
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .testi-text {
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin-bottom: 1.15rem;
+  }
+
+  .testi-reviewer-avatar-wrap {
+    width: 40px;
+    height: 40px;
+  }
+
+  .testi-reviewer-name {
+    font-size: 0.9rem;
   }
 
   .footer-grid {
