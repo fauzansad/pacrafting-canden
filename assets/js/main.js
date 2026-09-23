@@ -925,6 +925,25 @@ document.addEventListener('DOMContentLoaded', function () {
       syncGoogleUserUI(user);
     }
 
+    // Google Modal Helpers
+    function openGoogleModal() {
+      const modal = document.getElementById('modal-google-auth');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeGoogleModal() {
+      const modal = document.getElementById('modal-google-auth');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
     function syncGoogleUserUI(user) {
       const u = (user !== undefined) ? user : getActiveGoogleUser();
       const container = document.getElementById('google-active-account-bar');
@@ -1009,14 +1028,6 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
       }
 
-      // Re-bind switch button
-      const switchBtn = document.getElementById('btn-switch-google');
-      if (switchBtn && modalGoogleAuth) {
-        switchBtn.addEventListener('click', function () {
-          modalGoogleAuth.style.display = 'flex';
-        });
-      }
-
       // Update active state in modal
       document.querySelectorAll('.google-acc-item').forEach(item => {
         if (u && item.dataset.email === u.email) {
@@ -1026,6 +1037,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     }
+
+    // Global Delegated Listeners for Google Actions
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('#btn-switch-google')) {
+        e.preventDefault();
+        openGoogleModal();
+        return;
+      }
+
+      if (e.target.closest('#btn-close-google-modal')) {
+        e.preventDefault();
+        closeGoogleModal();
+        return;
+      }
+
+      const modal = document.getElementById('modal-google-auth');
+      if (modal && e.target === modal) {
+        closeGoogleModal();
+        return;
+      }
+
+      // Preset item clicked
+      const accItem = e.target.closest('.google-acc-item');
+      if (accItem && modal && modal.contains(accItem)) {
+        const user = {
+          nama: accItem.dataset.name,
+          email: accItem.dataset.email,
+          foto: accItem.dataset.photo
+        };
+        setActiveGoogleUser(user);
+        closeGoogleModal();
+        showUserToast(`Berhasil terhubung dengan Akun Google: ${user.nama}`, 'success');
+        return;
+      }
+    });
 
     // Toggle Form Collapse
     const btnToggle = document.getElementById('btn-toggle-ulasan');
@@ -1054,37 +1100,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnTutup) btnTutup.addEventListener('click', closeForm);
     if (btnCancel) btnCancel.addEventListener('click', closeForm);
 
-    // Google Account Switcher Modal Handlers
-    const modalGoogleAuth = document.getElementById('modal-google-auth');
-    const btnCloseGoogleModal = document.getElementById('btn-close-google-modal');
-    const btnCustomGoogleToggle = document.getElementById('btn-custom-google-toggle');
-    const customGoogleForm = document.getElementById('google-custom-login-form');
-    const btnSaveCustomGoogle = document.getElementById('btn-save-custom-google');
-    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
-
-    if (btnCloseGoogleModal && modalGoogleAuth) {
-      btnCloseGoogleModal.addEventListener('click', function () {
-        modalGoogleAuth.style.display = 'none';
-      });
-    }
-
-    if (modalGoogleAuth) {
-      modalGoogleAuth.addEventListener('click', function (e) {
-        if (e.target === modalGoogleAuth) {
-          modalGoogleAuth.style.display = 'none';
-        }
-      });
-    }
-
+    // Modal Specific Button Listeners
     const btnLogoutGoogle = document.getElementById('btn-logout-google');
     if (btnLogoutGoogle) {
       btnLogoutGoogle.addEventListener('click', function () {
         setActiveGoogleUser(null);
-        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
+        closeGoogleModal();
         showUserToast('Akun Google berhasil dilepas dari browser ini.', 'info');
       });
     }
 
+    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
     if (btnModalUploadFoto) {
       btnModalUploadFoto.addEventListener('click', function () {
         const fileInput = document.getElementById('g-avatar-file-input');
@@ -1092,26 +1118,15 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Preset Google account items selection
-    document.querySelectorAll('.google-acc-item').forEach(item => {
-      item.addEventListener('click', function () {
-        const user = {
-          nama: this.dataset.name,
-          email: this.dataset.email,
-          foto: this.dataset.photo
-        };
-        setActiveGoogleUser(user);
-        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
-        showUserToast(`Berhasil terhubung dengan Akun Google: ${user.nama}`, 'success');
-      });
-    });
-
+    const btnCustomGoogleToggle = document.getElementById('btn-custom-google-toggle');
+    const customGoogleForm = document.getElementById('google-custom-login-form');
     if (btnCustomGoogleToggle && customGoogleForm) {
       btnCustomGoogleToggle.addEventListener('click', function () {
         customGoogleForm.style.display = (customGoogleForm.style.display === 'none' || !customGoogleForm.style.display) ? 'block' : 'none';
       });
     }
 
+    const btnSaveCustomGoogle = document.getElementById('btn-save-custom-google');
     if (btnSaveCustomGoogle) {
       btnSaveCustomGoogle.addEventListener('click', function () {
         const nameInput = document.getElementById('custom-google-name');
@@ -1134,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         setActiveGoogleUser(user);
-        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
+        closeGoogleModal();
         showUserToast(`Terhubung dengan Akun Google: ${customName}`, 'success');
       });
     }
@@ -1221,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const activeGoogleUser = getActiveGoogleUser();
         if (!activeGoogleUser) {
           showUserToast('Silakan pilih atau masuk dengan Akun Google terlebih dahulu.', 'info');
-          if (modalGoogleAuth) modalGoogleAuth.style.display = 'flex';
+          openGoogleModal();
           return;
         }
 
