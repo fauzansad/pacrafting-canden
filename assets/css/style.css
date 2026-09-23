@@ -2517,14 +2517,49 @@ p {
   gap: 0.85rem;
 }
 
+.g-account-avatar-wrap {
+  position: relative;
+  cursor: pointer;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+}
+
 .g-account-avatar {
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
+  transition: filter 0.2s ease;
+}
+
+.g-account-avatar-wrap:hover .g-account-avatar {
+  filter: brightness(0.85);
+}
+
+.g-avatar-camera-icon {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  background: #1a73e8;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid #fff;
+  transition: all 0.2s ease;
+}
+
+.g-account-avatar-wrap:hover .g-avatar-camera-icon {
+  transform: scale(1.15);
+  background: #0d47a1;
 }
 
 .g-account-details {

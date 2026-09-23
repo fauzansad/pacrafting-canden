@@ -902,15 +902,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Google Account State Management for Reviews
     const DEFAULT_GOOGLE_USER = {
-      nama: 'Fauzan Sadida',
-      email: 'fauzansad@gmail.com',
+      nama: 'Fauzan Sadida Ramadhan',
+      email: 'fauzansadidaramadhan@gmail.com',
       foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'
     };
 
     function getActiveGoogleUser() {
       try {
         const stored = localStorage.getItem('packraft_google_user');
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Auto migrate previous email if needed
+          if (parsed && (parsed.email === 'fauzansad@gmail.com' || parsed.nama === 'Fauzan Sadida')) {
+            parsed.email = 'fauzansadidaramadhan@gmail.com';
+            parsed.nama = 'Fauzan Sadida Ramadhan';
+            localStorage.setItem('packraft_google_user', JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (e) {}
       return DEFAULT_GOOGLE_USER;
     }
@@ -925,17 +934,63 @@ document.addEventListener('DOMContentLoaded', function () {
     function syncGoogleUserUI(user) {
       const u = user || getActiveGoogleUser();
       const elAvatar = document.getElementById('g-active-avatar');
+      const elModalFauzanAvatar = document.getElementById('g-modal-fauzan-avatar');
       const elName = document.getElementById('g-active-name');
       const elEmail = document.getElementById('g-active-email');
-      if (elAvatar) elAvatar.src = u.foto || DEFAULT_GOOGLE_USER.foto;
+      const photoSrc = u.foto || DEFAULT_GOOGLE_USER.foto;
+
+      if (elAvatar) elAvatar.src = photoSrc;
+      if (elModalFauzanAvatar && u.email === DEFAULT_GOOGLE_USER.email) elModalFauzanAvatar.src = photoSrc;
       if (elName) elName.textContent = u.nama || DEFAULT_GOOGLE_USER.nama;
-      if (elEmail) elEmail.textContent = `${u.email || DEFAULT_GOOGLE_USER.email} • Foto Profil Google`;
+      if (elEmail) elEmail.innerHTML = `${u.email || DEFAULT_GOOGLE_USER.email} &bull; <a href="javascript:void(0)" id="link-ganti-foto" style="color:#0284c7;text-decoration:underline;">Ganti Foto</a>`;
+
+      // Re-attach link click listener after innerHTML update
+      const linkGantiFoto = document.getElementById('link-ganti-foto');
+      if (linkGantiFoto && avatarFileInput) {
+        linkGantiFoto.addEventListener('click', (e) => {
+          e.preventDefault();
+          avatarFileInput.click();
+        });
+      }
 
       document.querySelectorAll('.google-acc-item').forEach(item => {
         if (item.dataset.email === u.email) {
           item.classList.add('active');
         } else {
           item.classList.remove('active');
+        }
+      });
+    }
+
+    // Photo Upload Trigger for Google Profile
+    const avatarClickTrigger = document.getElementById('g-avatar-click-trigger');
+    const avatarFileInput = document.getElementById('g-avatar-file-input');
+    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
+
+    function triggerPhotoPicker() {
+      if (avatarFileInput) avatarFileInput.click();
+    }
+
+    if (avatarClickTrigger) avatarClickTrigger.addEventListener('click', triggerPhotoPicker);
+    if (btnModalUploadFoto) btnModalUploadFoto.addEventListener('click', triggerPhotoPicker);
+
+    if (avatarFileInput) {
+      avatarFileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          if (file.size > 3 * 1024 * 1024) {
+            showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const dataUrl = e.target.result;
+            const currentUser = getActiveGoogleUser();
+            currentUser.foto = dataUrl;
+            setActiveGoogleUser(currentUser);
+            showUserToast(`Foto profil akun Google (${currentUser.nama}) berhasil diperbarui!`, 'success');
+          };
+          reader.readAsDataURL(file);
         }
       });
     }
