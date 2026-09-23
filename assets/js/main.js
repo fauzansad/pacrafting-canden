@@ -803,13 +803,13 @@ document.addEventListener('DOMContentLoaded', function () {
         .replace(/'/g, '&#039;');
     }
 
-    // Render Testimonials Horizontal Track
+    // Render Testimonials Horizontal Track (Desain Bersih & Elegan Ala Referensi)
     function renderTestimonials(highlightId = null) {
       if (typeof DataStore === 'undefined' || !testiContainer) return;
       const list = DataStore.getTestimonials() || [];
       if (list.length === 0) {
         testiContainer.innerHTML = `
-          <div style="flex: 1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: 8px; border: 1.5px dashed var(--gray-300);">
+          <div style="flex: 1; text-align: center; padding: 3rem 1rem; color: #64748b; background: #fff; border-radius: 12px; border: 1.5px dashed var(--gray-300);">
             <i class="fa-regular fa-comment-dots" style="font-size: 2.5rem; margin-bottom: 0.75rem; color: #94a3b8; display: block;"></i>
             <h4 style="color: #334155; margin-bottom: 0.25rem;">Belum ada ulasan wisatawan</h4>
             <p style="margin: 0; font-size: 0.9rem;">Jadilah yang pertama memberikan ulasan &amp; rating Google untuk petualangan Packrafting di Sungai Opak Canden!</p>
@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 1; i <= 5; i++) {
           starsHtml += i <= rating 
             ? '<i class="fa-solid fa-star"></i>' 
-            : '<i class="fa-regular fa-star" style="color:#d2ccbf;"></i>';
+            : '<i class="fa-regular fa-star" style="color:#e2e8f0;"></i>';
         }
 
         const isHighlight = highlightId && String(item.id) === String(highlightId);
@@ -836,67 +836,83 @@ document.addEventListener('DOMContentLoaded', function () {
         const avatarBg = `linear-gradient(135deg, hsl(${hue}, 70%, 85%), hsl(${(hue + 40) % 360}, 75%, 70%))`;
         const avatarColor = `hsl(${hue}, 80%, 25%)`;
 
-        const displayDate = item.tanggal 
-          ? (typeof formatTanggal === 'function' ? formatTanggal(item.tanggal) : item.tanggal) 
-          : 'Ulasan Terverifikasi';
-
         // Avatar: Image or Initials
         const avatarHtml = item.foto 
           ? `<img src="${escapeHtml(item.foto)}" alt="${escapeHtml(item.nama || 'Reviewer')}" class="testi-avatar-img" loading="lazy">` 
           : `<div class="testi-avatar" style="background:${avatarBg}; color:${avatarColor};">${avatarInitial}</div>`;
 
-        // Account Handle/Role
-        const roleText = item.email ? item.email : (item.asal || 'Akun Google Terverifikasi');
-
         return `
           <div class="testi-card ${isHighlight ? 'new-highlight' : ''}" id="testi-card-${item.id}">
-            <div>
-              <div class="testi-card-top">
-                <div class="testi-rating" aria-label="${rating} dari 5 bintang">
-                  ${starsHtml}
-                </div>
-                <div class="testi-google-badge">
-                  <i class="fa-brands fa-google"></i>
-                  <span>Google Review</span>
-                </div>
+            <div class="testi-card-content">
+              <div class="testi-stars" aria-label="${rating} dari 5 bintang">
+                ${starsHtml}
               </div>
-              <p class="testi-quote">
-                "${escapeHtml(item.pesan || '')}"
+              <p class="testi-text">
+                ${escapeHtml(item.pesan || '')}
               </p>
             </div>
-            <div class="testi-author">
-              ${avatarHtml}
-              <div style="flex:1;min-width:0;">
-                <div class="testi-name-row">
-                  <span class="testi-name">${escapeHtml(item.nama || 'Wisatawan')}</span>
-                  <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:0.85rem;" title="Reviewer Terverifikasi Google"></i>
-                </div>
-                <div class="testi-role" title="${escapeHtml(roleText)}">${escapeHtml(roleText)}</div>
-                <div class="testi-date"><i class="fa-regular fa-clock" style="font-size:0.65rem;margin-right:0.25rem;"></i>${displayDate}</div>
+            <div class="testi-reviewer">
+              <div class="testi-reviewer-avatar-wrap">
+                ${avatarHtml}
+                <span class="testi-reviewer-badge" title="Ulasan Terverifikasi"><i class="fa-solid fa-star"></i></span>
               </div>
+              <span class="testi-reviewer-name">${escapeHtml(item.nama || 'Wisatawan')}</span>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // Horizontal Slider Controls (Kesamping ala Pentingsari)
-    const btnTestiPrev = document.getElementById('btn-testi-prev');
-    const btnTestiNext = document.getElementById('btn-testi-next');
+    // Horizontal Swipe & Drag-to-Scroll (Mulus Geser Kanan/Kiri tanpa tombol panah)
+    function initTestiSwipe(container) {
+      if (!container) return;
+      let isDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let hasDragged = false;
 
-    if (btnTestiPrev && testiContainer) {
-      btnTestiPrev.addEventListener('click', function () {
-        const cardWidth = 390;
-        testiContainer.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+      container.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return; // Hanya klik kiri
+        isDown = true;
+        hasDragged = false;
+        container.classList.add('is-dragging');
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
       });
+
+      window.addEventListener('mouseup', function () {
+        if (!isDown) return;
+        isDown = false;
+        container.classList.remove('is-dragging');
+      });
+
+      container.addEventListener('mouseleave', function () {
+        if (!isDown) return;
+        isDown = false;
+        container.classList.remove('is-dragging');
+      });
+
+      container.addEventListener('mousemove', function (e) {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        if (Math.abs(walk) > 4) {
+          hasDragged = true;
+        }
+        container.scrollLeft = scrollLeft - walk;
+      });
+
+      // Cegah klik tidak disengaja saat menyeret / drag
+      container.addEventListener('click', function (e) {
+        if (hasDragged) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
     }
 
-    if (btnTestiNext && testiContainer) {
-      btnTestiNext.addEventListener('click', function () {
-        const cardWidth = 390;
-        testiContainer.scrollBy({ left: cardWidth, behavior: 'smooth' });
-      });
-    }
+    initTestiSwipe(testiContainer);
 
 
 
