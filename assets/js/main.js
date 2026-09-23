@@ -900,102 +900,132 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Google Account State Management for Reviews
-    const DEFAULT_GOOGLE_USER = {
-      nama: 'Fauzan Sadida Ramadhan',
-      email: 'fauzansadidaramadhan@gmail.com',
-      foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'
-    };
-
+    // Google Account State Management for Reviews (Dynamic per Browser Profile)
     function getActiveGoogleUser() {
       try {
         const stored = localStorage.getItem('packraft_google_user');
         if (stored) {
           const parsed = JSON.parse(stored);
-          // Auto migrate previous email if needed
-          if (parsed && (parsed.email === 'fauzansad@gmail.com' || parsed.nama === 'Fauzan Sadida')) {
-            parsed.email = 'fauzansadidaramadhan@gmail.com';
-            parsed.nama = 'Fauzan Sadida Ramadhan';
-            localStorage.setItem('packraft_google_user', JSON.stringify(parsed));
+          if (parsed && parsed.email) {
+            return parsed;
           }
-          return parsed;
         }
       } catch (e) {}
-      return DEFAULT_GOOGLE_USER;
+      return null;
     }
 
     function setActiveGoogleUser(user) {
       try {
-        localStorage.setItem('packraft_google_user', JSON.stringify(user));
+        if (user) {
+          localStorage.setItem('packraft_google_user', JSON.stringify(user));
+        } else {
+          localStorage.removeItem('packraft_google_user');
+        }
       } catch (e) {}
       syncGoogleUserUI(user);
     }
 
     function syncGoogleUserUI(user) {
-      const u = user || getActiveGoogleUser();
-      const elAvatar = document.getElementById('g-active-avatar');
-      const elModalFauzanAvatar = document.getElementById('g-modal-fauzan-avatar');
-      const elName = document.getElementById('g-active-name');
-      const elEmail = document.getElementById('g-active-email');
-      const photoSrc = u.foto || DEFAULT_GOOGLE_USER.foto;
+      const u = (user !== undefined) ? user : getActiveGoogleUser();
+      const container = document.getElementById('google-active-account-bar');
+      if (!container) return;
 
-      if (elAvatar) elAvatar.src = photoSrc;
-      if (elModalFauzanAvatar && u.email === DEFAULT_GOOGLE_USER.email) elModalFauzanAvatar.src = photoSrc;
-      if (elName) elName.textContent = u.nama || DEFAULT_GOOGLE_USER.nama;
-      if (elEmail) elEmail.innerHTML = `${u.email || DEFAULT_GOOGLE_USER.email} &bull; <a href="javascript:void(0)" id="link-ganti-foto" style="color:#0284c7;text-decoration:underline;">Ganti Foto</a>`;
+      if (u && u.email) {
+        container.className = 'google-active-account-bar connected';
+        const photoSrc = u.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nama || 'User')}&background=1b4332&color=fff&size=120`;
+        container.innerHTML = `
+          <div class="g-account-info">
+            <div class="g-account-avatar-wrap" id="g-avatar-click-trigger" title="Klik untuk ganti / sesuaikan foto profil Google Anda">
+              <img id="g-active-avatar" src="${photoSrc}" alt="Akun Google" class="g-account-avatar">
+              <span class="g-avatar-camera-icon" title="Ganti Foto Profil"><i class="fa-solid fa-camera"></i></span>
+              <input type="file" id="g-avatar-file-input" accept="image/*" style="display:none;">
+            </div>
+            <div class="g-account-details">
+              <div class="g-account-name">
+                <span id="g-active-name">${escapeHtml(u.nama)}</span>
+                <span class="g-badge-pill"><i class="fa-brands fa-google"></i> Terhubung</span>
+              </div>
+              <div class="g-account-email" id="g-active-email">${escapeHtml(u.email)} &bull; <a href="javascript:void(0)" id="link-ganti-foto" style="color:#0284c7;text-decoration:underline;">Ganti Foto</a></div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm g-switch-btn" id="btn-switch-google" title="Ganti Akun Google">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Ganti Akun
+          </button>
+        `;
 
-      // Re-attach link click listener after innerHTML update
-      const linkGantiFoto = document.getElementById('link-ganti-foto');
-      if (linkGantiFoto && avatarFileInput) {
-        linkGantiFoto.addEventListener('click', (e) => {
-          e.preventDefault();
-          avatarFileInput.click();
+        // Bind photo pickers on dynamic elements
+        const trigger = document.getElementById('g-avatar-click-trigger');
+        const fileInput = document.getElementById('g-avatar-file-input');
+        const linkFoto = document.getElementById('link-ganti-foto');
+
+        if (trigger && fileInput) {
+          trigger.addEventListener('click', () => fileInput.click());
+        }
+        if (linkFoto && fileInput) {
+          linkFoto.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+          });
+        }
+        if (fileInput) {
+          fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+              if (file.size > 3 * 1024 * 1024) {
+                showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const dataUrl = e.target.result;
+                const currentUser = getActiveGoogleUser() || u;
+                currentUser.foto = dataUrl;
+                setActiveGoogleUser(currentUser);
+                showUserToast(`Foto profil akun Google (${currentUser.nama}) berhasil diperbarui!`, 'success');
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+      } else {
+        container.className = 'google-active-account-bar unlinked';
+        container.innerHTML = `
+          <div class="g-account-info">
+            <div class="g-account-avatar-placeholder">
+              <i class="fa-brands fa-google"></i>
+            </div>
+            <div class="g-account-details">
+              <div class="g-account-name" style="color:#92400e;">
+                <span>Belum Terhubung dengan Google</span>
+              </div>
+              <div class="g-account-email" style="color:#b45309;">
+                Pilih atau masukkan akun Google Anda untuk publikasi ulasan &amp; foto profil
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm g-switch-btn" id="btn-switch-google">
+            <i class="fa-brands fa-google"></i> Masuk dengan Google
+          </button>
+        `;
+      }
+
+      // Re-bind switch button
+      const switchBtn = document.getElementById('btn-switch-google');
+      if (switchBtn && modalGoogleAuth) {
+        switchBtn.addEventListener('click', function () {
+          modalGoogleAuth.style.display = 'flex';
         });
       }
 
+      // Update active state in modal
       document.querySelectorAll('.google-acc-item').forEach(item => {
-        if (item.dataset.email === u.email) {
+        if (u && item.dataset.email === u.email) {
           item.classList.add('active');
         } else {
           item.classList.remove('active');
         }
       });
     }
-
-    // Photo Upload Trigger for Google Profile
-    const avatarClickTrigger = document.getElementById('g-avatar-click-trigger');
-    const avatarFileInput = document.getElementById('g-avatar-file-input');
-    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
-
-    function triggerPhotoPicker() {
-      if (avatarFileInput) avatarFileInput.click();
-    }
-
-    if (avatarClickTrigger) avatarClickTrigger.addEventListener('click', triggerPhotoPicker);
-    if (btnModalUploadFoto) btnModalUploadFoto.addEventListener('click', triggerPhotoPicker);
-
-    if (avatarFileInput) {
-      avatarFileInput.addEventListener('change', function () {
-        const file = this.files[0];
-        if (file) {
-          if (file.size > 3 * 1024 * 1024) {
-            showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const dataUrl = e.target.result;
-            const currentUser = getActiveGoogleUser();
-            currentUser.foto = dataUrl;
-            setActiveGoogleUser(currentUser);
-            showUserToast(`Foto profil akun Google (${currentUser.nama}) berhasil diperbarui!`, 'success');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    syncGoogleUserUI();
 
     // Toggle Form Collapse
     const btnToggle = document.getElementById('btn-toggle-ulasan');
@@ -1025,18 +1055,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnCancel) btnCancel.addEventListener('click', closeForm);
 
     // Google Account Switcher Modal Handlers
-    const btnSwitchGoogle = document.getElementById('btn-switch-google');
     const modalGoogleAuth = document.getElementById('modal-google-auth');
     const btnCloseGoogleModal = document.getElementById('btn-close-google-modal');
     const btnCustomGoogleToggle = document.getElementById('btn-custom-google-toggle');
     const customGoogleForm = document.getElementById('google-custom-login-form');
     const btnSaveCustomGoogle = document.getElementById('btn-save-custom-google');
-
-    if (btnSwitchGoogle && modalGoogleAuth) {
-      btnSwitchGoogle.addEventListener('click', function () {
-        modalGoogleAuth.style.display = 'flex';
-      });
-    }
+    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
 
     if (btnCloseGoogleModal && modalGoogleAuth) {
       btnCloseGoogleModal.addEventListener('click', function () {
@@ -1052,6 +1076,22 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
+    const btnLogoutGoogle = document.getElementById('btn-logout-google');
+    if (btnLogoutGoogle) {
+      btnLogoutGoogle.addEventListener('click', function () {
+        setActiveGoogleUser(null);
+        if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
+        showUserToast('Akun Google berhasil dilepas dari browser ini.', 'info');
+      });
+    }
+
+    if (btnModalUploadFoto) {
+      btnModalUploadFoto.addEventListener('click', function () {
+        const fileInput = document.getElementById('g-avatar-file-input');
+        if (fileInput) fileInput.click();
+      });
+    }
+
     // Preset Google account items selection
     document.querySelectorAll('.google-acc-item').forEach(item => {
       item.addEventListener('click', function () {
@@ -1062,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         setActiveGoogleUser(user);
         if (modalGoogleAuth) modalGoogleAuth.style.display = 'none';
-        showUserToast(`Akun Google beralih ke: ${user.nama}`, 'info');
+        showUserToast(`Berhasil terhubung dengan Akun Google: ${user.nama}`, 'success');
       });
     });
 
@@ -1098,6 +1138,9 @@ document.addEventListener('DOMContentLoaded', function () {
         showUserToast(`Terhubung dengan Akun Google: ${customName}`, 'success');
       });
     }
+
+    // Run initial UI sync
+    syncGoogleUserUI();
 
     // Interactive Star Rating Picker
     const starBtns = document.querySelectorAll('#rating-stars .star-btn');
@@ -1175,6 +1218,13 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
+        const activeGoogleUser = getActiveGoogleUser();
+        if (!activeGoogleUser) {
+          showUserToast('Silakan pilih atau masuk dengan Akun Google terlebih dahulu.', 'info');
+          if (modalGoogleAuth) modalGoogleAuth.style.display = 'flex';
+          return;
+        }
+
         const submitBtn = document.getElementById('btn-submit-ulasan');
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -1182,8 +1232,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         setTimeout(() => {
-          // Auto-integrate active Google user credentials & photo
-          const activeGoogleUser = getActiveGoogleUser();
           const newId = Date.now();
           const newReview = {
             id: newId,
