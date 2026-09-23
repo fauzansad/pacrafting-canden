@@ -23,7 +23,7 @@
   <meta property="og:image" content="assets/images/logo/logo-horizontal.png">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="assets/css/style.css?v=4.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=4.2">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
@@ -1377,57 +1377,43 @@
         <p>Pilih akun Google Anda untuk publikasi ulasan &amp; rating otomatis di Packrafting Canden</p>
       </div>
       <div class="google-auth-body">
-        <div class="google-account-list">
-          <div class="google-acc-item active" data-name="Fauzan Sadida Ramadhan" data-email="fauzansadidaramadhan@gmail.com" data-photo="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80">
-            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80" alt="Avatar Fauzan" class="g-item-avatar" id="g-modal-fauzan-avatar">
-            <div class="g-item-meta">
-              <strong class="g-item-name">Fauzan Sadida Ramadhan</strong>
-              <span class="g-item-email">fauzansadidaramadhan@gmail.com</span>
+        <form id="form-connect-google" novalidate>
+          <div style="text-align:center;margin-bottom:1.25rem;">
+            <div style="position:relative;display:inline-block;cursor:pointer;" id="modal-avatar-preview-wrap" title="Klik untuk pasang foto profil Google Anda">
+              <img id="modal-avatar-preview" src="https://ui-avatars.com/api/?name=Google+User&background=1b4332&color=fff&size=120" alt="Preview Foto" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #1a73e8;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
+              <span style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:#1a73e8;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;border:2px solid #fff;"><i class="fa-solid fa-camera"></i></span>
             </div>
-            <i class="fa-solid fa-check g-item-check"></i>
-          </div>
-          <div class="google-acc-item" data-name="Rian Pratama" data-email="rian.pratama@gmail.com" data-photo="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80">
-            <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&auto=format&fit=crop&q=80" alt="Avatar Rian" class="g-item-avatar">
-            <div class="g-item-meta">
-              <strong class="g-item-name">Rian Pratama</strong>
-              <span class="g-item-email">rian.pratama@gmail.com</span>
+            <input type="file" id="modal-avatar-file" accept="image/*" style="display:none;">
+            <div style="margin-top:0.35rem;">
+              <button type="button" class="btn-link" id="btn-modal-browse-foto" style="font-size:0.8rem;color:#1a73e8;background:none;border:none;cursor:pointer;font-weight:600;">
+                <i class="fa-solid fa-camera"></i> Pasang Foto Profil Google Anda
+              </button>
             </div>
-            <i class="fa-solid fa-check g-item-check"></i>
           </div>
-          <div class="google-acc-item" data-name="Anisa Rahmawati" data-email="anisa.rahma@gmail.com" data-photo="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" alt="Avatar Anisa" class="g-item-avatar">
-            <div class="g-item-meta">
-              <strong class="g-item-name">Anisa Rahmawati</strong>
-              <span class="g-item-email">anisa.rahma@gmail.com</span>
-            </div>
-            <i class="fa-solid fa-check g-item-check"></i>
-          </div>
-        </div>
 
-        <div style="margin-top:0.75rem;display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:#f8fafc;border-radius:6px;border:1px dashed #cbd5e1;">
-          <span style="font-size:0.8rem;color:#475569;"><i class="fa-solid fa-image" style="color:#0284c7;margin-right:0.3rem;"></i> Mau pasang foto profil Google sendiri?</span>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-modal-upload-foto" style="font-size:0.75rem;padding:0.25rem 0.6rem;">
-            Upload Foto
-          </button>
-        </div>
-
-        <div class="google-custom-login-toggle" style="margin-top:1rem;border-top:1px solid #f1f5f9;padding-top:0.85rem;">
-          <button type="button" class="btn-link" id="btn-custom-google-toggle" style="background:none;border:none;color:#1a73e8;font-weight:600;font-size:0.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;padding:0.25rem 0;">
-            <i class="fa-solid fa-user-plus"></i> Gunakan Akun Google Lainnya...
-          </button>
-          <div id="google-custom-login-form" style="display:none;margin-top:0.75rem;padding:0.85rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-            <div style="margin-bottom:0.6rem;">
-              <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Nama Google:</label>
-              <input type="text" id="custom-google-name" class="form-control" placeholder="Contoh: Budi Santoso" style="font-size:0.85rem;padding:0.45rem 0.65rem;">
-            </div>
-            <div style="margin-bottom:0.6rem;">
-              <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;margin-bottom:0.25rem;">Email Google (@gmail.com):</label>
-              <input type="email" id="custom-google-email" class="form-control" placeholder="contoh@gmail.com" style="font-size:0.85rem;padding:0.45rem 0.65rem;">
-            </div>
-            <button type="button" class="btn btn-primary btn-sm" id="btn-save-custom-google" style="width:100%;">
-              Gunakan Akun Ini
-            </button>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label for="input-google-name" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.35rem;color:#334155;">
+              Nama Akun Google Anda <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="text" id="input-google-name" class="form-control" placeholder="Masukkan nama Google Anda..." required>
           </div>
+
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label for="input-google-email" style="font-size:0.82rem;font-weight:700;display:block;margin-bottom:0.35rem;color:#334155;">
+              Email Gmail (@gmail.com) <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="email" id="input-google-email" class="form-control" placeholder="contoh: akunanda@gmail.com" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-submit-google-auth" style="width:100%;padding:0.75rem;font-weight:700;">
+            <i class="fa-brands fa-google"></i> Simpan &amp; Hubungkan Akun Google
+          </button>
+        </form>
+
+        <div style="margin-top:1.15rem;padding-top:0.85rem;border-top:1px solid #f1f5f9;text-align:center;">
+          <a href="https://maps.google.com/?q=Desa+Wisata+Canden+Jetis+Bantul" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="width:100%;font-size:0.8rem;display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;">
+            <i class="fa-brands fa-google" style="color:#ea4335;"></i> Tulis Ulasan Langsung di Google Maps Resmi
+          </a>
         </div>
       </div>
       <div class="google-auth-footer" style="display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;">
@@ -1441,7 +1427,7 @@
 
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=3.9"></script>
-  <script src="assets/js/main.js?v=3.9"></script>
+  <script src="assets/js/data.js?v=4.0"></script>
+  <script src="assets/js/main.js?v=4.0"></script>
 </body>
 </html>

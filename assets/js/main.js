@@ -925,10 +925,29 @@ document.addEventListener('DOMContentLoaded', function () {
       syncGoogleUserUI(user);
     }
 
+    let currentModalAvatarData = null;
+
     // Google Modal Helpers
     function openGoogleModal() {
       const modal = document.getElementById('modal-google-auth');
       if (modal) {
+        const u = getActiveGoogleUser();
+        const nameInput = document.getElementById('input-google-name');
+        const emailInput = document.getElementById('input-google-email');
+        const avatarPreview = document.getElementById('modal-avatar-preview');
+
+        if (u) {
+          if (nameInput) nameInput.value = u.nama || '';
+          if (emailInput) emailInput.value = u.email || '';
+          if (avatarPreview && u.foto) avatarPreview.src = u.foto;
+          currentModalAvatarData = u.foto || null;
+        } else {
+          if (nameInput) nameInput.value = '';
+          if (emailInput) emailInput.value = '';
+          if (avatarPreview) avatarPreview.src = 'https://ui-avatars.com/api/?name=Google+User&background=1b4332&color=fff&size=120';
+          currentModalAvatarData = null;
+        }
+
         modal.style.display = 'flex';
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1027,15 +1046,6 @@ document.addEventListener('DOMContentLoaded', function () {
           </button>
         `;
       }
-
-      // Update active state in modal
-      document.querySelectorAll('.google-acc-item').forEach(item => {
-        if (u && item.dataset.email === u.email) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
-      });
     }
 
     // Global Delegated Listeners for Google Actions
@@ -1055,20 +1065,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const modal = document.getElementById('modal-google-auth');
       if (modal && e.target === modal) {
         closeGoogleModal();
-        return;
-      }
-
-      // Preset item clicked
-      const accItem = e.target.closest('.google-acc-item');
-      if (accItem && modal && modal.contains(accItem)) {
-        const user = {
-          nama: accItem.dataset.name,
-          email: accItem.dataset.email,
-          foto: accItem.dataset.photo
-        };
-        setActiveGoogleUser(user);
-        closeGoogleModal();
-        showUserToast(`Berhasil terhubung dengan Akun Google: ${user.nama}`, 'success');
         return;
       }
     });
@@ -1100,7 +1096,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnTutup) btnTutup.addEventListener('click', closeForm);
     if (btnCancel) btnCancel.addEventListener('click', closeForm);
 
-    // Modal Specific Button Listeners
+    // Modal Logout Button Listener
     const btnLogoutGoogle = document.getElementById('btn-logout-google');
     if (btnLogoutGoogle) {
       btnLogoutGoogle.addEventListener('click', function () {
@@ -1110,47 +1106,69 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    const btnModalUploadFoto = document.getElementById('btn-modal-upload-foto');
-    if (btnModalUploadFoto) {
-      btnModalUploadFoto.addEventListener('click', function () {
-        const fileInput = document.getElementById('g-avatar-file-input');
-        if (fileInput) fileInput.click();
+    // Modal Photo Picker Handlers
+    const modalAvatarWrap = document.getElementById('modal-avatar-preview-wrap');
+    const btnModalBrowse = document.getElementById('btn-modal-browse-foto');
+    const modalAvatarFile = document.getElementById('modal-avatar-file');
+    const modalAvatarPreview = document.getElementById('modal-avatar-preview');
+
+    function triggerModalAvatarPicker() {
+      if (modalAvatarFile) modalAvatarFile.click();
+    }
+    if (modalAvatarWrap) modalAvatarWrap.addEventListener('click', triggerModalAvatarPicker);
+    if (btnModalBrowse) btnModalBrowse.addEventListener('click', triggerModalAvatarPicker);
+
+    if (modalAvatarFile) {
+      modalAvatarFile.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          if (file.size > 3 * 1024 * 1024) {
+            showUserToast('Ukuran foto profil maksimal 3MB.', 'warning');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            currentModalAvatarData = e.target.result;
+            if (modalAvatarPreview) modalAvatarPreview.src = currentModalAvatarData;
+            showUserToast('Foto profil Google dipilih.', 'info');
+          };
+          reader.readAsDataURL(file);
+        }
       });
     }
 
-    const btnCustomGoogleToggle = document.getElementById('btn-custom-google-toggle');
-    const customGoogleForm = document.getElementById('google-custom-login-form');
-    if (btnCustomGoogleToggle && customGoogleForm) {
-      btnCustomGoogleToggle.addEventListener('click', function () {
-        customGoogleForm.style.display = (customGoogleForm.style.display === 'none' || !customGoogleForm.style.display) ? 'block' : 'none';
-      });
-    }
+    // Modal Connect Google Form Submit
+    const formConnectGoogle = document.getElementById('form-connect-google');
+    if (formConnectGoogle) {
+      formConnectGoogle.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('input-google-name');
+        const emailInput = document.getElementById('input-google-email');
+        const nameVal = nameInput ? nameInput.value.trim() : '';
+        const emailVal = emailInput ? emailInput.value.trim() : '';
 
-    const btnSaveCustomGoogle = document.getElementById('btn-save-custom-google');
-    if (btnSaveCustomGoogle) {
-      btnSaveCustomGoogle.addEventListener('click', function () {
-        const nameInput = document.getElementById('custom-google-name');
-        const emailInput = document.getElementById('custom-google-email');
-        const customName = nameInput ? nameInput.value.trim() : '';
-        const customEmail = emailInput ? emailInput.value.trim() : '';
-
-        if (!customName) {
+        if (!nameVal) {
           showUserToast('Masukkan nama akun Google Anda.', 'warning');
+          if (nameInput) nameInput.focus();
           return;
         }
 
-        const emailVal = (customEmail && customEmail.includes('@')) ? customEmail : `${customName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(customName)}&background=1b4332&color=fff&size=120`;
+        if (!emailVal || !emailVal.includes('@')) {
+          showUserToast('Masukkan alamat email Gmail yang valid (@gmail.com).', 'warning');
+          if (emailInput) emailInput.focus();
+          return;
+        }
 
-        const user = {
-          nama: customName,
+        const photoVal = currentModalAvatarData || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal)}&background=1b4332&color=fff&size=120`;
+        const newUser = {
+          nama: nameVal,
           email: emailVal,
-          foto: avatarUrl
+          foto: photoVal
         };
 
-        setActiveGoogleUser(user);
+        setActiveGoogleUser(newUser);
         closeGoogleModal();
-        showUserToast(`Terhubung dengan Akun Google: ${customName}`, 'success');
+        showUserToast(`Akun Google berhasil terhubung: ${nameVal}`, 'success');
       });
     }
 
