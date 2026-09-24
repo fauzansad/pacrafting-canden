@@ -307,26 +307,20 @@ function renderHeroSlotsAdmin() {
         <div class="slot-preview-box">
           <img src="${previewSrc}" id="slot-img-preview-${idx}" class="slot-preview-img" alt="Slide ${idx + 1}" onerror="this.onerror=null;this.src='../assets/images/galeri/1.jpg';">
         </div>
-        <div class="slot-body">
-          <div class="slot-btn-group">
-            <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="openGaleriPickerModal(${idx})">
+        <div class="slot-body" style="padding:1rem;display:flex;flex-direction:column;gap:0.75rem;">
+          <div class="slot-btn-group" style="display:flex;gap:0.5rem;">
+            <button type="button" class="btn-admin btn-admin-primary btn-admin-sm" onclick="openGaleriPickerModal(${idx})" style="flex:1;justify-content:center;padding:0.65rem 0.5rem;font-size:0.82rem;">
               <i class="fa-solid fa-photo-film"></i> Pilih dari Galeri
             </button>
-            <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="document.getElementById('slot-file-input-${idx}').click()">
-              <i class="fa-solid fa-upload"></i> Upload
+            <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="document.getElementById('slot-file-input-${idx}').click()" style="flex:1;justify-content:center;padding:0.65rem 0.5rem;font-size:0.82rem;">
+              <i class="fa-solid fa-upload"></i> Upload Foto
             </button>
             <input type="file" id="slot-file-input-${idx}" accept="image/*" style="display:none;" onchange="handleSlotFileUpload(${idx}, this)">
           </div>
 
-          <div class="form-group" style="margin:0;">
-            <label style="font-size:0.75rem;margin-bottom:0.25rem;display:block;">Path / URL Gambar:</label>
-            <input type="text" id="slot-url-input-${idx}" value="${slide.gambar || ''}" placeholder="assets/images/..." oninput="updateSlotImageUrl(${idx}, this.value)" style="font-size:0.8rem;padding:0.45rem 0.65rem;">
-          </div>
-
-          <div class="form-group" style="margin:0;">
-            <label style="font-size:0.75rem;margin-bottom:0.25rem;display:block;">Keterangan Foto (Alt):</label>
-            <input type="text" id="slot-title-input-${idx}" value="${slide.judul || ''}" placeholder="Keterangan foto" oninput="updateSlotTitle(${idx}, this.value)" style="font-size:0.8rem;padding:0.45rem 0.65rem;">
-          </div>
+          <!-- Hidden inputs for background data sync -->
+          <input type="hidden" id="slot-url-input-${idx}" value="${slide.gambar || ''}">
+          <input type="hidden" id="slot-title-input-${idx}" value="${slide.judul || ''}">
         </div>
       </div>
     `;
