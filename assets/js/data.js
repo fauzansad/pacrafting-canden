@@ -689,24 +689,76 @@ const DataStore = {
   getAdminCredentials() {
     const stored = localStorage.getItem('packraft_admin_cred');
     if (stored) {
-      try { return JSON.parse(stored); } catch(e) {}
+      try {
+        const parsed = JSON.parse(stored);
+        if (!parsed.email) parsed.email = 'fauzansadidaramadhan@gmail.com';
+        return parsed;
+      } catch(e) {}
     }
     // Default admin credential (Default password: AdminCanden2026!)
     // SHA-256 of "AdminCanden2026!" = 58a98bca4dbd715df68c5b058ad9081e62aa21e428cf12ea662ad783a30fc3b0
     // We also support "admin123" legacy hash = 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
     return {
       username: 'admin',
+      email: 'fauzansadidaramadhan@gmail.com',
       passwordHash: '58a98bca4dbd715df68c5b058ad9081e62aa21e428cf12ea662ad783a30fc3b0',
       legacyHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
     };
   },
 
-  saveAdminCredentials(username, passwordHash) {
+  saveAdminCredentials(username, passwordHash, email) {
+    const current = this.getAdminCredentials();
     localStorage.setItem('packraft_admin_cred', JSON.stringify({
-      username: username || 'admin',
-      passwordHash: passwordHash,
+      username: username || current.username || 'admin',
+      email: email || current.email || 'fauzansadidaramadhan@gmail.com',
+      passwordHash: passwordHash || current.passwordHash,
       updatedAt: new Date().toISOString()
     }));
+  },
+
+  generateOtp(email) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
+    const otpData = {
+      otp: otp,
+      email: (email || '').trim().toLowerCase(),
+      expiry: expiry,
+      createdAt: Date.now()
+    };
+    sessionStorage.setItem('packraft_pwd_reset_otp', JSON.stringify(otpData));
+    return { otp, expiry };
+  },
+
+  verifyOtp(email, inputOtp) {
+    try {
+      const stored = sessionStorage.getItem('packraft_pwd_reset_otp');
+      if (!stored) return { valid: false, message: 'Kode OTP belum dibuat atau sudah kedaluwarsa. Silakan minta kode baru.' };
+      const data = JSON.parse(stored);
+      if (Date.now() > data.expiry) {
+        sessionStorage.removeItem('packraft_pwd_reset_otp');
+        return { valid: false, message: 'Kode OTP telah kedaluwarsa (lebih dari 10 menit). Silakan kirim ulang.' };
+      }
+      if (data.email !== (email || '').trim().toLowerCase()) {
+        return { valid: false, message: 'Alamat email tidak sesuai dengan permohonan OTP.' };
+      }
+      if (data.otp !== (inputOtp || '').trim()) {
+        return { valid: false, message: 'Kode OTP yang Anda masukkan salah. Periksa kembali kotak masuk Gmail Anda.' };
+      }
+      return { valid: true };
+    } catch(e) {
+      return { valid: false, message: 'Terjadi kesalahan sistem saat verifikasi kode.' };
+    }
+  },
+
+  async resetAdminPasswordWithOtp(email, inputOtp, newPassword) {
+    const check = this.verifyOtp(email, inputOtp);
+    if (!check.valid) return check;
+
+    const newHash = await this.hashPassword(newPassword);
+    const cred = this.getAdminCredentials();
+    this.saveAdminCredentials(cred.username, newHash, email);
+    sessionStorage.removeItem('packraft_pwd_reset_otp');
+    return { valid: true };
   },
 
   getBookingWhatsAppUrl(paketNama) {

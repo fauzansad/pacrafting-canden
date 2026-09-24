@@ -63,7 +63,7 @@
           <label for="username">Username / Email</label>
           <input type="text" id="username" placeholder="Masukkan username admin" autocomplete="username" required>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:0.75rem;">
           <label for="password">Password</label>
           <div class="password-input-wrap">
             <input type="password" id="password" placeholder="Masukkan password admin" autocomplete="current-password" required>
@@ -72,6 +72,13 @@
             </button>
           </div>
         </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem;">
+          <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="color:#ea580c;font-size:0.85rem;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:0.35rem;transition:color 0.2s;">
+            <i class="fa-solid fa-key" style="font-size:0.78rem;"></i> Lupa Password?
+          </a>
+        </div>
+
         <button type="submit" class="btn-login" id="submit-btn">
           <i class="fa-solid fa-right-to-bracket" style="margin-right:0.4rem;"></i> Masuk ke Dashboard
         </button>
@@ -85,9 +92,145 @@
     </div>
   </div>
 
+  <!-- Modal Lupa Password via OTP Gmail -->
+  <div class="admin-modal-overlay" id="modal-forgot-pwd" style="display:none;">
+    <div class="admin-modal-dialog" style="max-width:450px;">
+      <div style="background:linear-gradient(135deg,#0b1710,#1b4332);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-top-left-radius:16px;border-top-right-radius:16px;">
+        <h3 style="margin:0;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fa-solid fa-shield-halved" style="color:#f97316;"></i> Reset Password Admin
+        </h3>
+        <button type="button" onclick="closeForgotPasswordModal()" style="background:none;border:none;color:#cbd5e1;font-size:1.25rem;cursor:pointer;padding:0.25rem;line-height:1;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding:1.5rem;">
+        <!-- Step Indicator -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:1.5rem;">
+          <div id="step-dot-1" style="width:28px;height:28px;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">1</div>
+          <div style="width:30px;height:2px;background:#e2e8f0;" id="step-line-1"></div>
+          <div id="step-dot-2" style="width:28px;height:28px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">2</div>
+          <div style="width:30px;height:2px;background:#e2e8f0;" id="step-line-2"></div>
+          <div id="step-dot-3" style="width:28px;height:28px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">3</div>
+        </div>
+
+        <!-- Step 1: Request OTP -->
+        <div id="forgot-step-1">
+          <div style="text-align:center;margin-bottom:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:50%;background:#ffedd5;color:#ea580c;display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin:0 auto 0.75rem;">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <h4 style="margin:0 0 0.35rem;font-size:1.1rem;color:#1e293b;">Verifikasi Gmail Tertaut</h4>
+            <p style="margin:0;font-size:0.85rem;color:#64748b;line-height:1.5;">
+              Kode verifikasi OTP 6 digit akan dikirim ke akun Gmail resmi admin untuk keamanan akun.
+            </p>
+          </div>
+
+          <form id="form-forgot-request" class="admin-form">
+            <div class="form-group">
+              <label for="forgot-email">Gmail Admin Tertaut</label>
+              <div style="position:relative;">
+                <input type="email" id="forgot-email" value="fauzansadidaramadhan@gmail.com" required readonly style="background:#f8fafc;color:#334155;font-weight:600;padding-left:2.5rem;">
+                <i class="fa-solid fa-envelope" style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.95rem;"></i>
+              </div>
+              <small style="color:#059669;display:block;margin-top:0.35rem;font-size:0.75rem;">
+                <i class="fa-solid fa-circle-check"></i> Akun Gmail ini tertaut resmi dengan admin Packrafting Canden
+              </small>
+            </div>
+
+            <button type="submit" class="btn-admin btn-admin-primary" id="btn-send-otp" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.5rem;">
+              <i class="fa-solid fa-paper-plane"></i> Kirim Kode OTP ke Gmail
+            </button>
+          </form>
+        </div>
+
+        <!-- Step 2: Input OTP -->
+        <div id="forgot-step-2" style="display:none;">
+          <div style="text-align:center;margin-bottom:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin:0 auto 0.75rem;">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <h4 style="margin:0 0 0.35rem;font-size:1.1rem;color:#1e293b;">Masukkan Kode Verifikasi</h4>
+            <p style="margin:0;font-size:0.85rem;color:#64748b;line-height:1.5;">
+              Kode 6 digit telah dikirim ke <strong id="display-target-email" style="color:#1e293b;">fauzansadidaramadhan@gmail.com</strong>.
+            </p>
+          </div>
+
+          <form id="form-forgot-verify" class="admin-form">
+            <div class="form-group" style="text-align:center;">
+              <label for="forgot-otp" style="display:block;margin-bottom:0.5rem;">Kode OTP 6 Digit</label>
+              <input type="text" id="forgot-otp" maxlength="6" placeholder="000000" autocomplete="one-time-code" required
+                style="text-align:center;font-size:1.75rem;letter-spacing:0.5rem;font-weight:700;font-family:monospace;padding:0.6rem 0.5rem;width:240px;margin:0 auto;display:block;">
+              <small style="color:#64748b;display:block;margin-top:0.5rem;font-size:0.78rem;">
+                Kode berlaku selama <strong>10 menit</strong>. Cek folder Inbox &amp; Spam.
+              </small>
+            </div>
+
+            <button type="submit" class="btn-admin btn-admin-primary" id="btn-verify-otp" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.5rem;">
+              <i class="fa-solid fa-check-double"></i> Verifikasi Kode
+            </button>
+
+            <div style="text-align:center;margin-top:1rem;">
+              <button type="button" id="btn-resend-otp" disabled style="background:none;border:none;color:#64748b;font-size:0.82rem;cursor:not-allowed;font-weight:600;">
+                Kirim ulang kode dalam <span id="resend-countdown">60</span>s
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 3: Set New Password -->
+        <div id="forgot-step-3" style="display:none;">
+          <div style="text-align:center;margin-bottom:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:50%;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin:0 auto 0.75rem;">
+              <i class="fa-solid fa-lock-open"></i>
+            </div>
+            <h4 style="margin:0 0 0.35rem;font-size:1.1rem;color:#1e293b;">Buat Password Baru</h4>
+            <p style="margin:0;font-size:0.85rem;color:#64748b;line-height:1.5;">
+              Verifikasi berhasil! Masukkan password baru untuk akun admin Anda.
+            </p>
+          </div>
+
+          <form id="form-forgot-reset" class="admin-form">
+            <div class="form-group">
+              <label for="reset-new-pwd">Password Baru * (Min. 8 Karakter)</label>
+              <div class="password-input-wrap">
+                <input type="password" id="reset-new-pwd" placeholder="Masukkan password baru" required>
+                <button type="button" class="toggle-pwd-btn" onclick="toggleInputType('reset-new-pwd', this)"><i class="fa-regular fa-eye"></i></button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reset-confirm-pwd">Konfirmasi Password Baru *</label>
+              <div class="password-input-wrap">
+                <input type="password" id="reset-confirm-pwd" placeholder="Ulangi password baru" required>
+                <button type="button" class="toggle-pwd-btn" onclick="toggleInputType('reset-confirm-pwd', this)"><i class="fa-regular fa-eye"></i></button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-admin btn-admin-primary" id="btn-save-new-pwd" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.5rem;">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru
+            </button>
+          </form>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div id="forgot-step-4" style="display:none;text-align:center;padding:1rem 0;">
+          <div style="width:60px;height:60px;border-radius:50%;background:#dcfce7;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h4 style="margin:0 0 0.5rem;font-size:1.2rem;color:#1e293b;">Password Berhasil Direset!</h4>
+          <p style="margin:0 0 1.5rem;font-size:0.875rem;color:#64748b;line-height:1.5;">
+            Password baru akun admin telah aktif. Silakan masuk menggunakan kredensial baru Anda.
+          </p>
+          <button type="button" class="btn-admin btn-admin-primary" onclick="closeForgotPasswordModal()" style="width:100%;justify-content:center;padding:0.75rem;">
+            <i class="fa-solid fa-right-to-bracket"></i> Masuk Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="../assets/js/data.js?v=2.8"></script>
+  <script src="../assets/js/data.js?v=4.6"></script>
   <script src="../assets/js/admin.js?v=4.6"></script>
   <script>
     const MAX_ATTEMPTS = 5;
@@ -106,6 +249,14 @@
       pwdInput.type = isPwd ? 'text' : 'password';
       this.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
     });
+
+    function toggleInputType(inputId, btn) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      const isPwd = el.type === 'password';
+      el.type = isPwd ? 'text' : 'password';
+      btn.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+    }
 
     // Check Lockout on Load
     function checkLockout() {
@@ -184,8 +335,8 @@
       const inputHash = await DataStore.hashPassword(p);
       const cred = DataStore.getAdminCredentials();
 
-      // Check username and hash match
-      const isUserMatch = (u.toLowerCase() === cred.username.toLowerCase());
+      // Check username or email and hash match
+      const isUserMatch = (u.toLowerCase() === cred.username.toLowerCase() || (cred.email && u.toLowerCase() === cred.email.toLowerCase()));
       const isPassMatch = (inputHash === cred.passwordHash || (cred.legacyHash && inputHash === cred.legacyHash));
 
       if (isUserMatch && isPassMatch) {
@@ -220,6 +371,268 @@
         }
       }
     });
+
+    // ============================================
+    // FORGOT PASSWORD MODAL & OTP VERIFICATION
+    // ============================================
+    const modalForgot = document.getElementById('modal-forgot-pwd');
+    const formForgotRequest = document.getElementById('form-forgot-request');
+    const formForgotVerify = document.getElementById('form-forgot-verify');
+    const formForgotReset = document.getElementById('form-forgot-reset');
+    const btnSendOtp = document.getElementById('btn-send-otp');
+    const btnVerifyOtp = document.getElementById('btn-verify-otp');
+    const btnSaveNewPwd = document.getElementById('btn-save-new-pwd');
+    const btnResendOtp = document.getElementById('btn-resend-otp');
+    const resendCountdown = document.getElementById('resend-countdown');
+    const displayTargetEmail = document.getElementById('display-target-email');
+
+    let currentResetEmail = 'fauzansadidaramadhan@gmail.com';
+    let verifiedOtpCode = '';
+    let resendTimerInterval = null;
+
+    function openForgotPasswordModal() {
+      const cred = DataStore.getAdminCredentials();
+      currentResetEmail = cred.email || 'fauzansadidaramadhan@gmail.com';
+      document.getElementById('forgot-email').value = currentResetEmail;
+      displayTargetEmail.textContent = currentResetEmail;
+
+      setForgotStep(1);
+      modalForgot.style.display = 'flex';
+      document.body.classList.add('modal-open');
+      document.documentElement.classList.add('modal-open');
+    }
+
+    function closeForgotPasswordModal() {
+      modalForgot.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
+      if (resendTimerInterval) clearInterval(resendTimerInterval);
+    }
+
+    // Dismiss on click outside modal
+    modalForgot.addEventListener('click', function(e) {
+      if (e.target === modalForgot) {
+        closeForgotPasswordModal();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modalForgot.style.display !== 'none') {
+        closeForgotPasswordModal();
+      }
+    });
+
+    function setForgotStep(step) {
+      document.getElementById('forgot-step-1').style.display = (step === 1) ? 'block' : 'none';
+      document.getElementById('forgot-step-2').style.display = (step === 2) ? 'block' : 'none';
+      document.getElementById('forgot-step-3').style.display = (step === 3) ? 'block' : 'none';
+      document.getElementById('forgot-step-4').style.display = (step === 4) ? 'block' : 'none';
+
+      // Update dots & lines
+      const dot1 = document.getElementById('step-dot-1');
+      const dot2 = document.getElementById('step-dot-2');
+      const dot3 = document.getElementById('step-dot-3');
+      const line1 = document.getElementById('step-line-1');
+      const line2 = document.getElementById('step-line-2');
+
+      dot1.style.background = '#f97316';
+      dot1.style.color = '#fff';
+
+      if (step >= 2) {
+        dot2.style.background = '#f97316';
+        dot2.style.color = '#fff';
+        line1.style.background = '#f97316';
+      } else {
+        dot2.style.background = '#e2e8f0';
+        dot2.style.color = '#64748b';
+        line1.style.background = '#e2e8f0';
+      }
+
+      if (step >= 3) {
+        dot3.style.background = '#f97316';
+        dot3.style.color = '#fff';
+        line2.style.background = '#f97316';
+      } else {
+        dot3.style.background = '#e2e8f0';
+        dot3.style.color = '#64748b';
+        line2.style.background = '#e2e8f0';
+      }
+    }
+
+    function startResendCountdown() {
+      if (resendTimerInterval) clearInterval(resendTimerInterval);
+      btnResendOtp.disabled = true;
+      btnResendOtp.style.cursor = 'not-allowed';
+      let count = 60;
+      resendCountdown.textContent = count;
+      btnResendOtp.innerHTML = `Kirim ulang kode dalam <span id="resend-countdown">${count}</span>s`;
+
+      resendTimerInterval = setInterval(() => {
+        count--;
+        const span = document.getElementById('resend-countdown');
+        if (span) span.textContent = count;
+        if (count <= 0) {
+          clearInterval(resendTimerInterval);
+          btnResendOtp.disabled = false;
+          btnResendOtp.style.cursor = 'pointer';
+          btnResendOtp.style.color = '#0e7490';
+          btnResendOtp.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Kirim Ulang Kode Sekarang';
+        }
+      }, 1000);
+    }
+
+    // Step 1: Request OTP
+    formForgotRequest.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!email) {
+        showToast('Email wajib diisi!', 'warning');
+        return;
+      }
+
+      btnSendOtp.disabled = true;
+      btnSendOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Kode ke Gmail...';
+
+      // 1. Generate OTP in DataStore
+      const { otp } = DataStore.generateOtp(email);
+
+      // 2. Dispatch email to linked Gmail
+      try {
+        await sendOtpEmail(email, otp);
+        showToast(`Kode OTP 6 digit berhasil dikirim ke ${email}!`, 'success');
+        setForgotStep(2);
+        startResendCountdown();
+        setTimeout(() => {
+          const otpInput = document.getElementById('forgot-otp');
+          if (otpInput) otpInput.focus();
+        }, 200);
+      } catch (err) {
+        console.error('Send OTP error:', err);
+        showToast('Kode OTP berhasil dibuat. Silakan periksa email Anda.', 'info');
+        setForgotStep(2);
+        startResendCountdown();
+      } finally {
+        btnSendOtp.disabled = false;
+        btnSendOtp.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Kode OTP ke Gmail';
+      }
+    });
+
+    // Step 2: Verify OTP
+    formForgotVerify.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const inputOtp = document.getElementById('forgot-otp').value.trim();
+      if (!inputOtp || inputOtp.length !== 6) {
+        showToast('Masukkan 6 digit kode OTP dengan lengkap!', 'warning');
+        return;
+      }
+
+      btnVerifyOtp.disabled = true;
+      btnVerifyOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memvalidasi...';
+
+      const check = DataStore.verifyOtp(currentResetEmail, inputOtp);
+      btnVerifyOtp.disabled = false;
+      btnVerifyOtp.innerHTML = '<i class="fa-solid fa-check-double"></i> Verifikasi Kode';
+
+      if (check.valid) {
+        verifiedOtpCode = inputOtp;
+        showToast('Kode verifikasi cocok! Silakan buat password baru.', 'success');
+        setForgotStep(3);
+        setTimeout(() => {
+          const pwd = document.getElementById('reset-new-pwd');
+          if (pwd) pwd.focus();
+        }, 200);
+      } else {
+        showToast(check.message || 'Kode OTP tidak valid atau kedaluwarsa!', 'error');
+      }
+    });
+
+    // Resend OTP button
+    btnResendOtp.addEventListener('click', async function() {
+      if (this.disabled) return;
+      this.disabled = true;
+      this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Ulang...';
+      const { otp } = DataStore.generateOtp(currentResetEmail);
+      try {
+        await sendOtpEmail(currentResetEmail, otp);
+        showToast(`Kode OTP baru telah dikirim ke ${currentResetEmail}!`, 'success');
+      } catch (e) {
+        showToast('Kode OTP baru telah digenerate.', 'info');
+      }
+      startResendCountdown();
+    });
+
+    // Step 3: Reset Password
+    formForgotReset.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const newPwd = document.getElementById('reset-new-pwd').value;
+      const confirmPwd = document.getElementById('reset-confirm-pwd').value;
+
+      if (!newPwd || !confirmPwd) {
+        showToast('Semua field wajib diisi!', 'warning');
+        return;
+      }
+
+      if (newPwd.length < 8) {
+        showToast('Password baru minimal 8 karakter!', 'warning');
+        return;
+      }
+
+      if (newPwd !== confirmPwd) {
+        showToast('Konfirmasi password tidak cocok!', 'warning');
+        return;
+      }
+
+      btnSaveNewPwd.disabled = true;
+      btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+      const res = await DataStore.resetAdminPasswordWithOtp(currentResetEmail, verifiedOtpCode, newPwd);
+      btnSaveNewPwd.disabled = false;
+      btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
+
+      if (res.valid) {
+        showToast('Password berhasil diubah! Silakan login.', 'success');
+        setForgotStep(4);
+      } else {
+        showToast(res.message || 'Gagal mengubah password. Silakan coba kembali.', 'error');
+      }
+    });
+
+    // Service to send email with OTP
+    async function sendOtpEmail(email, otp) {
+      // 1. Try serverless endpoint first (if available on Vercel)
+      try {
+        const sRes = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp })
+        });
+        if (sRes.ok) return true;
+      } catch(e) {}
+
+      // 2. Client-side FormSubmit AJAX delivery directly to Gmail
+      try {
+        const fRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            _subject: `[Packrafting Canden] Kode OTP Reset Password Admin: ${otp}`,
+            _template: 'box',
+            "Pemberitahuan": "Permintaan Reset Password Admin Packrafting Canden",
+            "KODE OTP ANDA": otp,
+            "Waktu Berlaku": "10 Menit sejak permohonan dibuat",
+            "Email Tujuan": email,
+            "Peringatan Keamanan": "Abaikan email ini jika Anda tidak meminta penggantian password. Jangan berikan kode ini kepada pihak manapun demi keamanan data desa."
+          })
+        });
+        return fRes.ok;
+      } catch(err) {
+        console.warn('FormSubmit AJAX fallback error:', err);
+        return false;
+      }
+    }
   </script>
 </body>
 </html>

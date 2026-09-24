@@ -90,6 +90,13 @@ function openChangePasswordModal() {
             <input type="text" id="cp-username" value="${cred.username || 'admin'}" required>
           </div>
           <div class="form-group">
+            <label for="cp-email">Gmail Admin Tertaut (untuk Reset OTP)</label>
+            <input type="email" id="cp-email" value="${cred.email || 'fauzansadidaramadhan@gmail.com'}" required>
+            <small style="color:#059669;display:block;margin-top:0.35rem;font-size:0.78rem;">
+              <i class="fa-solid fa-envelope-circle-check"></i> Email penerima kode OTP jika lupa password
+            </small>
+          </div>
+          <div class="form-group">
             <label for="cp-old-pwd">Password Saat Ini *</label>
             <input type="password" id="cp-old-pwd" placeholder="Masukkan password lama" required>
           </div>
@@ -125,6 +132,7 @@ function openChangePasswordModal() {
     document.getElementById('change-pwd-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const rawUser = document.getElementById('cp-username').value;
+      const newEmail = (document.getElementById('cp-email').value || 'fauzansadidaramadhan@gmail.com').trim();
       const oldPwd = document.getElementById('cp-old-pwd').value;
       const newPwd = document.getElementById('cp-new-pwd').value;
       const confirmPwd = document.getElementById('cp-confirm-pwd').value;
@@ -138,7 +146,7 @@ function openChangePasswordModal() {
 
       const newUsername = (typeof Security !== 'undefined') ? Security.sanitizeUsername(rawUser) : rawUser.trim();
 
-      if (!newUsername || !oldPwd || !newPwd || !confirmPwd) {
+      if (!newUsername || !newEmail || !oldPwd || !newPwd || !confirmPwd) {
         showToast('Semua kolom wajib diisi dengan format valid!', 'warning');
         return;
       }
@@ -163,10 +171,10 @@ function openChangePasswordModal() {
       }
 
       const newHash = await DataStore.hashPassword(newPwd);
-      DataStore.saveAdminCredentials(newUsername, newHash);
+      DataStore.saveAdminCredentials(newUsername, newHash, newEmail);
       sessionStorage.setItem('admin_user', newUsername);
 
-      showToast('Username & Password berhasil diperbarui!', 'success');
+      showToast('Kredensial & Gmail tertaut berhasil diperbarui!', 'success');
       closeChangePasswordModal();
     });
   } else {
