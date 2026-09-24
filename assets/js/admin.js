@@ -1176,27 +1176,69 @@ document.addEventListener('DOMContentLoaded', function () {
       document.body.appendChild(overlay);
     }
 
+    function openSidebar() {
+      sidebar.classList.add('active');
+      overlay.classList.add('active');
+      document.body.classList.add('sidebar-open');
+      document.documentElement.classList.add('sidebar-open');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.classList.remove('sidebar-open');
+      document.documentElement.classList.remove('sidebar-open');
+    }
+
     if (toggle) {
       toggle.addEventListener('click', function () {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
+        if (sidebar.classList.contains('active')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
       });
     }
 
-    overlay.addEventListener('click', function () {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    });
+    overlay.addEventListener('click', closeSidebar);
+    overlay.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Add close button inside sidebar header for mobile if not present
+    const sidebarHeader = sidebar.querySelector('.sidebar-header');
+    if (sidebarHeader && !sidebarHeader.querySelector('.sidebar-close-btn')) {
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'sidebar-close-btn';
+      closeBtn.setAttribute('aria-label', 'Tutup Sidebar');
+      closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      closeBtn.addEventListener('click', closeSidebar);
+      sidebarHeader.appendChild(closeBtn);
+    }
 
     // Close on navigation link click on mobile
     sidebar.querySelectorAll('.sidebar-link').forEach(function (link) {
       link.addEventListener('click', function () {
         if (window.innerWidth <= 768) {
-          sidebar.classList.remove('active');
-          overlay.classList.remove('active');
+          closeSidebar();
         }
       });
     });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+        closeSidebar();
+      }
+    });
+
+    // Auto-close on resize to desktop
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 768 && sidebar.classList.contains('active')) {
+        closeSidebar();
+      }
+    }, { passive: true });
   }
 
   initGaleriFileListener();

@@ -27,6 +27,17 @@ body.admin-body {
   min-height: 100vh;
 }
 
+/* Mobile Sidebar Open - Prevent body scrolling */
+html.sidebar-open,
+body.sidebar-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+html.sidebar-open body {
+  touch-action: none;
+}
+
 /* ---- Admin Login ---- */
 .login-page {
   min-height: 100vh;
@@ -196,6 +207,29 @@ body.admin-body {
   color: #64748b;
 }
 
+.sidebar-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  margin-left: auto;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-close-btn:hover,
+.sidebar-close-btn:active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -203,7 +237,7 @@ body.admin-body {
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: #cbd5e1;
   transition: all 0.2s;
   border-left: 3px solid transparent;
   text-decoration: none;
@@ -211,12 +245,12 @@ body.admin-body {
 
 .sidebar-link:hover {
   color: var(--admin-white);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.08);
 }
 
 .sidebar-link.active {
   color: var(--admin-white);
-  background: rgba(255,255,255,0.08);
+  background: rgba(249, 115, 22, 0.15);
   border-left-color: var(--admin-accent);
   font-weight: 600;
 }
@@ -763,13 +797,30 @@ body.admin-body {
 }
 
 @media (max-width: 768px) {
+  .sidebar-close-btn {
+    display: inline-flex;
+  }
   .admin-sidebar {
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
     transform: translateX(-100%);
-    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.4);
-    z-index: 999;
+    box-shadow: 8px 0 35px rgba(0, 0, 0, 0.55);
+    z-index: 1000;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
   }
   .admin-sidebar.active {
     transform: translateX(0);
+  }
+  .admin-sidebar-overlay {
+    touch-action: none;
+    z-index: 999;
   }
   .admin-main {
     margin-left: 0;
