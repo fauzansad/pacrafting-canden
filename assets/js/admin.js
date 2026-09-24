@@ -234,18 +234,29 @@ function showToast(message, type) {
 
 // ---- 3. Dashboard Statistics ----
 function renderDashboardStats() {
-  const banners = DataStore.getBanners();
-  const paket = DataStore.getPaket();
-  const galeri = DataStore.getGaleri();
-  const testi = DataStore.getTestimonials();
-  const faq = DataStore.getFAQ();
+  const slides = (typeof DataStore !== 'undefined' && typeof DataStore.getHeroSlides === 'function')
+    ? DataStore.getHeroSlides()
+    : [];
+  const bannerCount = (Array.isArray(slides) && slides.length > 0) ? slides.length : 3;
+  const paket = (typeof DataStore !== 'undefined' && typeof DataStore.getPaket === 'function')
+    ? DataStore.getPaket()
+    : [];
+  const galeri = (typeof DataStore !== 'undefined' && typeof DataStore.getGaleri === 'function')
+    ? DataStore.getGaleri()
+    : [];
+  const testi = (typeof DataStore !== 'undefined' && typeof DataStore.getTestimonials === 'function')
+    ? DataStore.getTestimonials()
+    : [];
+  const faq = (typeof DataStore !== 'undefined' && typeof DataStore.getFAQ === 'function')
+    ? DataStore.getFAQ()
+    : [];
 
   const setEl = (id, val) => {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   };
 
-  setEl('stat-banner', banners.length);
+  setEl('stat-banner', bannerCount);
   setEl('stat-paket', paket.length);
   setEl('stat-galeri', galeri.length);
   setEl('stat-testi', testi.length);
