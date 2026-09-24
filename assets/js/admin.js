@@ -58,37 +58,36 @@ function logout() {
 
 // ---- Change Password Modal Feature ----
 function openChangePasswordModal() {
+  // Close mobile sidebar immediately if open
+  const sidebar = document.querySelector('.admin-sidebar');
+  const sidebarOverlay = document.querySelector('.admin-sidebar-overlay');
+  if (sidebar && sidebar.classList.contains('active')) {
+    sidebar.classList.remove('active');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+    document.documentElement.classList.remove('sidebar-open');
+  }
+
   let modal = document.getElementById('change-pwd-modal');
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'change-pwd-modal';
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.background = 'rgba(0,0,0,0.6)';
-    modal.style.backdropFilter = 'blur(4px)';
-    modal.style.zIndex = '99999';
-    modal.style.display = 'flex';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-    modal.style.padding = '1rem';
+    modal.className = 'admin-modal-overlay';
 
-    const cred = DataStore.getAdminCredentials();
+    const cred = (typeof DataStore !== 'undefined' && DataStore.getAdminCredentials) ? DataStore.getAdminCredentials() : { username: 'admin' };
 
     modal.innerHTML = `
-      <div style="background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;animation:modalFadeIn 0.2s ease;">
-        <div style="background:linear-gradient(135deg,#0b1710,#1b4332);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+      <div class="admin-modal-dialog">
+        <div style="background:linear-gradient(135deg,#0b1710,#1b4332);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-top-left-radius:16px;border-top-right-radius:16px;">
           <h3 style="margin:0;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;display:flex;align-items:center;gap:0.5rem;">
             <i class="fa-solid fa-shield-halved" style="color:#f97316;"></i> Keamanan &amp; Ganti Password
           </h3>
-          <button type="button" onclick="closeChangePasswordModal()" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" onclick="closeChangePasswordModal()" style="background:none;border:none;color:#cbd5e1;font-size:1.25rem;cursor:pointer;padding:0.25rem;line-height:1;"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form id="change-pwd-form" style="padding:1.5rem;" class="admin-form">
           <div class="form-group">
             <label for="cp-username">Username Admin</label>
-            <input type="text" id="cp-username" value="${cred.username}" required>
+            <input type="text" id="cp-username" value="${cred.username || 'admin'}" required>
           </div>
           <div class="form-group">
             <label for="cp-old-pwd">Password Saat Ini *</label>
@@ -115,6 +114,13 @@ function openChangePasswordModal() {
     `;
 
     document.body.appendChild(modal);
+
+    // Dismiss when clicking backdrop
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeChangePasswordModal();
+      }
+    });
 
     document.getElementById('change-pwd-form').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -166,6 +172,10 @@ function openChangePasswordModal() {
   } else {
     modal.style.display = 'flex';
   }
+
+  // Lock body scroll while modal is open
+  document.body.classList.add('modal-open');
+  document.documentElement.classList.add('modal-open');
 }
 
 function closeChangePasswordModal() {
@@ -175,7 +185,19 @@ function closeChangePasswordModal() {
     const form = document.getElementById('change-pwd-form');
     if (form) form.reset();
   }
+  document.body.classList.remove('modal-open');
+  document.documentElement.classList.remove('modal-open');
 }
+
+// Close password modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const cpModal = document.getElementById('change-pwd-modal');
+    if (cpModal && cpModal.style.display !== 'none') {
+      closeChangePasswordModal();
+    }
+  }
+});
 
 // ---- 2. Toast Notifications ----
 function showToast(message, type) {
