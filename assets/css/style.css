@@ -123,6 +123,17 @@ html, body {
   max-width: 100%;
 }
 
+/* Mobile Nav Open - Prevent background scroll */
+html.menu-open,
+body.menu-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+html.menu-open body {
+  touch-action: none;
+}
+
 body {
   font-family: var(--font-body);
   font-size: var(--fs-base);
@@ -426,24 +437,30 @@ p {
   color: var(--nature);
 }
 
-.navbar.scrolled .nav-link {
-  color: var(--text);
+@media (min-width: 769px) {
+  .navbar.scrolled .nav-link {
+    color: var(--text);
+  }
+
+  .navbar.scrolled .nav-link:hover {
+    color: var(--nature);
+    background: rgba(45, 106, 79, 0.05);
+  }
+
+  .navbar.scrolled .nav-link.active {
+    color: var(--nature-dark);
+    background: var(--nature-50);
+    box-shadow: inset 0 0 0 1.5px rgba(45, 106, 79, 0.22);
+    font-weight: 800;
+  }
 }
 
-.navbar.scrolled .nav-link:hover {
-  color: var(--nature);
-  background: rgba(45, 106, 79, 0.05);
-}
-
-.navbar.scrolled .nav-link.active {
-  color: var(--nature-dark);
-  background: var(--nature-50);
-  box-shadow: inset 0 0 0 1.5px rgba(45, 106, 79, 0.22);
-  font-weight: 800;
-}
-
-.navbar.scrolled .nav-toggle span {
+.navbar.scrolled .nav-toggle:not(.active) span {
   background: var(--text);
+}
+
+.navbar.scrolled .nav-toggle.active span {
+  background: var(--white);
 }
 
 .navbar .container {
@@ -3737,6 +3754,14 @@ a.cta-booking-meta-pill:hover {
     padding: calc(0.7rem + env(safe-area-inset-top, 0px)) 0 0.7rem;
   }
 
+  .nav-overlay {
+    touch-action: none;
+  }
+
+  .nav-overlay.active {
+    display: block;
+  }
+
   .nav-menu {
     position: fixed;
     top: 0;
@@ -3744,29 +3769,69 @@ a.cta-booking-meta-pill:hover {
     width: 82%;
     max-width: 320px;
     height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
     background: var(--bg-dark);
     flex-direction: column;
     align-items: flex-start;
-    padding: 6rem 2rem 2rem;
-    gap: 0.5rem;
-    box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+    padding: calc(5.5rem + env(safe-area-inset-top, 0px)) 1.75rem calc(2.5rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.55rem;
+    box-shadow: -8px 0 35px rgba(0, 0, 0, 0.65);
     transition: right var(--transition);
     z-index: 999;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
   }
 
   .nav-menu.active {
     right: 0;
   }
 
-  .nav-link {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    font-size: var(--fs-base);
+  .nav-menu li {
+    display: flex;
+    width: auto;
+    list-style: none;
+  }
+
+  /* Force exact Gambar 1 look for all drawer links regardless of .navbar.scrolled */
+  .nav-menu .nav-link,
+  .navbar.scrolled .nav-menu .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    padding: 0.6rem 1.35rem;
+    font-size: 1.05rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: transparent !important;
+    border-radius: var(--radius-full);
+    box-shadow: none !important;
+    transition: all var(--transition-fast);
+  }
+
+  .nav-menu .nav-link:hover,
+  .navbar.scrolled .nav-menu .nav-link:hover {
+    color: var(--white) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Active item matches Gambar 1 frosted rounded pill */
+  .nav-menu .nav-link.active,
+  .navbar.scrolled .nav-menu .nav-link.active {
+    color: var(--white) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
   }
 
   .nav-cta {
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 
   .nav-cta .btn {
@@ -3777,8 +3842,10 @@ a.cta-booking-meta-pill:hover {
     display: flex;
   }
 
-  .nav-overlay.active {
-    display: block;
+  /* Hamburger toggle 'X' when open on mobile must stay bright white like Gambar 1 */
+  .nav-toggle.active span,
+  .navbar.scrolled .nav-toggle.active span {
+    background: #ffffff !important;
   }
 
   .intro-grid {

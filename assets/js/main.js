@@ -397,25 +397,51 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---- 5. Mobile Menu Toggle ----
   const navToggle = document.getElementById('nav-toggle');
   const navMenu = document.getElementById('nav-menu');
-  const navOverlay = document.getElementById('nav-overlay');
+  const navOverlay = document.getElementById('nav-overlay') || document.querySelector('.nav-overlay');
 
   if (navToggle && navMenu) {
+    function openMenu() {
+      navToggle.classList.add('active');
+      navMenu.classList.add('active');
+      if (navOverlay) navOverlay.classList.add('active');
+      document.body.classList.add('menu-open');
+      document.documentElement.classList.add('menu-open');
+    }
+
+    function closeMenu() {
+      navToggle.classList.remove('active');
+      navMenu.classList.remove('active');
+      if (navOverlay) navOverlay.classList.remove('active');
+      document.body.classList.remove('menu-open');
+      document.documentElement.classList.remove('menu-open');
+      document.body.style.overflow = '';
+    }
+
     function toggleMenu() {
-      navToggle.classList.toggle('active');
-      navMenu.classList.toggle('active');
-      if (navOverlay) navOverlay.classList.toggle('active');
-      document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+      if (navMenu.classList.contains('active')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     }
 
     navToggle.addEventListener('click', toggleMenu);
 
     if (navOverlay) {
-      navOverlay.addEventListener('click', function () {
-        navToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-        navOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      });
+      navOverlay.addEventListener('click', closeMenu);
+      navOverlay.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+      }, { passive: false });
+    }
+
+    // Prevent scrolling body when touching navbar area outside navMenu while open
+    const navbarEl = document.getElementById('navbar');
+    if (navbarEl) {
+      navbarEl.addEventListener('touchmove', function (e) {
+        if (navMenu.classList.contains('active') && !navMenu.contains(e.target)) {
+          e.preventDefault();
+        }
+      }, { passive: false });
     }
 
     // Close on navigation link click & immediately update active state
@@ -423,12 +449,23 @@ document.addEventListener('DOMContentLoaded', function () {
       link.addEventListener('click', function () {
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
-        navToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-        if (navOverlay) navOverlay.classList.remove('active');
-        document.body.style.overflow = '';
+        closeMenu();
       });
     });
+
+    // Close menu on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+        closeMenu();
+      }
+    });
+
+    // Auto-close on resize to desktop
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 768 && navMenu.classList.contains('active')) {
+        closeMenu();
+      }
+    }, { passive: true });
   }
 
   // ---- 6. Scroll Reveal Animation ----
