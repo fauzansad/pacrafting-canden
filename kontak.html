@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#061524" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#061524" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#061524">
+  <meta name="theme-color" content="#14241c" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#14241c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#14241c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Rute Sungai &amp; Kontak | Packrafting Canden</title>
@@ -20,7 +20,7 @@
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar scrolled" id="navbar">
+  <nav class="navbar" id="navbar">
     <div class="container">
       <a href="index.html" class="navbar-brand" title="Packrafting Canden">
         <img src="assets/images/logo/logo-square.png" alt="Logo Packrafting Canden" class="brand-logo-square">
@@ -37,21 +37,24 @@
         <li><a href="index.html#tentang" class="nav-link">Tentang</a></li>
         <li><a href="index.html#paket" class="nav-link">Paket</a></li>
         <li><a href="index.html#pengalaman" class="nav-link">Pengalaman</a></li>
+        <li><a href="index.html#safety" class="nav-link">SOP &amp; Safety</a></li>
         <li><a href="galeri.html" class="nav-link">Galeri</a></li>
-        <li><a href="index.html#lokasi" class="nav-link">Rute &amp; Peta</a></li>
-        <li><a href="kontak.html" class="nav-link active">Kontak</a></li>
+        <li><a href="index.html#lokasi" class="nav-link active">Rute &amp; Peta</a></li>
+        <li><a href="index.html#faq" class="nav-link">FAQ</a></li>
       </ul>
 
       <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu">
-        <span></span><span></span><span></span>
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
     </div>
   </nav>
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg, #030e1a 0%, #0756a0 60%, #126939 100%);padding:8rem 0 4rem;text-align:center;color:#fff;">
+  <div style="background:linear-gradient(135deg, #0d1813 0%, #14241c 45%, #1b4332 80%, #1a6b85 100%);padding:8rem 0 4rem;text-align:center;color:#fff;">
     <div class="container">
-      <div class="badge-tag badge-tag-orange" style="color:#fff;border-color:rgba(255,255,255,0.3);">Rute Sungai &amp; Reservasi</div>
+      <div class="badge-tag badge-tag-orange" style="color:var(--accent-light, #f59e0b);">Rute Sungai &amp; Reservasi</div>
       <h1 style="color:#fff;margin-bottom:0.75rem;">LOKASI &amp; TITIK KUMPUL</h1>
       <p style="color:rgba(255,255,255,0.85);max-width:640px;margin:0 auto;font-size:var(--fs-lg);">
         Rute pengarungan Sungai Opak dari Starting Point Canden hingga finish di Wisata Potrobayan.
@@ -216,7 +219,7 @@
   </a>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="assets/js/data.js?v=2.8"></script>
+  <script src="assets/js/data.js?v=4.5"></script>
   <script src="assets/js/main.js?v=4.5"></script>
 </body>
 </html>
