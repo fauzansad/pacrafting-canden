@@ -333,18 +333,121 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
   window.addEventListener('storage', refreshAllDynamicContent);
 
-  // ---- 4. Navbar Scroll Effect & ScrollSpy ----
+  // ---- 4. Navbar Scroll Effect, Scroll Progress & Sliding Greenish Indicator ----
   const navbar = document.getElementById('navbar');
-  if (navbar) {
-    function checkNavbar() {
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
+  const scrollProgress = document.getElementById('nav-scroll-progress') || (function() {
+    if (!navbar) return null;
+    let bar = navbar.querySelector('.nav-scroll-progress');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'nav-scroll-progress';
+      bar.id = 'nav-scroll-progress';
+      navbar.appendChild(bar);
     }
+    return bar;
+  })();
+
+  function checkNavbar() {
+    if (!navbar) return;
+    if (window.scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+
+    if (scrollProgress) {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const percent = docHeight > 0 ? Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100)) : 0;
+      scrollProgress.style.width = percent + '%';
+    }
+  }
+
+  if (navbar) {
     window.addEventListener('scroll', checkNavbar, { passive: true });
     checkNavbar();
+  }
+
+  // Sliding Greenish Pill Indicator on Desktop Nav
+  const navMenu = document.getElementById('nav-menu');
+  let navIndicator = document.getElementById('nav-indicator');
+
+  function positionIndicator(targetLink, immediate) {
+    if (!targetLink || !navIndicator || window.innerWidth <= 768) {
+      if (navIndicator) navIndicator.style.opacity = '0';
+      return;
+    }
+
+    // Check if target link is visible
+    if (targetLink.offsetParent === null) return;
+
+    const linkRect = targetLink.getBoundingClientRect();
+    const menuRect = navMenu.getBoundingClientRect();
+
+    const left = linkRect.left - menuRect.left;
+    const top = linkRect.top - menuRect.top;
+    const width = linkRect.width;
+    const height = linkRect.height;
+
+    if (immediate) {
+      navIndicator.style.transition = 'none';
+    } else {
+      navIndicator.style.transition = '';
+    }
+
+    navIndicator.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+    navIndicator.style.width = `${width}px`;
+    navIndicator.style.height = `${height}px`;
+    navIndicator.style.opacity = '1';
+
+    if (immediate) {
+      navIndicator.offsetHeight; // force reflow
+      navIndicator.style.transition = '';
+    }
+  }
+
+  function getActiveNavLink() {
+    if (!navMenu) return null;
+    return navMenu.querySelector('.nav-link.active') || navMenu.querySelector('.nav-link');
+  }
+
+  if (navMenu) {
+    if (!navIndicator) {
+      navIndicator = document.createElement('span');
+      navIndicator.className = 'nav-indicator';
+      navIndicator.id = 'nav-indicator';
+      navMenu.prepend(navIndicator);
+    }
+
+    // Initial positioning after layout renders
+    setTimeout(function () {
+      positionIndicator(getActiveNavLink(), true);
+    }, 100);
+
+    // Re-check when window finishes loading fonts/assets
+    window.addEventListener('load', function () {
+      positionIndicator(getActiveNavLink(), true);
+    });
+
+    // Hover effect on links
+    const allLinks = navMenu.querySelectorAll('.nav-link');
+    allLinks.forEach(function (link) {
+      link.addEventListener('mouseenter', function () {
+        positionIndicator(link);
+      });
+      link.addEventListener('focus', function () {
+        positionIndicator(link);
+      });
+    });
+
+    // When mouse leaves nav-menu, return to active link
+    navMenu.addEventListener('mouseleave', function () {
+      positionIndicator(getActiveNavLink());
+    });
+
+    // Window resize handler
+    window.addEventListener('resize', function () {
+      positionIndicator(getActiveNavLink(), true);
+    }, { passive: true });
   }
 
   // ScrollSpy Active Link Indicator
@@ -359,6 +462,13 @@ document.addEventListener('DOMContentLoaded', function () {
         spySections.push({ id: href, el: target, link: link });
       }
     }
+
+    // Click handler: immediate glide
+    link.addEventListener('click', function () {
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      positionIndicator(link);
+    });
   });
 
   function updateActiveNavLink() {
@@ -388,6 +498,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (activeItem) {
       navLinks.forEach(l => l.classList.remove('active'));
       activeItem.link.classList.add('active');
+      if (navMenu && !navMenu.matches(':hover')) {
+        positionIndicator(activeItem.link);
+      }
     }
   }
 
@@ -396,7 +509,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ---- 5. Mobile Menu Toggle ----
   const navToggle = document.getElementById('nav-toggle');
-  const navMenu = document.getElementById('nav-menu');
   const navOverlay = document.getElementById('nav-overlay') || document.querySelector('.nav-overlay');
 
   if (navToggle && navMenu) {
