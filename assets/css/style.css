@@ -3395,15 +3395,15 @@ a.cta-booking-meta-pill:hover {
 /* ---- FOOTER SUPPORT IN BRAND COLUMN ---- */
 .footer-support-brand-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.65rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
   margin-bottom: 1.25rem;
 }
 
 .footer-support-card-mini {
   background: #ffffff;
   border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  padding: 0.35rem 0.5rem;
   height: 48px;
   display: flex;
   align-items: center;
@@ -3429,20 +3429,27 @@ a.cta-booking-meta-pill:hover {
 }
 
 .footer-support-card-mini:hover img {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .footer-support-brand-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
   }
   .footer-support-card-mini {
     height: 44px;
-    padding: 0.35rem 0.5rem;
+    padding: 0.25rem 0.35rem;
   }
   .footer-support-card-mini img {
     max-height: 28px;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer-support-brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
   }
 }
 
