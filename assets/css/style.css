@@ -439,15 +439,23 @@ p {
 
 @media (min-width: 769px) {
   .navbar.scrolled .nav-link {
-    color: var(--text-light);
+    color: var(--text) !important;
     background: transparent !important;
   }
 
-  .navbar.scrolled .nav-link:hover,
-  .navbar.scrolled .nav-link.active {
+  /* Any link currently covered by the green indicator pill */
+  .navbar.scrolled .nav-link.has-indicator,
+  .navbar.scrolled .nav-link:hover {
     color: var(--white) !important;
     background: transparent !important;
     box-shadow: none !important;
+  }
+
+  /* Active link when cursor is hovering over another link: stays sharp nature green on cream background */
+  .navbar.scrolled .nav-menu:hover .nav-link.active:not(:hover):not(.has-indicator),
+  .navbar.scrolled .nav-link.active:not(.has-indicator) {
+    color: var(--nature) !important;
+    font-weight: 800;
   }
 }
 
@@ -668,7 +676,7 @@ p {
   }
 
   .nav-link:hover,
-  .nav-link.active {
+  .nav-link.has-indicator {
     color: #ffffff !important;
     background: transparent !important;
   }

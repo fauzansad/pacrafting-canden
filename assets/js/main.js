@@ -374,11 +374,20 @@ document.addEventListener('DOMContentLoaded', function () {
   function positionIndicator(targetLink, immediate) {
     if (!targetLink || !navIndicator || window.innerWidth <= 768) {
       if (navIndicator) navIndicator.style.opacity = '0';
+      if (navMenu) {
+        navMenu.querySelectorAll('.nav-link').forEach(l => l.classList.remove('has-indicator'));
+      }
       return;
     }
 
     // Check if target link is visible
     if (targetLink.offsetParent === null) return;
+
+    // Update .has-indicator class on targeted link
+    if (navMenu) {
+      navMenu.querySelectorAll('.nav-link').forEach(l => l.classList.remove('has-indicator'));
+      targetLink.classList.add('has-indicator');
+    }
 
     const linkRect = targetLink.getBoundingClientRect();
     const menuRect = navMenu.getBoundingClientRect();
