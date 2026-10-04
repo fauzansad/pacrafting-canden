@@ -999,8 +999,35 @@ document.addEventListener('DOMContentLoaded', function () {
           ? `<img src="${escapeHtml(item.foto)}" alt="${escapeHtml(item.nama || 'Reviewer')}" class="testi-avatar-img" loading="lazy">` 
           : `<div class="testi-avatar" style="background:${avatarBg}; color:${avatarColor};">${avatarInitial}</div>`;
 
+        // Reply / Tanggapan Resmi dari Pengelola
+        const hasReply = !!(item.balasan && (typeof item.balasan === 'string' ? item.balasan.trim().length > 0 : (item.balasan.pesan && item.balasan.pesan.trim().length > 0)));
+        let replyHtml = '';
+        if (hasReply) {
+          const replyText = typeof item.balasan === 'object' && item.balasan ? item.balasan.pesan : item.balasan;
+          const replyDate = (typeof item.balasan === 'object' && item.balasan ? item.balasan.tanggal : item.balasanTanggal) || '';
+          const replyAuthor = (typeof item.balasan === 'object' && item.balasan ? item.balasan.oleh : item.balasanOleh) || 'Pengelola Packrafting Canden';
+
+          replyHtml = `
+            <div class="testi-reply-box">
+              <div class="testi-reply-header">
+                <div class="testi-reply-badge">
+                  <div class="testi-reply-avatar">
+                    <img src="assets/images/logo/logo-square.png" alt="Logo Pengelola" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid fa-water\\'></i>'">
+                  </div>
+                  <div class="testi-reply-author-info">
+                    <span class="testi-reply-title">${escapeHtml(replyAuthor)}</span>
+                    <span class="testi-reply-status"><i class="fa-solid fa-circle-check"></i> Respon Resmi</span>
+                  </div>
+                </div>
+                ${replyDate ? `<span class="testi-reply-date"><i class="fa-regular fa-calendar-check"></i> ${escapeHtml(replyDate)}</span>` : ''}
+              </div>
+              <p class="testi-reply-text">${escapeHtml(replyText)}</p>
+            </div>
+          `;
+        }
+
         return `
-          <div class="testi-card ${isHighlight ? 'new-highlight' : ''}" id="testi-card-${item.id}">
+          <div class="testi-card ${isHighlight ? 'new-highlight' : ''} ${hasReply ? 'has-reply' : ''}" id="testi-card-${item.id}">
             <div class="testi-card-content">
               <div class="testi-stars" aria-label="${rating} dari 5 bintang">
                 ${starsHtml}
@@ -1008,6 +1035,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <p class="testi-text">
                 ${escapeHtml(item.pesan || '')}
               </p>
+              ${replyHtml}
             </div>
             <div class="testi-reviewer">
               <div class="testi-reviewer-avatar-wrap">

@@ -988,6 +988,35 @@ function initGaleriFileListener() {
 let adminTestiFilterRating = 'all';
 let adminTestiSearchQuery = '';
 
+function escapeHtmlAdmin(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function hasReplyHelper(item) {
+  if (!item || !item.balasan) return false;
+  if (typeof item.balasan === 'string') return item.balasan.trim().length > 0;
+  if (typeof item.balasan === 'object' && item.balasan.pesan) return item.balasan.pesan.trim().length > 0;
+  return false;
+}
+
+function getReplyDetails(item) {
+  if (!hasReplyHelper(item)) return null;
+  const replyText = typeof item.balasan === 'object' && item.balasan ? item.balasan.pesan : item.balasan;
+  const replyDate = (typeof item.balasan === 'object' && item.balasan ? item.balasan.tanggal : item.balasanTanggal) || '';
+  const replyAuthor = (typeof item.balasan === 'object' && item.balasan ? item.balasan.oleh : item.balasanOleh) || 'Pengelola Packrafting Canden';
+  return {
+    pesan: replyText.trim(),
+    tanggal: replyDate,
+    oleh: replyAuthor
+  };
+}
+
 function initTestimoniAdminPage() {
   renderTestimoniAdmin();
 
@@ -1020,6 +1049,8 @@ function renderTestimoniAdmin() {
   const totalCount = rawList.length;
   const count5 = rawList.filter(t => (parseInt(t.rating) || 5) === 5).length;
   const count4 = rawList.filter(t => (parseInt(t.rating) || 5) === 4).length;
+  const repliedCount = rawList.filter(hasReplyHelper).length;
+  const unrepliedCount = totalCount - repliedCount;
   const sumRating = rawList.reduce((acc, t) => acc + (parseInt(t.rating) || 5), 0);
   const avgRating = totalCount > 0 ? (sumRating / totalCount).toFixed(1) : '5.0';
 
@@ -1032,27 +1063,36 @@ function renderTestimoniAdmin() {
   setEl('stat-avg-rating', avgRating);
   setEl('stat-star-5', count5);
   setEl('stat-star-4', count4);
+  setEl('stat-replied', repliedCount);
+  setEl('stat-unreplied', unrepliedCount);
 
   let list = [...rawList];
 
-  // Filter by rating
-  if (adminTestiFilterRating !== 'all') {
+  // Filter by rating or reply status
+  if (adminTestiFilterRating === 'unreplied') {
+    list = list.filter(t => !hasReplyHelper(t));
+  } else if (adminTestiFilterRating === 'replied') {
+    list = list.filter(hasReplyHelper);
+  } else if (adminTestiFilterRating === '3down') {
+    list = list.filter(t => (parseInt(t.rating) || 5) <= 3);
+  } else if (adminTestiFilterRating !== 'all') {
     const targetRating = parseInt(adminTestiFilterRating, 10);
-    if (adminTestiFilterRating === '3down') {
-      list = list.filter(t => (parseInt(t.rating) || 5) <= 3);
-    } else {
-      list = list.filter(t => (parseInt(t.rating) || 5) === targetRating);
-    }
+    list = list.filter(t => (parseInt(t.rating) || 5) === targetRating);
   }
 
-  // Filter by search query
+  // Filter by search query (nama, pesan, asal, email, atau isi balasan)
   if (adminTestiSearchQuery) {
-    list = list.filter(t => 
-      (t.nama && t.nama.toLowerCase().includes(adminTestiSearchQuery)) ||
-      (t.pesan && t.pesan.toLowerCase().includes(adminTestiSearchQuery)) ||
-      (t.asal && t.asal.toLowerCase().includes(adminTestiSearchQuery)) ||
-      (t.email && t.email.toLowerCase().includes(adminTestiSearchQuery))
-    );
+    list = list.filter(t => {
+      const reply = getReplyDetails(t);
+      const replyMatch = reply && reply.pesan && reply.pesan.toLowerCase().includes(adminTestiSearchQuery);
+      return (
+        (t.nama && t.nama.toLowerCase().includes(adminTestiSearchQuery)) ||
+        (t.pesan && t.pesan.toLowerCase().includes(adminTestiSearchQuery)) ||
+        (t.asal && t.asal.toLowerCase().includes(adminTestiSearchQuery)) ||
+        (t.email && t.email.toLowerCase().includes(adminTestiSearchQuery)) ||
+        replyMatch
+      );
+    });
   }
 
   if (list.length === 0) {
@@ -1077,13 +1117,56 @@ function renderTestimoniAdmin() {
 
     const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'G')).toUpperCase();
     const photoHtml = item.foto 
-      ? `<img src="${item.foto}" alt="${item.nama}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;">` 
+      ? `<img src="${escapeHtmlAdmin(item.foto)}" alt="${escapeHtmlAdmin(item.nama)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;">` 
       : `<div style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;color:#334155;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${avatarInitial}</div>`;
 
     const isGoogle = item.isGoogle !== false;
-    const badgeHtml = isGoogle 
+    const badgeSourceHtml = isGoogle 
       ? `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#e0f2fe;color:#0369a1;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;"><i class="fa-brands fa-google"></i> Google</span>`
       : `<span style="display:inline-flex;align-items:center;gap:0.3rem;background:#f1f5f9;color:#475569;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;"><i class="fa-solid fa-user"></i> Pengunjung</span>`;
+
+    const reply = getReplyDetails(item);
+    const hasReply = !!reply;
+
+    const replyStatusBadge = hasReply
+      ? `<span style="display:inline-flex;align-items:center;gap:0.25rem;background:#dcfce7;color:#166534;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;"><i class="fa-solid fa-circle-check"></i> Sudah Dibalas</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:0.25rem;background:#fff7ed;color:#c2410c;font-size:0.7rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;border:1px solid #fed7aa;"><i class="fa-solid fa-clock"></i> Belum Dibalas</span>`;
+
+    let replyBlockHtml = '';
+    if (hasReply) {
+      replyBlockHtml = `
+        <div class="admin-testi-reply" style="margin-top:0.85rem;background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:8px;padding:0.85rem 1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.45rem;">
+              <span style="background:#16a34a;color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;"><i class="fa-solid fa-reply"></i></span>
+              <strong style="font-size:0.83rem;color:#166534;">${escapeHtmlAdmin(reply.oleh)}</strong>
+              <span style="font-size:0.7rem;color:#15803d;background:#dcfce7;padding:0.12rem 0.45rem;border-radius:4px;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Respon Resmi</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span style="font-size:0.72rem;color:#64748b;"><i class="fa-regular fa-clock" style="margin-right:0.25rem;"></i>${reply.tanggal || 'Terkini'}</span>
+              <button type="button" onclick="openReplyTestimoniModal(${item.id})" title="Edit Respon" style="background:#dcfce7;color:#166534;border:none;padding:0.25rem 0.55rem;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+              <button type="button" onclick="deleteReplyAdmin(${item.id})" title="Hapus Respon" style="background:#fee2e2;color:#ef4444;border:none;padding:0.25rem 0.55rem;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;">
+                <i class="fa-solid fa-trash-can"></i> Hapus
+              </button>
+            </div>
+          </div>
+          <p style="margin:0;font-size:0.85rem;color:#14532d;line-height:1.6;white-space:pre-line;">${escapeHtmlAdmin(reply.pesan)}</p>
+        </div>
+      `;
+    } else {
+      replyBlockHtml = `
+        <div style="margin-top:0.85rem;display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:0.65rem 0.85rem;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.8rem;color:#64748b;display:inline-flex;align-items:center;gap:0.35rem;">
+            <i class="fa-solid fa-comment-dots" style="color:#94a3b8;"></i> Belum ada tanggapan pengelola
+          </span>
+          <button type="button" onclick="openReplyTestimoniModal(${item.id})" class="btn-admin btn-admin-primary" style="padding:0.4rem 0.85rem;font-size:0.8rem;border-radius:6px;display:inline-flex;align-items:center;gap:0.35rem;white-space:nowrap;">
+            <i class="fa-solid fa-reply"></i> Jawab Ulasan
+          </button>
+        </div>
+      `;
+    }
 
     return `
       <div class="admin-testi-card" id="admin-testi-${item.id}">
@@ -1093,13 +1176,14 @@ function renderTestimoniAdmin() {
               ${photoHtml}
               <div style="min-width:0;">
                 <div style="font-weight:700;color:var(--admin-text);font-size:0.95rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
-                  <span>${item.nama}</span>
-                  ${badgeHtml}
+                  <span>${escapeHtmlAdmin(item.nama)}</span>
+                  ${badgeSourceHtml}
+                  ${replyStatusBadge}
                 </div>
-                <div style="font-size:0.78rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.email || item.asal || 'Wisatawan'} • ${item.tanggal || '-'}</div>
+                <div style="font-size:0.78rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtmlAdmin(item.email || item.asal || 'Wisatawan')} • ${item.tanggal || '-'}</div>
               </div>
             </div>
-            <button type="button" onclick="deleteTestimoniAdmin(${item.id})" title="Hapus Ulasan" style="background:#fee2e2;color:#ef4444;border:none;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;">
+            <button type="button" onclick="deleteTestimoniAdmin(${item.id})" title="Hapus Ulasan dari Website" style="background:#fee2e2;color:#ef4444;border:none;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -1107,17 +1191,148 @@ function renderTestimoniAdmin() {
             ${starsHtml}
             <span style="font-size:0.82rem;font-weight:700;color:#f59e0b;margin-left:0.35rem;">${rating}.0</span>
           </div>
-          <p style="margin:0 0 1rem 0;font-size:0.88rem;color:#334155;line-height:1.6;white-space:pre-line;">
-            ${item.pesan}
+          <p style="margin:0 0 0.5rem 0;font-size:0.88rem;color:#334155;line-height:1.6;white-space:pre-line;">
+            ${escapeHtmlAdmin(item.pesan)}
           </p>
+          ${replyBlockHtml}
         </div>
-        <div style="font-size:0.72rem;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:0.6rem;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:0.72rem;color:#94a3b8;border-top:1px solid #f1f5f9;margin-top:0.85rem;padding-top:0.6rem;display:flex;justify-content:space-between;align-items:center;">
           <span>ID: #${item.id}</span>
           <span><i class="fa-regular fa-calendar" style="margin-right:0.25rem;"></i>${item.tanggal || 'Terkini'}</span>
         </div>
       </div>
     `;
   }).join('');
+}
+
+// Modal Balas Ulasan Controls
+let activeReplyTargetItem = null;
+
+function openReplyTestimoniModal(id) {
+  const list = DataStore.getTestimonials() || [];
+  const item = list.find(t => String(t.id) === String(id));
+  if (!item) {
+    showToast('Ulasan tidak ditemukan!', 'error');
+    return;
+  }
+
+  activeReplyTargetItem = item;
+
+  const modal = document.getElementById('modal-reply-testi');
+  if (!modal) return;
+
+  const inputId = document.getElementById('reply-testi-id');
+  const previewAuthor = document.getElementById('reply-preview-author');
+  const previewRating = document.getElementById('reply-preview-rating');
+  const previewPesan = document.getElementById('reply-preview-pesan');
+  const inputAuthor = document.getElementById('reply-author-name');
+  const textareaPesan = document.getElementById('reply-testi-pesan');
+
+  if (inputId) inputId.value = item.id;
+  if (previewAuthor) previewAuthor.textContent = item.nama || 'Wisatawan';
+  if (previewPesan) previewPesan.textContent = `"${item.pesan || ''}"`;
+
+  const rating = Math.max(1, Math.min(5, parseInt(item.rating) || 5));
+  let starsText = '';
+  for (let i = 0; i < rating; i++) starsText += '⭐';
+  if (previewRating) previewRating.textContent = `${starsText} (${rating}.0)`;
+
+  const reply = getReplyDetails(item);
+  if (reply) {
+    if (inputAuthor) inputAuthor.value = reply.oleh || 'Pengelola Packrafting Canden';
+    if (textareaPesan) textareaPesan.value = reply.pesan || '';
+  } else {
+    if (inputAuthor) inputAuthor.value = 'Pengelola Packrafting Canden';
+    if (textareaPesan) textareaPesan.value = '';
+  }
+
+  modal.style.display = 'flex';
+  if (textareaPesan) {
+    setTimeout(() => textareaPesan.focus(), 100);
+  }
+}
+
+function closeReplyTestimoniModal() {
+  const modal = document.getElementById('modal-reply-testi');
+  if (modal) {
+    modal.style.display = 'none';
+    const form = document.getElementById('form-reply-testi');
+    if (form) form.reset();
+  }
+  activeReplyTargetItem = null;
+}
+
+function applyReplyTemplate(templateType) {
+  const textarea = document.getElementById('reply-testi-pesan');
+  if (!textarea) return;
+
+  const name = (activeReplyTargetItem && activeReplyTargetItem.nama) ? activeReplyTargetItem.nama : 'Kakak';
+  const rating = (activeReplyTargetItem && activeReplyTargetItem.rating) ? activeReplyTargetItem.rating : '5';
+
+  if (templateType === 'terima_kasih') {
+    textarea.value = `Halo Kak ${name}, terima kasih banyak atas ulasan dan rating bintang ${rating}-nya! Kami sangat senang Kakak menikmati pengalaman petualangan susur Sungai Opak bersama tim kami. Ditunggu kunjungan seru berikutnya ya! Salam hangat dari tim Pengelola Packrafting Canden.`;
+  } else if (templateType === 'undangan') {
+    textarea.value = `Terima kasih banyak atas kunjungannya, Kak ${name}! Keselamatan, kenyamanan, dan senyum puas wisatawan selalu menjadi prioritas utama kami. Jangan lupa ajak keluarga dan teman-teman di pengarungan berikutnya ya! Sampai jumpa di Canden.`;
+  } else if (templateType === 'masukan') {
+    textarea.value = `Halo Kak ${name}, terima kasih banyak atas ulasan dan masukan berharga yang diberikan kepada kami. Masukan Kakak sangat berarti bagi pengembangan fasilitas dan kualitas layanan susur Sungai Opak agar semakin prima. Sehat selalu dan sukses untuk Kakak!`;
+  }
+
+  textarea.focus();
+}
+
+function saveReplyAdmin(e) {
+  if (e) e.preventDefault();
+  const id = document.getElementById('reply-testi-id').value;
+  const author = document.getElementById('reply-author-name').value.trim() || 'Pengelola Packrafting Canden';
+  const pesan = document.getElementById('reply-testi-pesan').value.trim();
+
+  if (!id || !pesan) {
+    showToast('Isi balasan wajib diisi!', 'warning');
+    return;
+  }
+
+  let list = DataStore.getTestimonials() || [];
+  const idx = list.findIndex(t => String(t.id) === String(id));
+
+  if (idx === -1) {
+    showToast('Ulasan tidak ditemukan!', 'error');
+    return;
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  list[idx].balasan = {
+    pesan: pesan,
+    tanggal: todayStr,
+    oleh: author
+  };
+  list[idx].balasanTanggal = todayStr;
+  list[idx].balasanOleh = author;
+
+  DataStore.saveTestimonials(list);
+
+  showToast('Jawaban pengelola berhasil dipublikasikan!', 'success');
+  closeReplyTestimoniModal();
+  renderTestimoniAdmin();
+  renderDashboardStats();
+}
+
+function deleteReplyAdmin(id) {
+  if (confirm('Apakah Anda yakin ingin menghapus balasan/tanggapan resmi untuk ulasan ini?')) {
+    let list = DataStore.getTestimonials() || [];
+    const idx = list.findIndex(t => String(t.id) === String(id));
+
+    if (idx !== -1) {
+      delete list[idx].balasan;
+      delete list[idx].balasanTanggal;
+      delete list[idx].balasanOleh;
+
+      DataStore.saveTestimonials(list);
+      showToast('Balasan resmi berhasil dihapus!', 'success');
+      renderTestimoniAdmin();
+      renderDashboardStats();
+    }
+  }
 }
 
 function deleteTestimoniAdmin(id) {

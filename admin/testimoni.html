@@ -6,7 +6,7 @@
   <title>Ulasan &amp; Rating | Admin Packrafting Canden</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="../assets/images/logo/logo-square.png">
-  <link rel="stylesheet" href="../assets/css/admin.css?v=4.6">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=4.7">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="admin-body">
@@ -64,7 +64,7 @@
         </div>
 
         <div class="dash-stat-card">
-          <div class="dash-stat-icon green"><i class="fa-solid fa-comments"></i></div>
+          <div class="dash-stat-icon blue"><i class="fa-solid fa-comments"></i></div>
           <div class="dash-stat-info">
             <h4 id="stat-total-testi">0</h4>
             <p>Total Ulasan Masuk</p>
@@ -72,18 +72,18 @@
         </div>
 
         <div class="dash-stat-card">
-          <div class="dash-stat-icon orange"><i class="fa-solid fa-award"></i></div>
+          <div class="dash-stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
           <div class="dash-stat-info">
-            <h4 id="stat-star-5">0</h4>
-            <p>Ulasan Bintang 5</p>
+            <h4 id="stat-replied">0</h4>
+            <p>Sudah Dibalas</p>
           </div>
         </div>
 
         <div class="dash-stat-card">
-          <div class="dash-stat-icon blue"><i class="fa-solid fa-thumbs-up"></i></div>
+          <div class="dash-stat-icon orange"><i class="fa-solid fa-clock"></i></div>
           <div class="dash-stat-info">
-            <h4 id="stat-star-4">0</h4>
-            <p>Ulasan Bintang 4</p>
+            <h4 id="stat-unreplied">0</h4>
+            <p>Menunggu Balasan</p>
           </div>
         </div>
       </div>
@@ -92,6 +92,8 @@
       <div class="testi-filter-bar">
         <div class="testi-filter-tabs">
           <button type="button" class="testi-filter-btn active" data-rating="all">Semua Ulasan</button>
+          <button type="button" class="testi-filter-btn" data-rating="unreplied"><i class="fa-solid fa-clock" style="color:#ea580c;"></i> Menunggu Balasan</button>
+          <button type="button" class="testi-filter-btn" data-rating="replied"><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> Sudah Dibalas</button>
           <button type="button" class="testi-filter-btn" data-rating="5"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Bintang 5</button>
           <button type="button" class="testi-filter-btn" data-rating="4"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Bintang 4</button>
           <button type="button" class="testi-filter-btn" data-rating="3down">Bintang 3 ke Bawah</button>
@@ -99,7 +101,7 @@
 
         <div class="testi-search-box">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="search-testi" placeholder="Cari nama atau ulasan...">
+          <input type="text" id="search-testi" placeholder="Cari nama, ulasan, atau balasan...">
         </div>
       </div>
 
@@ -159,8 +161,73 @@
     </div>
   </div>
 
+  <!-- Modal Balas / Jawab Ulasan Pengunjung -->
+  <div id="modal-reply-testi" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:99999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:16px;max-width:540px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;animation:modalFadeIn 0.2s ease;">
+      <div style="background:linear-gradient(135deg,#0b1710,#1b4332);color:#fff;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="margin:0;font-size:1.1rem;font-family:'Plus Jakarta Sans',sans-serif;color:#fff;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fa-solid fa-reply" style="color:#4ade80;"></i> Jawab Ulasan Wisatawan
+        </h3>
+        <button type="button" onclick="closeReplyTestimoniModal()" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding:1.5rem;">
+        <!-- Review Context Preview Box -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #f59e0b;border-radius:10px;padding:0.9rem 1rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+            <strong id="reply-preview-author" style="color:#1e293b;font-size:0.92rem;">Nama Wisatawan</strong>
+            <span id="reply-preview-rating" style="color:#f59e0b;font-size:0.85rem;">⭐⭐⭐⭐⭐</span>
+          </div>
+          <p id="reply-preview-pesan" style="margin:0;font-size:0.84rem;color:#475569;font-style:italic;line-height:1.55;max-height:85px;overflow-y:auto;">
+            Isi ulasan wisatawan...
+          </p>
+        </div>
+
+        <form id="form-reply-testi" onsubmit="saveReplyAdmin(event)" class="admin-form">
+          <input type="hidden" id="reply-testi-id">
+
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label for="reply-author-name" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Identitas Penjawab (Respon Resmi) *</label>
+            <input type="text" id="reply-author-name" class="form-control" value="Pengelola Packrafting Canden" required style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;">
+          </div>
+
+          <!-- Quick Templates Helper -->
+          <div style="margin-bottom:0.85rem;">
+            <span style="display:block;font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:0.4rem;">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:#10b981;"></i> Template Jawaban Cepat:
+            </span>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+              <button type="button" class="btn-template-chip" onclick="applyReplyTemplate('terima_kasih')" style="padding:0.3rem 0.65rem;font-size:0.75rem;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;">
+                🙏 Terima Kasih Positif
+              </button>
+              <button type="button" class="btn-template-chip" onclick="applyReplyTemplate('undangan')" style="padding:0.3rem 0.65rem;font-size:0.75rem;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;">
+                🛶 Undangan Kembali
+              </button>
+              <button type="button" class="btn-template-chip" onclick="applyReplyTemplate('masukan')" style="padding:0.3rem 0.65rem;font-size:0.75rem;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;">
+                💡 Tanggapan Saran
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label for="reply-testi-pesan" style="display:block;font-weight:600;font-size:0.875rem;margin-bottom:0.35rem;">Isi Balasan / Tanggapan Anda *</label>
+            <textarea id="reply-testi-pesan" class="form-control" rows="4" placeholder="Tuliskan jawaban yang ramah dan profesional atas ulasan wisatawan..." required style="width:100%;padding:0.75rem;border:1.5px solid var(--admin-border);border-radius:8px;font-size:0.9rem;resize:vertical;"></textarea>
+            <span style="font-size:0.75rem;color:#64748b;margin-top:0.35rem;display:block;">
+              <i class="fa-solid fa-globe" style="color:#0ea5e9;"></i> Jawaban akan otomatis tampil resmi pada ulasan di website publik dan panel admin.
+            </span>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
+            <button type="button" class="btn-admin btn-admin-outline" onclick="closeReplyTestimoniModal()">Batal</button>
+            <button type="submit" class="btn-admin btn-admin-primary"><i class="fa-solid fa-paper-plane"></i> Publikasikan Jawaban</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toast-container"></div>
-  <script src="../assets/js/data.js?v=2.9"></script>
-  <script src="../assets/js/admin.js?v=4.6"></script>
+  <script src="../assets/js/data.js?v=4.6"></script>
+  <script src="../assets/js/admin.js?v=4.7"></script>
 </body>
 </html>

@@ -285,7 +285,12 @@ const PackraftData = {
       pesan: 'Rute susur sungainya keren banget dari Canden sampai Potrobayan! Alamnya asri, guidenya ramah dan sangat memperhatikan keselamatan. Wajib coba bareng keluarga atau teman!',
       avatar: 'B',
       isGoogle: true,
-      tanggal: '2026-08-25'
+      tanggal: '2026-08-25',
+      balasan: {
+        pesan: 'Terima kasih banyak Kak Bima atas ulasan dan kepercayaannya! Senang sekali Kakak dan rombongan puas menikmati keseruan jeram Sungai Opak sampai Potrobayan. Kami nantikan kedatangannya lagi di petualangan berikutnya ya!',
+        tanggal: '2026-08-26',
+        oleh: 'Pengelola Packrafting Canden'
+      }
     },
     {
       id: 2,
@@ -297,7 +302,12 @@ const PackraftData = {
       pesan: 'Seru banget buat liburan keluarga. Anak-anak senang dan merasa aman karena didampingi instruktur yang sabar. Titik finish di Potrobayan juga pemandangannya bagus banget buat foto-foto!',
       avatar: 'S',
       isGoogle: true,
-      tanggal: '2026-08-20'
+      tanggal: '2026-08-20',
+      balasan: {
+        pesan: 'Terima kasih banyak Bu Siti! Keselamatan dan kenyamanan liburan keluarga adalah prioritas utama kami. Senang sekali anak-anak ceria dan puas menikmati keasrian alam Canden.',
+        tanggal: '2026-08-21',
+        oleh: 'Pengelola Packrafting Canden'
+      }
     },
     {
       id: 3,
@@ -654,7 +664,24 @@ const DataStore = {
 
   getTestimonials() {
     const stored = localStorage.getItem('packraft_testimonials');
-    return stored ? JSON.parse(stored) : PackraftData.testimonials;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Pastikan sampel balasan awal tersedia pada ulasan bawaan jika belum pernah diubah
+          PackraftData.testimonials.forEach(defItem => {
+            if (defItem.balasan) {
+              const matched = parsed.find(p => p.id === defItem.id);
+              if (matched && !matched.balasan) {
+                matched.balasan = defItem.balasan;
+              }
+            }
+          });
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return PackraftData.testimonials;
   },
   saveTestimonials(data) {
     return this.saveToCloud('testimonials', data);
