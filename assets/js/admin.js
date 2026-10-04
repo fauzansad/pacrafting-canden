@@ -161,24 +161,57 @@ function openChangePasswordModal() {
         return;
       }
 
-      const oldHash = await DataStore.hashPassword(oldPwd);
-      const currentCred = DataStore.getAdminCredentials();
-
-      const isOldValid = (oldHash === currentCred.passwordHash || (currentCred.legacyHash && oldHash === currentCred.legacyHash));
-      if (!isOldValid) {
-        showToast('Password saat ini salah!', 'error');
-        return;
+      const submitBtn = document.getElementById('change-pwd-form').querySelector('button[type="submit"]');
+      const origBtnHtml = submitBtn ? submitBtn.innerHTML : '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
       }
 
-      const newHash = await DataStore.hashPassword(newPwd);
-      DataStore.saveAdminCredentials(newUsername, newHash, newEmail);
-      sessionStorage.setItem('admin_user', newUsername);
+      try {
+        const oldHash = await DataStore.hashPassword(oldPwd);
+        const currentCred = await DataStore.getAdminCredentialsAsync();
 
-      showToast('Kredensial & Gmail tertaut berhasil diperbarui!', 'success');
-      closeChangePasswordModal();
+        const isOldValid = (oldHash === currentCred.passwordHash || (currentCred.legacyHash && oldHash === currentCred.legacyHash));
+        if (!isOldValid) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+          }
+          showToast('Password saat ini salah!', 'error');
+          return;
+        }
+
+        const newHash = await DataStore.hashPassword(newPwd);
+        await DataStore.saveAdminCredentials(newUsername, newHash, newEmail);
+        sessionStorage.setItem('admin_user', newUsername);
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origBtnHtml;
+        }
+        showToast('Kredensial berhasil diperbarui & disinkronkan ke seluruh perangkat!', 'success');
+        closeChangePasswordModal();
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origBtnHtml;
+        }
+        showToast('Gagal menyimpan kredensial ke cloud: ' + (err.message || err), 'error');
+      }
     });
   } else {
     modal.style.display = 'flex';
+  }
+
+  // Sinkronkan input username & email dengan data terbaru dari cloud
+  if (typeof DataStore !== 'undefined' && DataStore.getAdminCredentialsAsync) {
+    DataStore.getAdminCredentialsAsync().then(c => {
+      const uInput = document.getElementById('cp-username');
+      const eInput = document.getElementById('cp-email');
+      if (uInput && c.username) uInput.value = c.username;
+      if (eInput && c.email) eInput.value = c.email;
+    }).catch(() => {});
   }
 
   // Lock body scroll while modal is open

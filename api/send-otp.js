@@ -28,8 +28,31 @@ module.exports = async function handler(req, res) {
     const targetEmail = (email || '').trim().toLowerCase();
     const authorizedEmail = 'fauzansadidaramadhan@gmail.com';
 
-    // Verify authorized admin recipient
-    if (targetEmail !== authorizedEmail && !targetEmail.includes('candenpackraft')) {
+    let isAuthorized = (targetEmail === authorizedEmail || targetEmail.includes('candenpackraft'));
+
+    // Verify authorized admin recipient against Supabase Cloud if email was updated
+    if (!isAuthorized) {
+      try {
+        const supRes = await fetch('https://fnyocuashzlrklduehzu.supabase.co/rest/v1/site_data?key=eq.admin_cred&select=*', {
+          headers: {
+            'apikey': 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv',
+            'Authorization': 'Bearer sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv'
+          }
+        });
+        if (supRes.ok) {
+          const records = await supRes.json();
+          if (Array.isArray(records) && records.length > 0 && records[0].value && records[0].value.email) {
+            if (targetEmail === records[0].value.email.trim().toLowerCase()) {
+              isAuthorized = true;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase check error in send-otp:', err);
+      }
+    }
+
+    if (!isAuthorized) {
       return res.status(403).json({ success: false, message: 'Alamat email tidak terdaftar sebagai admin.' });
     }
 

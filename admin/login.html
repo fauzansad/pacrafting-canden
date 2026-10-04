@@ -230,8 +230,8 @@
 
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="../assets/js/data.js?v=4.6"></script>
-  <script src="../assets/js/admin.js?v=4.6"></script>
+  <script src="../assets/js/data.js?v=4.7"></script>
+  <script src="../assets/js/admin.js?v=4.7"></script>
   <script>
     const MAX_ATTEMPTS = 5;
     const LOCKOUT_SECONDS = 60;
@@ -296,6 +296,11 @@
 
     checkLockout();
 
+    // Sinkronisasi kredensial admin dari cloud saat halaman dibuka
+    if (typeof DataStore !== 'undefined' && DataStore.getAdminCredentialsAsync) {
+      DataStore.getAdminCredentialsAsync().catch(() => {});
+    }
+
     loginForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       if (checkLockout()) return;
@@ -332,8 +337,9 @@
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
       submitBtn.disabled = true;
 
+      // Dapatkan kredensial terbaru langsung dari cloud database Supabase
+      const cred = await DataStore.getAdminCredentialsAsync();
       const inputHash = await DataStore.hashPassword(p);
-      const cred = DataStore.getAdminCredentials();
 
       // Check username or email and hash match
       const isUserMatch = (u.toLowerCase() === cred.username.toLowerCase() || (cred.email && u.toLowerCase() === cred.email.toLowerCase()));
@@ -390,8 +396,9 @@
     let verifiedOtpCode = '';
     let resendTimerInterval = null;
 
-    function openForgotPasswordModal() {
-      const cred = DataStore.getAdminCredentials();
+    async function openForgotPasswordModal() {
+      // Pastikan email penerima OTP tersinkron dari cloud database
+      const cred = await DataStore.getAdminCredentialsAsync();
       currentResetEmail = cred.email || 'fauzansadidaramadhan@gmail.com';
       document.getElementById('forgot-email').value = currentResetEmail;
       displayTargetEmail.textContent = currentResetEmail;
@@ -583,17 +590,23 @@
       }
 
       btnSaveNewPwd.disabled = true;
-      btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+      btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
 
-      const res = await DataStore.resetAdminPasswordWithOtp(currentResetEmail, verifiedOtpCode, newPwd);
-      btnSaveNewPwd.disabled = false;
-      btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
+      try {
+        const res = await DataStore.resetAdminPasswordWithOtp(currentResetEmail, verifiedOtpCode, newPwd);
+        btnSaveNewPwd.disabled = false;
+        btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
 
-      if (res.valid) {
-        showToast('Password berhasil diubah! Silakan login.', 'success');
-        setForgotStep(4);
-      } else {
-        showToast(res.message || 'Gagal mengubah password. Silakan coba kembali.', 'error');
+        if (res.valid) {
+          showToast('Password berhasil diubah & disinkronkan ke seluruh perangkat!', 'success');
+          setForgotStep(4);
+        } else {
+          showToast(res.message || 'Gagal mengubah password. Silakan coba kembali.', 'error');
+        }
+      } catch (err) {
+        btnSaveNewPwd.disabled = false;
+        btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
+        showToast('Terjadi kesalahan saat menyimpan password ke cloud: ' + (err.message || err), 'error');
       }
     });
 

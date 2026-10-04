@@ -733,14 +733,63 @@ const DataStore = {
     };
   },
 
-  saveAdminCredentials(username, passwordHash, email) {
+  async getAdminCredentialsAsync() {
+    // 1. Tunggu inisialisasi cloud sync jika sedang berjalan
+    if (this._cloudSyncPromise) {
+      try {
+        await this._cloudSyncPromise;
+      } catch(e) {}
+    }
+
+    // 2. Fetch langsung kredensial terbaru dari Supabase Cloud untuk menjamin sinkronisasi antar perangkat
+    try {
+      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data?key=eq.admin_cred&select=*`, {
+        headers: {
+          'apikey': this.SUPABASE_KEY,
+          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+      if (res.ok) {
+        const records = await res.json();
+        if (Array.isArray(records) && records.length > 0 && records[0].value) {
+          const remoteCred = records[0].value;
+          localStorage.setItem('packraft_admin_cred', JSON.stringify(remoteCred));
+          return remoteCred;
+        } else {
+          // Jika Supabase belum memiliki data admin_cred, periksa apakah device saat ini memiliki password kustom lokal
+          const localStored = localStorage.getItem('packraft_admin_cred');
+          if (localStored) {
+            try {
+              const parsed = JSON.parse(localStored);
+              if (parsed && parsed.passwordHash) {
+                // Auto-upload kredensial lokal ke cloud agar device lain langsung tersinkron
+                this.saveToCloud('admin_cred', parsed).catch(err => {
+                  console.warn('[DataStore] Auto-upload local cred ke Supabase gagal:', err);
+                });
+                return parsed;
+              }
+            } catch(e) {}
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[DataStore] Gagal mengambil admin_cred dari cloud, menggunakan cache lokal:', err);
+    }
+
+    return this.getAdminCredentials();
+  },
+
+  async saveAdminCredentials(username, passwordHash, email) {
     const current = this.getAdminCredentials();
-    localStorage.setItem('packraft_admin_cred', JSON.stringify({
+    const credData = {
       username: username || current.username || 'admin',
       email: email || current.email || 'fauzansadidaramadhan@gmail.com',
       passwordHash: passwordHash || current.passwordHash,
       updatedAt: new Date().toISOString()
-    }));
+    };
+    // Simpan ke localStorage & sinkronkan secara real-time ke database cloud Supabase
+    return await this.saveToCloud('admin_cred', credData);
   },
 
   generateOtp(email) {
@@ -782,8 +831,8 @@ const DataStore = {
     if (!check.valid) return check;
 
     const newHash = await this.hashPassword(newPassword);
-    const cred = this.getAdminCredentials();
-    this.saveAdminCredentials(cred.username, newHash, email);
+    const cred = await this.getAdminCredentialsAsync();
+    await this.saveAdminCredentials(cred.username, newHash, email);
     sessionStorage.removeItem('packraft_pwd_reset_otp');
     return { valid: true };
   },
