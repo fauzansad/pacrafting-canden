@@ -837,11 +837,27 @@ const DataStore = {
     return { valid: true };
   },
 
-  getBookingWhatsAppUrl(paketNama) {
+  getBookingWhatsAppUrl(paketNama, lang) {
     const brand = this.getBrandInfo();
     const phone = this.normalizePhone(brand.whatsapp);
-    const defaultPaket = paketNama ? paketNama : '[Pilih Paket]';
-    const message = `Halo, saya ingin booking Packrafting Canden.
+    const activeLang = lang || (typeof localStorage !== 'undefined' ? localStorage.getItem('packraft_lang') : 'id');
+    const isEn = activeLang === 'en';
+
+    const defaultPaket = paketNama ? paketNama : (isEn ? '[Select Package]' : '[Pilih Paket]');
+    let message = '';
+
+    if (isEn) {
+      message = `Hello Packrafting Canden, I would like to book a river tour.
+
+Full Name:
+Number of Guests:
+Package Choice: ${defaultPaket}
+Preferred Date:
+Time Slot:
+
+Please provide availability and booking details. Thank you!`;
+    } else {
+      message = `Halo, saya ingin booking Packrafting Canden.
 
 Nama:
 Jumlah peserta:
@@ -850,6 +866,7 @@ Tanggal:
 Jam:
 
 Mohon informasi ketersediaannya.`;
+    }
 
     if (!phone || phone.includes('NOMOR')) {
       return `https://wa.me/[NOMOR_WHATSAPP]?text=${encodeURIComponent(message)}`;

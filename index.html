@@ -44,21 +44,33 @@
 
       <ul class="nav-menu" id="nav-menu">
         <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
-        <li><a href="#home" class="nav-link active">Home</a></li>
-        <li><a href="#tentang" class="nav-link">Tentang</a></li>
-        <li><a href="#paket" class="nav-link">Paket</a></li>
-        <li><a href="#pengalaman" class="nav-link">Pengalaman</a></li>
-        <li><a href="#safety" class="nav-link">SOP &amp; Safety</a></li>
-        <li><a href="#galeri" class="nav-link">Galeri</a></li>
-        <li><a href="#lokasi" class="nav-link">Rute &amp; Peta</a></li>
-        <li><a href="#faq" class="nav-link">FAQ</a></li>
+        <li><a href="#home" class="nav-link active" data-i18n="nav_home">Home</a></li>
+        <li><a href="#tentang" class="nav-link" data-i18n="nav_about">Tentang</a></li>
+        <li><a href="#paket" class="nav-link" data-i18n="nav_packages">Paket</a></li>
+        <li><a href="#pengalaman" class="nav-link" data-i18n="nav_experience">Pengalaman</a></li>
+        <li><a href="#safety" class="nav-link" data-i18n="nav_safety">SOP &amp; Safety</a></li>
+        <li><a href="#galeri" class="nav-link" data-i18n="nav_gallery">Galeri</a></li>
+        <li><a href="#lokasi" class="nav-link" data-i18n="nav_location">Rute &amp; Peta</a></li>
+        <li><a href="#faq" class="nav-link" data-i18n="nav_faq">FAQ</a></li>
       </ul>
 
-      <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <div class="lang-switcher" id="lang-switcher" role="group" aria-label="Language Selector">
+          <button type="button" class="lang-btn active" data-lang="id" aria-label="Bahasa Indonesia" title="Bahasa Indonesia">
+            <span class="lang-flag">🇮🇩</span> <span class="lang-code">ID</span>
+          </button>
+          <button type="button" class="lang-btn" data-lang="en" aria-label="English" title="English">
+            <span class="lang-flag">🇬🇧</span> <span class="lang-code">EN</span>
+          </button>
+        </div>
+
+        <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu" data-i18n-aria="nav_toggle_menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
     <div class="nav-scroll-progress" id="nav-scroll-progress"></div>
   </nav>
@@ -90,18 +102,18 @@
 
     <div class="container">
       <div class="hero-content">
-        <div class="hero-location reveal">
+        <div class="hero-location reveal" data-i18n-html="hero_location">
           <i class="fa-solid fa-route text-accent"></i> Rute Sungai Opak &bull; 4,5 KM (± 1,5 Jam) &bull; Canden &rarr; Wisata Potrobayan
         </div>
-        <h1 class="hero-title reveal">
+        <h1 class="hero-title reveal" data-i18n-html="hero_title">
           PACKRAFTING <span>CANDEN</span>
         </h1>
-        <span class="hero-sub reveal">Adventure on the River</span>
-        <p class="hero-lead reveal">
+        <span class="hero-sub reveal" data-i18n="hero_sub">Adventure on the River</span>
+        <p class="hero-lead reveal" data-i18n="hero_lead">
           Rasakan sensasi menyusuri Sungai Opak dari Starting Point Canden hingga finish di Wisata Potrobayan. Petualangan air seru, alami, dan tak terlupakan!
         </p>
         <div class="hero-actions reveal">
-          <a href="#paket" class="btn btn-accent btn-lg">
+          <a href="#paket" class="btn btn-accent btn-lg" data-i18n-html="hero_cta">
             <i class="fa-solid fa-compass"></i> Lihat Pilihan Paket Wisata
           </a>
         </div>
@@ -110,7 +122,7 @@
 
     <div class="hero-scroll-indicator">
       <div class="hero-scroll-mouse"></div>
-      <span>Scroll ke Bawah</span>
+      <span data-i18n="hero_scroll">Scroll ke Bawah</span>
     </div>
   </section>
 
@@ -123,36 +135,36 @@
             <img src="assets/images/galeri/2.jpg" alt="Pemandangan Asri Sungai Opak Desa Canden" loading="lazy">
           </div>
           <div class="intro-badge-float">
-            <strong>4,5 KM</strong>
-            <span>Durasi ± 1,5 Jam</span>
+            <strong data-i18n="about_badge_km">4,5 KM</strong>
+            <span data-i18n="about_badge_duration">Durasi ± 1,5 Jam</span>
           </div>
         </div>
 
         <div class="intro-text reveal-right">
-          <div class="section-eyebrow">Pesona Desa Wisata Canden</div>
-          <h2>PETUALANGAN, KESEHATAN &amp; KEARIFAN LOKAL</h2>
-          <p style="font-size:var(--fs-lg);font-weight:700;color:var(--primary);line-height:1.5;">
+          <div class="section-eyebrow" data-i18n="about_eyebrow">Pesona Desa Wisata Canden</div>
+          <h2 data-i18n-html="about_title">PETUALANGAN, KESEHATAN &amp; KEARIFAN LOKAL</h2>
+          <p style="font-size:var(--fs-lg);font-weight:700;color:var(--primary);line-height:1.5;" data-i18n="about_sub">
             Sensasi Packrafting Pertama di Yogyakarta Berbalut Nuansa Asri Pedesaan
           </p>
-          <p>
+          <p data-i18n-html="about_p1">
             <strong>Packrafting Canden</strong> memadukan petualangan mendayung perahu di alam terbuka dengan kehangatan kearifan lokal Desa Canden, Bantul. Cocok untuk wisatawan keluarga, komunitas, maupun rombongan yang mendambakan liburan Jogja yang tenang, menyehatkan, dan menyenangkan.
           </p>
-          <p style="font-size:var(--fs-base);color:var(--text-light);">
+          <p style="font-size:var(--fs-base);color:var(--text-light);" data-i18n-html="about_p2">
             Menyusuri jernihnya aliran Sungai Opak sejauh <strong>4,5 km selama ± 1,5 jam</strong>, Anda akan disuguhi rimbunnya pepohonan, tebing alami tepian kali, serta sajian jamu tradisional khas Canden yang menyegarkan tubuh dan pikiran.
           </p>
           <div style="margin-top:1.25rem;padding:0.85rem 1.15rem;background:#f0fdf4;border-left:4px solid #16a34a;border-radius:8px;font-size:var(--fs-xs);">
             <div style="font-weight:700;color:#166534;margin-bottom:0.25rem;font-size:var(--fs-sm);">
-              <i class="fa-solid fa-users" style="margin-right:0.35rem;"></i> <span data-info-pengelola>Pokdarwis &amp; Pengelola Susur Sungai Desa Canden</span>
+              <i class="fa-solid fa-users" style="margin-right:0.35rem;"></i> <span data-info-pengelola data-i18n="about_manager_title">Pokdarwis &amp; Pengelola Susur Sungai Desa Canden</span>
             </div>
-            <p style="margin:0.35rem 0 0.4rem;color:#1e3a2b;line-height:1.5;font-size:var(--fs-xs);" data-info-deskripsi>
+            <p style="margin:0.35rem 0 0.4rem;color:#1e3a2b;line-height:1.5;font-size:var(--fs-xs);" data-info-deskripsi data-i18n="about_manager_desc">
               Pengelola resmi aktivitas wisata petualangan air Packrafting di Sungai Opak, Desa Canden, Kapanewon Jetis, Kabupaten Bantul. Tim pemandu lokal bersertifikat siap mendampingi setiap perjalanan susur kali Anda.
             </p>
             <div style="color:#15803d;line-height:1.4;">
-              <i class="fa-solid fa-certificate" style="margin-right:0.35rem;"></i> <span data-info-legalitas>Binaan Dinas Pariwisata &amp; Pemerintah Kalurahan Canden — Standar Keamanan &amp; River Guide Bersertifikasi.</span>
+              <i class="fa-solid fa-certificate" style="margin-right:0.35rem;"></i> <span data-info-legalitas data-i18n="about_manager_cert">Binaan Dinas Pariwisata &amp; Pemerintah Kalurahan Canden — Standar Keamanan &amp; River Guide Bersertifikasi.</span>
             </div>
           </div>
           <div style="margin-top:1.5rem;">
-            <a href="#paket" class="btn btn-primary">
+            <a href="#paket" class="btn btn-primary" data-i18n-html="about_btn">
               Pilih Paket Wisata <i class="fa-solid fa-arrow-right"></i>
             </a>
           </div>
@@ -165,9 +177,9 @@
   <section class="section section-alt" id="why">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Pengalaman Berkesan</div>
-        <h2>Kenapa Memilih Packrafting Canden?</h2>
-        <p>Pengalaman wisata susur kali otentik di Desa Canden yang aman, menyehatkan, dan penuh kehangatan keramahan warga.</p>
+        <div class="section-eyebrow" data-i18n="why_eyebrow">Pengalaman Berkesan</div>
+        <h2 data-i18n="why_title">Kenapa Memilih Packrafting Canden?</h2>
+        <p data-i18n="why_desc">Pengalaman wisata susur kali otentik di Desa Canden yang aman, menyehatkan, dan penuh kehangatan keramahan warga.</p>
       </div>
 
       <div class="why-grid">
@@ -176,8 +188,8 @@
             <img src="assets/images/galeri/1.jpg" alt="Petualangan Air Alami Sungai Opak" loading="lazy">
           </div>
           <div class="why-card-body">
-            <h4>Petualangan Air Alami</h4>
-            <p>Menyusuri arus Sungai Opak yang ramah pemula namun tetap memacu adrenalin di atas perahu packraft yang stabil.</p>
+            <h4 data-i18n="why_1_title">Petualangan Air Alami</h4>
+            <p data-i18n="why_1_desc">Menyusuri arus Sungai Opak yang ramah pemula namun tetap memacu adrenalin di atas perahu packraft yang stabil.</p>
           </div>
         </div>
 
@@ -186,8 +198,8 @@
             <img src="assets/images/galeri/tes.jpg" alt="Peralatan Standar Keamanan" loading="lazy">
           </div>
           <div class="why-card-body">
-            <h4>Standar Keamanan Terjamin</h4>
-            <p>Peralatan APD lengkap berstandar resmi (helm, life jacket, dayung) dengan pendampingan river guide &amp; tim rescue.</p>
+            <h4 data-i18n="why_2_title">Standar Keamanan Terjamin</h4>
+            <p data-i18n="why_2_desc">Peralatan APD lengkap berstandar resmi (helm, life jacket, dayung) dengan pendampingan river guide &amp; tim rescue.</p>
           </div>
         </div>
 
@@ -196,8 +208,8 @@
             <img src="assets/images/galeri/2.jpg" alt="Kebugaran & Tradisi Jamu Canden" loading="lazy">
           </div>
           <div class="why-card-body">
-            <h4>Kebugaran &amp; Jamu Desa</h4>
-            <p>Sentra jamu tradisional Desa Canden dan kelapa muda segar untuk memulihkan vitalitas setelah menyusuri sungai.</p>
+            <h4 data-i18n-html="why_3_title">Kebugaran &amp; Jamu Desa</h4>
+            <p data-i18n="why_3_desc">Sentra jamu tradisional Desa Canden dan kelapa muda segar untuk memulihkan vitalitas setelah menyusuri sungai.</p>
           </div>
         </div>
 
@@ -206,8 +218,8 @@
             <img src="assets/images/galeri/7.jpg" alt="Finish di Wisata Potrobayan" loading="lazy">
           </div>
           <div class="why-card-body">
-            <h4>Finish Wisata Potrobayan</h4>
-            <p>Pendaratan istimewa di muara pertemuan Sungai Opak &amp; Sungai Oya dengan panorama lembah yang asri.</p>
+            <h4 data-i18n="why_4_title">Finish Wisata Potrobayan</h4>
+            <p data-i18n-html="why_4_desc">Pendaratan istimewa di muara pertemuan Sungai Opak &amp; Sungai Oya dengan panorama lembah yang asri.</p>
           </div>
         </div>
       </div>
@@ -218,9 +230,9 @@
   <section class="section" id="paket">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Pilihan Trip Wisata</div>
-        <h2>PILIHAN PAKET WISATA</h2>
-        <p>Nikmati sensasi mendayung di Sungai Opak dengan fasilitas lengkap, pemandu ramah, kuliner desa, dan proteksi asuransi resmi.</p>
+        <div class="section-eyebrow" data-i18n="pkg_eyebrow">Pilihan Trip Wisata</div>
+        <h2 data-i18n="pkg_title">PILIHAN PAKET WISATA</h2>
+        <p data-i18n="pkg_desc">Nikmati sensasi mendayung di Sungai Opak dengan fasilitas lengkap, pemandu ramah, kuliner desa, dan proteksi asuransi resmi.</p>
       </div>
 
       <div class="paket-grid" id="paket-container">
@@ -228,15 +240,15 @@
         <div class="paket-card reveal-left">
           <div class="paket-img-header">
             <img src="assets/images/galeri/3.jpg" alt="Petualangan Packrafting Seru" loading="lazy">
-            <span class="paket-ribbon">Trip Favorit</span>
+            <span class="paket-ribbon" data-i18n="pkg_ribbon_fav">Trip Favorit</span>
           </div>
           <div class="paket-header">
-            <h3>PAKET 1 &mdash; ADVENTURE</h3>
-            <div class="paket-subtitle">Sensasi Pengarungan Sungai + Jamu Tradisional / Kelapa Muda</div>
+            <h3 data-i18n-html="pkg_1_title">PAKET 1 &mdash; ADVENTURE</h3>
+            <div class="paket-subtitle" data-i18n="pkg_1_sub">Sensasi Pengarungan Sungai + Jamu Tradisional / Kelapa Muda</div>
             <div class="paket-price-box">
               <div class="paket-price">
                 <span class="amount">Rp 110.000</span>
-                <span class="unit">/ orang</span>
+                <span class="unit" data-i18n="pkg_unit">/ orang</span>
               </div>
             </div>
           </div>
@@ -244,27 +256,27 @@
             <div class="paket-meta-list">
               <div class="paket-meta-item">
                 <i class="fa-regular fa-clock"></i>
-                <div><strong>Durasi Trip</strong>± 1,5 Jam (4,5 km)</div>
+                <div><strong data-i18n="pkg_duration_label">Durasi Trip</strong><span data-i18n="pkg_duration_val">± 1,5 Jam (4,5 km)</span></div>
               </div>
               <div class="paket-meta-item">
                 <i class="fa-solid fa-sailboat"></i>
-                <div><strong>Perahu</strong>1 Orang / Packraft</div>
+                <div><strong data-i18n="pkg_boat_label">Perahu</strong><span data-i18n="pkg_boat_val">1 Orang / Packraft</span></div>
               </div>
             </div>
 
-            <div class="paket-features-title">Fasilitas Termasuk:</div>
+            <div class="paket-features-title" data-i18n="pkg_features_title">Fasilitas Termasuk:</div>
             <ul class="paket-features">
-              <li><i class="fa-solid fa-circle-check"></i> Packrafting Kit Lengkap (Helm, Pelampung, Paddle)</li>
-              <li><i class="fa-solid fa-circle-check"></i> Transportasi Lokal Penjemputan (Finish kembali ke Start)</li>
-              <li><i class="fa-solid fa-circle-check"></i> Pemandu / River Guide Profesional</li>
-              <li><i class="fa-solid fa-circle-check"></i> Tim Rescue Standby di Jalur Sungai</li>
-              <li><i class="fa-solid fa-circle-check"></i> Tradisional Snack Khas Desa Canden</li>
-              <li><i class="fa-solid fa-circle-check"></i> Welcome Drink: <strong>Jamu Tradisional</strong> atau <strong>Kelapa Muda</strong></li>
-              <li><i class="fa-solid fa-circle-check"></i> Perlindungan Asuransi Resmi</li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_gear">Packrafting Kit Lengkap (Helm, Pelampung, Paddle)</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_transport">Transportasi Lokal Penjemputan (Finish kembali ke Start)</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_guide">Pemandu / River Guide Profesional</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_rescue">Tim Rescue Standby di Jalur Sungai</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_snack">Tradisional Snack Khas Desa Canden</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n-html="pkg_f_drink">Welcome Drink: <strong>Jamu Tradisional</strong> atau <strong>Kelapa Muda</strong></span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_insurance">Perlindungan Asuransi Resmi</span></li>
             </ul>
 
             <div class="paket-footer">
-              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%201%20(Rp%20110.000%2Forang)." target="_blank" data-booking-wa="PAKET 1" class="btn btn-primary">
+              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%201%20(Rp%20110.000%2Forang)." target="_blank" data-booking-wa="PAKET 1" class="btn btn-primary" data-i18n-html="pkg_btn_1">
                 <i class="fa-brands fa-whatsapp"></i> Reservasi Paket 1
               </a>
             </div>
@@ -275,15 +287,15 @@
         <div class="paket-card reveal-right">
           <div class="paket-img-header">
             <img src="assets/images/galeri/6.jpg" alt="Packrafting & Makan Prasmanan Ndeso" loading="lazy">
-            <span class="paket-ribbon">Lengkap + Makan</span>
+            <span class="paket-ribbon" data-i18n="pkg_ribbon_meal">Lengkap + Makan</span>
           </div>
           <div class="paket-header">
-            <h3>PAKET 2 &mdash; KOMPLIT</h3>
-            <div class="paket-subtitle">Pengarungan Lengkap + Sajian Makan Prasmanan Khas Ndeso</div>
+            <h3 data-i18n-html="pkg_2_title">PAKET 2 &mdash; KOMPLIT</h3>
+            <div class="paket-subtitle" data-i18n="pkg_2_sub">Pengarungan Lengkap + Sajian Makan Prasmanan Khas Ndeso</div>
             <div class="paket-price-box">
               <div class="paket-price">
                 <span class="amount">Rp 135.000</span>
-                <span class="unit">/ orang</span>
+                <span class="unit" data-i18n="pkg_unit">/ orang</span>
               </div>
             </div>
           </div>
@@ -291,27 +303,27 @@
             <div class="paket-meta-list">
               <div class="paket-meta-item">
                 <i class="fa-regular fa-clock"></i>
-                <div><strong>Durasi Trip</strong>± 1,5 Jam (4,5 km)</div>
+                <div><strong data-i18n="pkg_duration_label">Durasi Trip</strong><span data-i18n="pkg_duration_val">± 1,5 Jam (4,5 km)</span></div>
               </div>
               <div class="paket-meta-item">
                 <i class="fa-solid fa-sailboat"></i>
-                <div><strong>Perahu</strong>1 Orang / Packraft</div>
+                <div><strong data-i18n="pkg_boat_label">Perahu</strong><span data-i18n="pkg_boat_val">1 Orang / Packraft</span></div>
               </div>
             </div>
 
-            <div class="paket-features-title">Fasilitas Termasuk:</div>
+            <div class="paket-features-title" data-i18n="pkg_features_title">Fasilitas Termasuk:</div>
             <ul class="paket-features">
-              <li><i class="fa-solid fa-circle-check"></i> <strong>Semua fasilitas Paket 1 lengkap</strong></li>
-              <li><i class="fa-solid fa-circle-check"></i> <strong>Makan Menu Prasmanan sajian masakan khas Ndeso Canden</strong></li>
-              <li><i class="fa-solid fa-circle-check"></i> Packrafting Kit Lengkap (Helm, Pelampung, Paddle)</li>
-              <li><i class="fa-solid fa-circle-check"></i> Transportasi Lokal Antar-Jemput Start &amp; Finish</li>
-              <li><i class="fa-solid fa-circle-check"></i> River Guide Profesional &amp; Tim Rescue</li>
-              <li><i class="fa-solid fa-circle-check"></i> Tradisional Snack &amp; Jamu / Kelapa Muda</li>
-              <li><i class="fa-solid fa-circle-check"></i> Perlindungan Asuransi Resmi</li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n-html="pkg_f_all_pkg1"><strong>Semua fasilitas Paket 1 lengkap</strong></span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n-html="pkg_f_buffet"><strong>Makan Menu Prasmanan sajian masakan khas Ndeso Canden</strong></span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_gear">Packrafting Kit Lengkap (Helm, Pelampung, Paddle)</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_transport_start_finish">Transportasi Lokal Antar-Jemput Start &amp; Finish</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_guide">River Guide Profesional &amp; Tim Rescue</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_snack">Tradisional Snack &amp; Jamu / Kelapa Muda</span></li>
+              <li><i class="fa-solid fa-circle-check"></i> <span data-i18n="pkg_f_insurance">Perlindungan Asuransi Resmi</span></li>
             </ul>
 
             <div class="paket-footer">
-              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%202%20(Rp%20135.000%2Forang)." target="_blank" data-booking-wa="PAKET 2" class="btn btn-accent">
+              <a href="https://wa.me/6281260092044?text=Halo%20Admin%20Packrafting%20Canden%2C%20saya%20tertarik%20booking%20Paket%202%20(Rp%20135.000%2Forang)." target="_blank" data-booking-wa="PAKET 2" class="btn btn-accent" data-i18n-html="pkg_btn_2">
                 <i class="fa-brands fa-whatsapp"></i> Reservasi Paket 2
               </a>
             </div>
@@ -322,9 +334,9 @@
       <!-- Fasilitas Tambahan (Opsional) & Ketentuan Perahu -->
       <div class="addons-wrap reveal-scale">
         <div class="section-header" style="margin-bottom:1.5rem;text-align:left;">
-          <div class="section-eyebrow"><i class="fa-solid fa-camera"></i> Layanan Dokumentasi</div>
-          <h3 style="font-size:1.6rem;margin-bottom:0.25rem;">Fasilitas Tambahan (Opsional)</h3>
-          <p style="margin:0;">Abadikan momen petualangan wellness Anda dengan dokumentasi foto kamera dan video udara drone sinematik.</p>
+          <div class="section-eyebrow" data-i18n-html="addons_eyebrow"><i class="fa-solid fa-camera"></i> Layanan Dokumentasi</div>
+          <h3 style="font-size:1.6rem;margin-bottom:0.25rem;" data-i18n="addons_title">Fasilitas Tambahan (Opsional)</h3>
+          <p style="margin:0;" data-i18n="addons_desc">Abadikan momen petualangan wellness Anda dengan dokumentasi foto kamera dan video udara drone sinematik.</p>
         </div>
 
         <div class="addons-grid">
@@ -333,21 +345,21 @@
             <div class="addon-header">
               <div class="addon-icon"><i class="fa-solid fa-camera-retro"></i></div>
               <div>
-                <h4>Dokumentasi Standar Foto</h4>
-                <p style="font-size:var(--fs-xs);color:var(--text-light);margin:0;">Foto aksi pengarungan sungai jernih &amp; tajam</p>
+                <h4 data-i18n="addon_card1_title">Dokumentasi Standar Foto</h4>
+                <p style="font-size:var(--fs-xs);color:var(--text-light);margin:0;" data-i18n-html="addon_card1_sub">Foto aksi pengarungan sungai jernih &amp; tajam</p>
               </div>
             </div>
             <ul class="addon-item-list">
               <li class="addon-item">
-                <span class="addon-item-name"><i class="fa-solid fa-camera text-accent"></i> Dokumentasi Kamera Standar</span>
+                <span class="addon-item-name" data-i18n-html="addon_item_camera"><i class="fa-solid fa-camera text-accent"></i> Dokumentasi Kamera Standar</span>
                 <span class="addon-item-price">Rp 200.000 / paket</span>
               </li>
               <li class="addon-item">
-                <span class="addon-item-name"><i class="fa-brands fa-apple text-accent"></i> Kamera iPhone + Edit</span>
+                <span class="addon-item-name" data-i18n-html="addon_item_iphone"><i class="fa-brands fa-apple text-accent"></i> Kamera iPhone + Edit</span>
                 <span class="addon-item-price">Rp 250.000 / paket</span>
               </li>
               <li class="addon-item">
-                <span class="addon-item-name"><i class="fa-solid fa-camera-rotate text-accent"></i> Kamera DSLR/Mirrorless + Edit</span>
+                <span class="addon-item-name" data-i18n-html="addon_item_dslr"><i class="fa-solid fa-camera-rotate text-accent"></i> Kamera DSLR/Mirrorless + Edit</span>
                 <span class="addon-item-price">Rp 300.000 / paket</span>
               </li>
             </ul>
@@ -358,17 +370,17 @@
             <div class="addon-header">
               <div class="addon-icon"><i class="fa-solid fa-helicopter"></i></div>
               <div>
-                <h4>Dokumentasi Drone Udara</h4>
-                <p style="font-size:var(--fs-xs);color:var(--text-light);margin:0;">Video udara sinematik pemandangan alam dari langit</p>
+                <h4 data-i18n="addon_card2_title">Dokumentasi Drone Udara</h4>
+                <p style="font-size:var(--fs-xs);color:var(--text-light);margin:0;" data-i18n="addon_card2_sub">Video udara sinematik pemandangan alam dari langit</p>
               </div>
             </div>
             <ul class="addon-item-list">
               <li class="addon-item">
-                <span class="addon-item-name"><i class="fa-solid fa-film text-accent"></i> Video Sinematik Drone (Full HD / 4K)</span>
+                <span class="addon-item-name" data-i18n-html="addon_item_drone"><i class="fa-solid fa-film text-accent"></i> Video Sinematik Drone (Full HD / 4K)</span>
                 <span class="addon-item-price">Rp 250.000 / baterai / paket</span>
               </li>
             </ul>
-            <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:1.1rem;line-height:1.5;">
+            <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:1.1rem;line-height:1.5;" data-i18n-html="addon_note">
               <i class="fa-solid fa-circle-info text-accent"></i> Biaya dokumentasi dapat disesuaikan dengan kebutuhan rombongan dan kondisi cuaca saat pengarungan.
             </p>
           </div>
@@ -378,41 +390,41 @@
         <div class="info-tambahan-card">
           <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
             <div style="width:38px;height:38px;border-radius:8px;background:var(--primary-100);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="fa-solid fa-circle-info"></i></div>
-            <h4 style="margin:0;font-size:1.2rem;color:var(--primary-dark);">Informasi Tambahan &amp; Ketentuan Kegiatan</h4>
+            <h4 style="margin:0;font-size:1.2rem;color:var(--primary-dark);" data-i18n-html="info_title">Informasi Tambahan &amp; Ketentuan Kegiatan</h4>
           </div>
           <div class="info-tambahan-grid">
             <div>
               <div class="info-spec-item">
                 <i class="fa-solid fa-sailboat"></i>
-                <div><strong>Kapasitas Perahu:</strong> 1 Orang dewasa per perahu packraft untuk stabilitas dan manuver maksimal.</div>
+                <div><strong data-i18n="info_cap">Kapasitas Perahu:</strong> <span data-i18n="info_cap_val">1 Orang dewasa per perahu packraft untuk stabilitas dan manuver maksimal.</span></div>
               </div>
               <div class="info-spec-item">
                 <i class="fa-solid fa-children"></i>
-                <div><strong>Tandem untuk Anak-anak:</strong> Bisa dilakukan dengan pendampingan orang tua (anak usia mulai 7 tahun).</div>
+                <div><strong data-i18n="info_tandem">Tandem untuk Anak-anak:</strong> <span data-i18n="info_tandem_val">Bisa dilakukan dengan pendampingan orang tua (anak usia mulai 7 tahun).</span></div>
               </div>
               <div class="info-spec-item">
                 <i class="fa-solid fa-id-card"></i>
-                <div><strong>Batas Usia Minimal:</strong> 12 tahun untuk mendayung mandiri (kondisi fisik sehat &amp; bugar).</div>
+                <div><strong data-i18n="info_age">Batas Usia Minimal:</strong> <span data-i18n="info_age_val">12 tahun untuk mendayung mandiri (kondisi fisik sehat &amp; bugar).</span></div>
               </div>
               <div class="info-spec-item">
                 <i class="fa-solid fa-route"></i>
-                <div><strong>Jalur &amp; Durasi:</strong> Rute pengarungan sungai sepanjang ± 4,5 KM dengan durasi ± 1,5 jam.</div>
+                <div><strong data-i18n="info_route">Jalur &amp; Durasi:</strong> <span data-i18n="info_route_val">Rute pengarungan sungai sepanjang ± 4,5 KM dengan durasi ± 1,5 jam.</span></div>
               </div>
             </div>
 
             <div>
-              <div style="font-size:var(--fs-sm);font-weight:700;color:var(--gray-900);margin-bottom:0.4rem;">
+              <div style="font-size:var(--fs-sm);font-weight:700;color:var(--gray-900);margin-bottom:0.4rem;" data-i18n-html="meeting_points_title">
                 <i class="fa-solid fa-location-dot text-accent"></i> 5 Pilihan Lokasi Titik Kumpul (Meeting Point):
               </div>
-              <p style="font-size:var(--fs-xs);color:var(--text-light);margin-bottom:0.6rem;">
+              <p style="font-size:var(--fs-xs);color:var(--text-light);margin-bottom:0.6rem;" data-i18n="meeting_points_desc">
                 Lokasi titik kumpul fleksibel dan akan diinformasikan serta dikoordinasikan lebih lanjut oleh tim admin:
               </p>
               <div class="meeting-points-list">
-                <div class="meeting-point-pill"><i class="fa-solid fa-utensils"></i> 1. Rumah Makan Kongkow</div>
-                <div class="meeting-point-pill"><i class="fa-solid fa-mug-hot"></i> 2. Rumah Makan Kopi Klotok Paris</div>
-                <div class="meeting-point-pill"><i class="fa-solid fa-bowl-rice"></i> 3. Rumah Makan Paon Darmo</div>
-                <div class="meeting-point-pill"><i class="fa-solid fa-building-columns"></i> 4. Kantor BUMKal Candi Arta Kalurahan Canden</div>
-                <div class="meeting-point-pill"><i class="fa-solid fa-campground"></i> 5. Basecamp Packrafting Canden</div>
+                <div class="meeting-point-pill" data-i18n="meeting_pt_1"><i class="fa-solid fa-utensils"></i> 1. Rumah Makan Kongkow</div>
+                <div class="meeting-point-pill" data-i18n="meeting_pt_2"><i class="fa-solid fa-mug-hot"></i> 2. Rumah Makan Kopi Klotok Paris</div>
+                <div class="meeting-point-pill" data-i18n="meeting_pt_3"><i class="fa-solid fa-bowl-rice"></i> 3. Rumah Makan Paon Darmo</div>
+                <div class="meeting-point-pill" data-i18n="meeting_pt_4"><i class="fa-solid fa-building-columns"></i> 4. Kantor BUMKal Candi Arta Kalurahan Canden</div>
+                <div class="meeting-point-pill" data-i18n="meeting_pt_5"><i class="fa-solid fa-campground"></i> 5. Basecamp Packrafting Canden</div>
               </div>
             </div>
           </div>
@@ -425,9 +437,9 @@
   <section class="wellness-section" id="wellness">
     <div class="container">
       <div class="section-header reveal" style="color:#fff;">
-        <div class="section-eyebrow" style="color:var(--nature-light);">Wisata Sehat &amp; Bugar</div>
-        <h2 style="color:#fff;">WELLNESS TOURISM DI DESA CANDEN</h2>
-        <p style="color:rgba(255,255,255,0.88);">
+        <div class="section-eyebrow" style="color:var(--nature-light);" data-i18n-html="wellness_eyebrow">Wisata Sehat &amp; Bugar</div>
+        <h2 style="color:#fff;" data-i18n="wellness_title">WELLNESS TOURISM DI DESA CANDEN</h2>
+        <p style="color:rgba(255,255,255,0.88);" data-i18n="wellness_desc">
           Harmonisasi petualangan alam bebas dengan kesehatan raga, ketenangan jiwa, dan kearifan racikan jamu tradisional nusantara.
         </p>
       </div>
@@ -435,26 +447,26 @@
       <div class="wellness-grid">
         <div class="wellness-card reveal">
           <div class="wellness-icon"><i class="fa-solid fa-person-swimming"></i></div>
-          <h4>Olahraga Air Alami</h4>
-          <p>Sensasi olahraga dayung aktif yang melatih otot inti dan menyehatkan tubuh di tengah gemericik arus Sungai Opak.</p>
+          <h4 data-i18n="wellness_1_title">Olahraga Air Alami</h4>
+          <p data-i18n="wellness_1_desc">Sensasi olahraga dayung aktif yang melatih otot inti dan menyehatkan tubuh di tengah gemericik arus Sungai Opak.</p>
         </div>
 
         <div class="wellness-card reveal">
           <div class="wellness-icon"><i class="fa-solid fa-mortar-pestle"></i></div>
-          <h4>Tradisi Jamu Canden</h4>
-          <p>Racikan jamu tradisional khas Desa Canden atau kelapa muda segar untuk memulihkan vitalitas tubuh.</p>
+          <h4 data-i18n="wellness_2_title">Tradisi Jamu Canden</h4>
+          <p data-i18n="wellness_2_desc">Racikan jamu tradisional khas Desa Canden atau kelapa muda segar untuk memulihkan vitalitas tubuh.</p>
         </div>
 
         <div class="wellness-card reveal">
           <div class="wellness-icon"><i class="fa-solid fa-leaf"></i></div>
-          <h4>Relaksasi Pikiran</h4>
-          <p>Pemandangan asri pepohonan hijau dan tebing alami sungai yang memberi ketenangan jiwa (refreshing mind &amp; soul).</p>
+          <h4 data-i18n="wellness_3_title">Relaksasi Pikiran</h4>
+          <p data-i18n-html="wellness_3_desc">Pemandangan asri pepohonan hijau dan tebing alami sungai yang memberi ketenangan jiwa (refreshing mind &amp; soul).</p>
         </div>
 
         <div class="wellness-card reveal">
           <div class="wellness-icon"><i class="fa-solid fa-users-gear"></i></div>
-          <h4>Budaya &amp; Kearifan Lokal</h4>
-          <p>Mengenal keramahan warga Desa Canden dan sejarah Sungai Opak dalam balutan wisata edukasi pedesaan.</p>
+          <h4 data-i18n-html="wellness_4_title">Budaya &amp; Kearifan Lokal</h4>
+          <p data-i18n="wellness_4_desc">Mengenal keramahan warga Desa Canden dan sejarah Sungai Opak dalam balutan wisata edukasi pedesaan.</p>
         </div>
       </div>
     </div>
@@ -464,9 +476,9 @@
   <section class="section section-alt" id="pengalaman">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Alur Petualangan</div>
-        <h2>Alur Pengarungan Sungai</h2>
-        <p>Tahapan seru petualangan packrafting dari Starting Point Canden hingga pendaratan di Wisata Potrobayan.</p>
+        <div class="section-eyebrow" data-i18n="exp_eyebrow">Alur Petualangan</div>
+        <h2 data-i18n="exp_title">Alur Pengarungan Sungai</h2>
+        <p data-i18n="exp_desc">Tahapan seru petualangan packrafting dari Starting Point Canden hingga pendaratan di Wisata Potrobayan.</p>
       </div>
 
       <div class="timeline-visual-grid">
@@ -478,8 +490,8 @@
             <span class="timeline-step-pill">01</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>MEETING POINT &amp; KUMPUL</h4>
-            <p>Tiba di Basecamp / Meeting Point Canden, registrasi peserta, dan sambutan hangat tim pemandu lokal.</p>
+            <h4 data-i18n-html="exp_step1_title">MEETING POINT &amp; KUMPUL</h4>
+            <p data-i18n="exp_step1_desc">Tiba di Basecamp / Meeting Point Canden, registrasi peserta, dan sambutan hangat tim pemandu lokal.</p>
           </div>
         </div>
 
@@ -491,8 +503,8 @@
             <span class="timeline-step-pill">02</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>SAFETY BRIEFING</h4>
-            <p>River guide bersertifikasi memberikan pengarahan keselamatan, teknik dasar mendayung paddle, dan simulasi arus sungai.</p>
+            <h4 data-i18n="exp_step2_title">SAFETY BRIEFING</h4>
+            <p data-i18n="exp_step2_desc">River guide bersertifikasi memberikan pengarahan keselamatan, teknik dasar mendayung paddle, dan simulasi arus sungai.</p>
           </div>
         </div>
 
@@ -504,8 +516,8 @@
             <span class="timeline-step-pill">03</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>FITTING GEAR &amp; APD</h4>
-            <p>Pemasangan rompi pelampung (life jacket), helm pelindung bersertifikasi, dan penyerahan double blade paddle standar.</p>
+            <h4 data-i18n-html="exp_step3_title">FITTING GEAR &amp; APD</h4>
+            <p data-i18n="exp_step3_desc">Pemasangan rompi pelampung (life jacket), helm pelindung bersertifikasi, dan penyerahan double blade paddle standar.</p>
           </div>
         </div>
 
@@ -517,8 +529,8 @@
             <span class="timeline-step-pill">04</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>START PENGARUNGAN</h4>
-            <p>Perahu packraft meluncur ke aliran Sungai Opak! Mulai mendayung santai beradaptasi dengan segarnya air sungai.</p>
+            <h4 data-i18n="exp_step4_title">START PENGARUNGAN</h4>
+            <p data-i18n="exp_step4_desc">Perahu packraft meluncur ke aliran Sungai Opak! Mulai mendayung santai beradaptasi dengan segarnya air sungai.</p>
           </div>
         </div>
 
@@ -530,8 +542,8 @@
             <span class="timeline-step-pill">05</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>JERAM SERU &amp; REST AREA</h4>
-            <p>Menaklukkan jeram-jeram ringan yang seru, rehat sejenak di Rest Area, dan menikmati keelokan tebing alam nan asri.</p>
+            <h4 data-i18n-html="exp_step5_title">JERAM SERU &amp; REST AREA</h4>
+            <p data-i18n="exp_step5_desc">Menaklukkan jeram-jeram ringan yang seru, rehat sejenak di Rest Area, dan menikmati keelokan tebing alam nan asri.</p>
           </div>
         </div>
 
@@ -543,8 +555,8 @@
             <span class="timeline-step-pill">06</span>
           </div>
           <div class="timeline-visual-body">
-            <h4>FINISH DI POTROBAYAN</h4>
-            <p>Mendarat di Wisata Potrobayan (pertemuan Sungai Opak &amp; Oya), bilas bersih, dokumentasi, dan penjemputan shuttle kembali.</p>
+            <h4 data-i18n="exp_step6_title">FINISH DI POTROBAYAN</h4>
+            <p data-i18n-html="exp_step6_desc">Mendarat di Wisata Potrobayan (pertemuan Sungai Opak &amp; Oya), bilas bersih, dokumentasi, dan penjemputan shuttle kembali.</p>
           </div>
         </div>
       </div>
@@ -555,9 +567,9 @@
   <section class="section" id="safety">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Prosedur Keselamatan</div>
-        <h2>Standar Keselamatan &amp; SOP Pengarungan</h2>
-        <p>
+        <div class="section-eyebrow" data-i18n="sop_eyebrow">Prosedur Keselamatan</div>
+        <h2 data-i18n-html="sop_title">Standar Keselamatan &amp; SOP Pengarungan</h2>
+        <p data-i18n-html="sop_desc">
           Petualangan yang berkesan berawal dari rasa aman. Kami menerapkan <strong>8 Standar Operasional Prosedur (SOP)</strong> wajib demi keselamatan dan kenyamanan seluruh wisatawan selama pengarungan Sungai Opak.
         </p>
       </div>
@@ -567,29 +579,29 @@
         <div class="sop-pillar-card">
           <div class="sop-pillar-icon"><i class="fa-solid fa-vest"></i></div>
           <div>
-            <h5>APD Bersertifikasi</h5>
-            <p>Helm pelindung &amp; life jacket berdaya apung tinggi.</p>
+            <h5 data-i18n="sop_p1_title">APD Bersertifikasi</h5>
+            <p data-i18n-html="sop_p1_desc">Helm pelindung &amp; life jacket berdaya apung tinggi.</p>
           </div>
         </div>
         <div class="sop-pillar-card">
           <div class="sop-pillar-icon"><i class="fa-solid fa-user-shield"></i></div>
           <div>
-            <h5>River Guide Terlatih</h5>
-            <p>Pemandu dan tim rescue berpengalaman di arus sungai.</p>
+            <h5 data-i18n="sop_p2_title">River Guide Terlatih</h5>
+            <p data-i18n="sop_p2_desc">Pemandu dan tim rescue berpengalaman di arus sungai.</p>
           </div>
         </div>
         <div class="sop-pillar-card">
           <div class="sop-pillar-icon"><i class="fa-solid fa-clipboard-check"></i></div>
           <div>
-            <h5>Safety Briefing</h5>
-            <p>Simulasi dayung dan arahan evakuasi sebelum start.</p>
+            <h5 data-i18n="sop_p3_title">Safety Briefing</h5>
+            <p data-i18n="sop_p3_desc">Simulasi dayung dan arahan evakuasi sebelum start.</p>
           </div>
         </div>
         <div class="sop-pillar-card">
           <div class="sop-pillar-icon"><i class="fa-solid fa-cloud-showers-water"></i></div>
           <div>
-            <h5>Monitoring Arus Realtime</h5>
-            <p>Pemeriksaan debit sungai dan prakiraan cuaca berkala.</p>
+            <h5 data-i18n="sop_p4_title">Monitoring Arus Realtime</h5>
+            <p data-i18n="sop_p4_desc">Pemeriksaan debit sungai dan prakiraan cuaca berkala.</p>
           </div>
         </div>
       </div>
@@ -600,13 +612,13 @@
         <div class="sop-card sop-accent-emerald reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-shield"></i> SOP 01</span>
-            <span class="sop-tag sop-tag-wajib">Wajib</span>
+            <span class="sop-tag sop-tag-wajib" data-i18n="sop_tag_wajib">Wajib</span>
           </div>
           <div class="sop-icon-wrap sop-icon-primary">
             <i class="fa-solid fa-vest"></i>
           </div>
-          <h4>Wajib Mengenakan APD</h4>
-          <p>
+          <h4 data-i18n="sop_1_title">Wajib Mengenakan APD</h4>
+          <p data-i18n-html="sop_1_desc">
             Seluruh peserta <strong>WAJIB</strong> mengenakan Alat Pelindung Diri (APD) resmi berupa <strong>Helm pengaman</strong>, <strong>Life Jacket (rompi pelampung)</strong>, serta <strong>sepatu air atau sandal gunung</strong> yang mengikat kuat selama kegiatan di sungai.
           </p>
         </div>
@@ -615,13 +627,13 @@
         <div class="sop-card sop-accent-blue reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-users"></i> SOP 02</span>
-            <span class="sop-tag sop-tag-info">Kriteria Usia</span>
+            <span class="sop-tag sop-tag-info" data-i18n="sop_tag_age">Kriteria Usia</span>
           </div>
           <div class="sop-icon-wrap sop-icon-blue">
             <i class="fa-solid fa-child-reaching"></i>
           </div>
-          <h4>Usia Minimal 7 Tahun</h4>
-          <p>
+          <h4 data-i18n="sop_2_title">Usia Minimal 7 Tahun</h4>
+          <p data-i18n-html="sop_2_desc">
             Peserta memiliki batas <strong>usia minimal 7 tahun</strong> dalam kondisi fisik sehat dan bugar. Peserta anak-anak wajib mendapatkan pendampingan dari orang tua atau wali dewasa.
           </p>
         </div>
@@ -630,13 +642,13 @@
         <div class="sop-card sop-accent-amber reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-heart"></i> SOP 03</span>
-            <span class="sop-tag sop-tag-perhatian">Himbauan</span>
+            <span class="sop-tag sop-tag-perhatian" data-i18n="sop_tag_warn">Himbauan</span>
           </div>
           <div class="sop-icon-wrap sop-icon-amber">
             <i class="fa-solid fa-person-pregnant"></i>
           </div>
-          <h4>Himbauan Ibu Hamil</h4>
-          <p>
+          <h4 data-i18n="sop_3_title">Himbauan Ibu Hamil</h4>
+          <p data-i18n-html="sop_3_desc">
             Ibu hamil <strong>tidak disarankan</strong> untuk mengikuti aktivitas packrafting ini demi memprioritaskan kesehatan, keselamatan, dan kenyamanan ibu beserta janin.
           </p>
         </div>
@@ -645,13 +657,13 @@
         <div class="sop-card sop-accent-red reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-hand-dots"></i> SOP 04</span>
-            <span class="sop-tag sop-tag-larangan">Kesehatan</span>
+            <span class="sop-tag sop-tag-larangan" data-i18n="sop_tag_health">Kesehatan</span>
           </div>
           <div class="sop-icon-wrap sop-icon-red">
             <i class="fa-solid fa-heart-pulse"></i>
           </div>
-          <h4>Riwayat Penyakit Bawaan</h4>
-          <p>
+          <h4 data-i18n="sop_4_title">Riwayat Penyakit Bawaan</h4>
+          <p data-i18n-html="sop_4_desc">
             Peserta dengan penyakit bawaan seperti <strong>epilepsi, asma, dan penyakit jantung TIDAK DIPERBOLEHKAN</strong> mengikuti aktivitas pengarungan sungai demi mencegah risiko medis darurat di air.
           </p>
         </div>
@@ -660,32 +672,28 @@
         <div class="sop-card sop-accent-orange reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-triangle-exclamation"></i> SOP 05</span>
-            <span class="sop-tag sop-tag-darurat">Darurat</span>
+            <span class="sop-tag sop-tag-darurat" data-i18n="sop_tag_emergency">Darurat</span>
           </div>
           <div class="sop-icon-wrap sop-icon-orange">
             <i class="fa-solid fa-cloud-bolt"></i>
           </div>
-          <h4>Kondisi Penghentian Aktivitas</h4>
-          <p>
-            Aktivitas akan segera <strong>dihentikan atau dialihkan</strong> jika:
+          <h4 data-i18n="sop_5_title">Kondisi Penghentian Aktivitas</h4>
+          <p data-i18n-html="sop_5_desc">
+            Aktivitas akan segera <strong>dihentikan atau dialihkan</strong> jika: 1. Terjadi perubahan iklim ekstrem (angin kencang, badai, luapan arus). 2. Terjadi situasi darurat yang membutuhkan evakuasi.
           </p>
-          <ul class="sop-sublist">
-            <li><strong>1.</strong> Terjadi perubahan iklim secara geologi (angin kencang, hujan badai, dan peningkatan arus secara signifikan).</li>
-            <li><strong>2.</strong> Terjadi insiden yang memungkinkan untuk melakukan evakuasi secara besar-besaran.</li>
-          </ul>
         </div>
 
         <!-- SOP 6 -->
         <div class="sop-card sop-accent-emerald reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-file-shield"></i> SOP 06</span>
-            <span class="sop-tag sop-tag-wajib">Asuransi</span>
+            <span class="sop-tag sop-tag-wajib" data-i18n="sop_tag_insurance">Asuransi</span>
           </div>
           <div class="sop-icon-wrap sop-icon-primary">
             <i class="fa-solid fa-ticket"></i>
           </div>
-          <h4>Simpan Tiket untuk Asuransi</h4>
-          <p>
+          <h4 data-i18n="sop_6_title">Simpan Tiket untuk Asuransi</h4>
+          <p data-i18n-html="sop_6_desc">
             Pengunjung <strong>wajib menyimpan tiket resmi</strong> kegiatan dengan baik sebagai bukti sah kepesertaan guna memproses <strong>klaim asuransi</strong> bila sewaktu-waktu dibutuhkan.
           </p>
         </div>
@@ -694,13 +702,13 @@
         <div class="sop-card sop-accent-red reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-ban"></i> SOP 07</span>
-            <span class="sop-tag sop-tag-larangan">Larangan Keras</span>
+            <span class="sop-tag sop-tag-larangan" data-i18n="sop_tag_prohibit">Larangan Keras</span>
           </div>
           <div class="sop-icon-wrap sop-icon-red">
             <i class="fa-solid fa-ban"></i>
           </div>
-          <h4>Bebas Alkohol &amp; Obat Terlarang</h4>
-          <p>
+          <h4 data-i18n-html="sop_7_title">Bebas Alkohol &amp; Obat Terlarang</h4>
+          <p data-i18n-html="sop_7_desc">
             Peserta <strong>TIDAK BOLEH</strong> mengikuti aktivitas apabila berada di bawah pengaruh minuman beralkohol, narkotika, maupun obat-obatan terlarang atau zat adiktif berbahaya lainnya.
           </p>
         </div>
@@ -709,13 +717,13 @@
         <div class="sop-card sop-accent-red reveal">
           <div class="sop-card-header">
             <span class="sop-num-badge"><i class="fa-solid fa-smoking-ban"></i> SOP 08</span>
-            <span class="sop-tag sop-tag-larangan">Larangan</span>
+            <span class="sop-tag sop-tag-larangan" data-i18n="sop_tag_ban">Larangan</span>
           </div>
           <div class="sop-icon-wrap sop-icon-red">
             <i class="fa-solid fa-ban-smoking"></i>
           </div>
-          <h4>Dilarang Merokok</h4>
-          <p>
+          <h4 data-i18n="sop_8_title">Dilarang Merokok</h4>
+          <p data-i18n-html="sop_8_desc">
             <strong>Dilarang merokok</strong> (rokok tembakau maupun rokok elektrik/vape) selama seluruh rangkaian aktivitas pengarungan sungai berlangsung demi keselamatan dan kenyamanan bersama.
           </p>
         </div>
@@ -728,14 +736,14 @@
             <i class="fa-solid fa-triangle-exclamation"></i>
           </div>
           <div class="sop-alert-content">
-            <h4>Kebijakan &amp; Diskresi Keselamatan River Guide</h4>
-            <p>
+            <h4 data-i18n-html="sop_alert_title">Kebijakan &amp; Diskresi Keselamatan River Guide</h4>
+            <p data-i18n="sop_alert_desc">
               Instruktur dan river guide kami memiliki wewenang penuh untuk menyesuaikan rute, menunda trip, atau membatalkan keikutsertaan peserta yang tidak memenuhi SOP demi keselamatan bersama. Keputusan river guide bersifat mutlak demi proteksi seluruh peserta.
             </p>
           </div>
         </div>
         <div class="sop-alert-action">
-          <a href="https://wa.me/6281260092044?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi%20mengenai%20kondisi%20kesehatan%20dan%20SOP%20Packrafting%20Canden" target="_blank" class="btn btn-accent" data-social-wa>
+          <a href="https://wa.me/6281260092044?text=Halo%20Admin%2C%20saya%20ingin%20konsultasi%20mengenai%20kondisi%20kesehatan%20dan%20SOP%20Packrafting%20Canden" target="_blank" class="btn btn-accent" data-social-wa data-i18n-html="sop_consult_btn">
             <i class="fa-brands fa-whatsapp"></i> Konsultasi Safety
           </a>
         </div>
@@ -747,9 +755,9 @@
   <section class="section section-alt" id="galeri">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Dokumentasi Wisata</div>
-        <h2>Galeri Foto &amp; Momen Seru</h2>
-        <p>Dokumentasi keceriaan dan keindahan panorama alam di sepanjang rute Packrafting Canden.</p>
+        <div class="section-eyebrow" data-i18n="gal_eyebrow">Dokumentasi Wisata</div>
+        <h2 data-i18n-html="gal_title">Galeri Foto &amp; Momen Seru</h2>
+        <p data-i18n="gal_desc">Dokumentasi keceriaan dan keindahan panorama alam di sepanjang rute Packrafting Canden.</p>
       </div>
 
       <div class="gallery-grid">
@@ -819,7 +827,7 @@
       </div>
 
       <div style="text-align:center;margin-top:2.5rem;" class="reveal">
-        <a href="galeri.html" class="btn btn-outline btn-gallery-more">
+        <a href="galeri.html" class="btn btn-outline btn-gallery-more" data-i18n-html="gal_more_btn">
           <i class="fa-solid fa-images"></i> Lihat Semua Foto Galeri &rarr;
         </a>
       </div>
@@ -830,9 +838,9 @@
   <section class="section" id="video">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Video Petualangan</div>
-        <h2>Keseruan di Atas Sungai</h2>
-        <p>Cuplikan keseruan dan keasrian alam saat mendayung packraft di Sungai Opak.</p>
+        <div class="section-eyebrow" data-i18n="video_eyebrow">Video Petualangan</div>
+        <h2 data-i18n="video_title">Keseruan di Atas Sungai</h2>
+        <p data-i18n="video_desc">Cuplikan keseruan dan keasrian alam saat mendayung packraft di Sungai Opak.</p>
       </div>
 
       <div class="video-box reveal-scale">
@@ -840,7 +848,7 @@
           <button class="video-play-btn" id="video-play-btn" aria-label="Putar Video">
             <i class="fa-solid fa-play"></i>
           </button>
-          <p style="margin-top:1.5rem;color:#ffffff;font-size:var(--fs-sm);font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.8);letter-spacing:0.02em;">
+          <p style="margin-top:1.5rem;color:#ffffff;font-size:var(--fs-sm);font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.8);letter-spacing:0.02em;" data-i18n-html="video_play_label">
             <i class="fa-solid fa-circle-play" style="color:var(--accent);margin-right:0.4rem;"></i> Tonton Video Petualangan Packrafting Canden
           </p>
         </div>
@@ -852,9 +860,9 @@
   <section class="section" id="lokasi">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Panduan Rute &amp; Peta</div>
-        <h2>Rute Susur Sungai &amp; Titik Kumpul</h2>
-        <p>Jalur pengarungan air sepanjang 4,5 km (durasi ± 1,5 jam) dari Starting Point Canden menuju Finish di Wisata Potrobayan.</p>
+        <div class="section-eyebrow" data-i18n-html="loc_eyebrow">Panduan Rute &amp; Peta</div>
+        <h2 data-i18n-html="loc_title">Rute Susur Sungai &amp; Titik Kumpul</h2>
+        <p data-i18n="loc_desc">Jalur pengarungan air sepanjang 4,5 km (durasi ± 1,5 jam) dari Starting Point Canden menuju Finish di Wisata Potrobayan.</p>
       </div>
 
       <div class="location-grid">
@@ -862,13 +870,13 @@
           <!-- Card Start -->
           <div class="location-info-card" style="border-left:4px solid #10b981;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-              <span class="badge" style="background:#dcfce7;color:#16a34a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;">TITIK START &amp; MEETING POINT</span>
+              <span class="badge" style="background:#dcfce7;color:#16a34a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;" data-i18n-html="loc_start_badge">TITIK START &amp; MEETING POINT</span>
             </div>
             <h4><i class="fa-solid fa-play text-accent"></i> <span data-display-start-name>Starting Point Susur Sungai Opak</span></h4>
-            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;" data-i18n="loc_start_desc">
               Lokasi titik kumpul, registrasi, safety briefing, dan awal keberangkatan perahu packraft di Desa Canden, Jetis, Bantul.
             </p>
-            <a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" class="btn btn-river btn-sm" data-start-maps>
+            <a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" class="btn btn-river btn-sm" data-start-maps data-i18n-html="loc_start_btn">
               <i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Start
             </a>
           </div>
@@ -876,13 +884,13 @@
           <!-- Card Rest Area -->
           <div class="location-info-card" style="border-left:4px solid #f59e0b;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-              <span class="badge" style="background:#fef3c7;color:#d97706;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;">TITIK REST AREA &amp; OUTBOUND</span>
+              <span class="badge" style="background:#fef3c7;color:#d97706;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;" data-i18n-html="loc_rest_badge">TITIK REST AREA &amp; OUTBOUND</span>
             </div>
             <h4><i class="fa-solid fa-mug-hot" style="color:#f59e0b;"></i> <span data-display-rest-name>Rest Area Packrafting Canden &amp; Outbound Area</span></h4>
-            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;" data-i18n="loc_rest_desc">
               Spot istirahat di pertengahan rute pengarungan susur sungai, rehat sejenak, menikmati kelapa muda segar, dan area outbound alam terbuka tepi kali.
             </p>
-            <a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;" data-rest-maps>
+            <a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a;" data-rest-maps data-i18n-html="loc_rest_btn">
               <i class="fa-solid fa-location-dot"></i> Buka Google Maps Rest Area
             </a>
           </div>
@@ -890,13 +898,13 @@
           <!-- Card Finish -->
           <div class="location-info-card" style="border-left:4px solid #ef4444;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-              <span class="badge" style="background:#fee2e2;color:#dc2626;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;">TITIK FINISH &amp; BILAS</span>
+              <span class="badge" style="background:#fee2e2;color:#dc2626;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.75rem;font-weight:800;" data-i18n-html="loc_finish_badge">TITIK FINISH &amp; BILAS</span>
             </div>
             <h4><i class="fa-solid fa-flag-checkered" style="color:#ef4444;"></i> <span data-display-finish-name>Wisata Potrobayan</span></h4>
-            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;">
+            <p style="font-size:var(--fs-sm);margin-bottom:0.75rem;" data-i18n="loc_finish_desc">
               Titik akhir pendaratan di pertemuan Sungai Opak &amp; Oya, area bilas bersih, dokumentasi, dan penjemputan kembali.
             </p>
-            <a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" class="btn btn-outline btn-sm" data-finish-maps>
+            <a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" class="btn btn-outline btn-sm" data-finish-maps data-i18n-html="loc_finish_btn">
               <i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Finish
             </a>
           </div>
@@ -905,25 +913,25 @@
           <div style="background:#f8fafc;padding:0.9rem 1.25rem;border-radius:var(--radius);border:1px solid #e2e8f0;font-size:var(--fs-xs);color:var(--text);margin-bottom:0.75rem;">
             <div style="margin-bottom:0.35rem;">
               <i class="fa-regular fa-clock text-accent" style="margin-right:0.4rem;"></i>
-              <strong>Jam Operasional:</strong> <span data-info-jam>Setiap Hari: 07.30 – 16.30 WIB</span>
+              <strong data-i18n="loc_hours_label">Jam Operasional:</strong> <span data-info-jam data-i18n="loc_hours_val">Setiap Hari: 07.30 – 16.30 WIB</span>
             </div>
             <div style="margin-bottom:0.35rem;">
               <i class="fa-solid fa-campground text-accent" style="margin-right:0.4rem;"></i>
-              <strong>Basecamp:</strong> <span data-info-basecamp>Toilet, Kamar Mandi Bilas, Tempat Ganti, Mushola, Gazebo, Loker</span>
+              <strong data-i18n="loc_basecamp_label">Basecamp:</strong> <span data-info-basecamp data-i18n="loc_basecamp_val">Toilet, Kamar Mandi Bilas, Tempat Ganti, Mushola, Gazebo, Loker</span>
             </div>
             <div style="margin-bottom:0.35rem;">
               <i class="fa-solid fa-store text-accent" style="margin-right:0.4rem;"></i>
-              <strong>Fasilitas Sekitar:</strong> <span data-info-sekitar>Area Parkir Luas &amp; Aman, Warung Makan Tradisional, Spot Foto Alami Tepi Sungai.</span>
+              <strong data-i18n="loc_surround_label">Fasilitas Sekitar:</strong> <span data-info-sekitar data-i18n-html="loc_surround_val">Area Parkir Luas &amp; Aman, Warung Makan Tradisional, Spot Foto Alami Tepi Sungai.</span>
             </div>
             <div>
               <i class="fa-solid fa-route text-accent" style="margin-right:0.4rem;"></i>
-              <strong>Akses Jalan:</strong> <span data-info-akses>Dapat diakses dengan mobil, motor, maupun bus pariwisata.</span>
+              <strong data-i18n="loc_access_label">Akses Jalan:</strong> <span data-info-akses data-i18n="loc_access_val">Dapat diakses dengan mobil, motor, maupun bus pariwisata.</span>
             </div>
           </div>
 
           <div style="background:var(--river-50);padding:1rem 1.25rem;border-radius:var(--radius);border:1px solid rgba(14,116,144,0.15);font-size:var(--fs-xs);color:var(--river-dark);">
-            <i class="fa-solid fa-van-shuttle" style="margin-right:0.4rem;"></i>
-            <strong>Fasilitas Transportasi:</strong> Disediakan kendaraan penjemputan dari titik finish Potrobayan kembali ke starting point Canden.
+            <span data-i18n-html="loc_transport_banner"><i class="fa-solid fa-van-shuttle" style="margin-right:0.4rem;"></i>
+            <strong>Fasilitas Transportasi:</strong> Disediakan kendaraan penjemputan dari titik finish Potrobayan kembali ke starting point Canden.</span>
           </div>
         </div>
 
@@ -934,28 +942,28 @@
               <i class="fa-solid fa-water"></i>
               <div>
                 <strong>Sungai Opak</strong>
-                <span>Alur Alami Bantul</span>
+                <span data-i18n="loc_metrics_river_sub">Alur Alami Bantul</span>
               </div>
             </div>
             <div class="route-metric-item">
               <i class="fa-solid fa-arrows-left-right"></i>
               <div>
                 <strong>4,5 KM</strong>
-                <span>Jarak Pengarungan</span>
+                <span data-i18n="loc_metrics_dist_sub">Jarak Pengarungan</span>
               </div>
             </div>
             <div class="route-metric-item">
               <i class="fa-regular fa-clock"></i>
               <div>
                 <strong>± 1,5 Jam</strong>
-                <span>Durasi Rata-rata</span>
+                <span data-i18n="loc_metrics_dur_sub">Durasi Rata-rata</span>
               </div>
             </div>
             <div class="route-metric-item">
               <i class="fa-solid fa-shield-halved"></i>
               <div>
                 <strong>Grade I – II</strong>
-                <span>Aman &amp; Ramah Pemula</span>
+                <span data-i18n-html="loc_metrics_grade_sub">Aman &amp; Ramah Pemula</span>
               </div>
             </div>
           </div>
@@ -968,26 +976,26 @@
           <!-- Area Bawah Peta: Interactive Journey Guide & Direct Shortcuts -->
           <div class="route-journey-guide">
             <div class="journey-header">
-              <h4><i class="fa-solid fa-map-location-dot" style="color:#0891b2;margin-right:0.4rem;"></i> 3 Titik Kunci Pengarungan</h4>
+              <h4 data-i18n-html="loc_3points_title"><i class="fa-solid fa-map-location-dot" style="color:#0891b2;margin-right:0.4rem;"></i> 3 Titik Kunci Pengarungan</h4>
               <span class="journey-tag">Canden &rarr; Potrobayan</span>
             </div>
             <div class="journey-steps-row">
               <a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" class="journey-step-box step-start" data-start-maps>
-                <div class="journey-step-badge"><i class="fa-solid fa-play"></i> 1. START</div>
-                <div class="journey-step-title">Starting Point Canden</div>
-                <div class="journey-step-desc">Meeting point &amp; briefing</div>
+                <div class="journey-step-badge"><i class="fa-solid fa-play"></i> <span data-i18n="loc_step1_badge">1. START</span></div>
+                <div class="journey-step-title" data-i18n="loc_step1_title">Starting Point Canden</div>
+                <div class="journey-step-desc" data-i18n-html="loc_step1_desc">Meeting point &amp; briefing</div>
               </a>
               <div class="journey-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               <a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" class="journey-step-box step-rest" data-rest-maps>
-                <div class="journey-step-badge"><i class="fa-solid fa-mug-hot"></i> 2. REST AREA</div>
-                <div class="journey-step-title">Rest Area &amp; Outbound</div>
-                <div class="journey-step-desc">Rehat kelapa muda</div>
+                <div class="journey-step-badge"><i class="fa-solid fa-mug-hot"></i> <span data-i18n="loc_step2_badge">2. REST AREA</span></div>
+                <div class="journey-step-title" data-i18n-html="loc_step2_title">Rest Area &amp; Outbound</div>
+                <div class="journey-step-desc" data-i18n="loc_step2_desc">Rehat kelapa muda</div>
               </a>
               <div class="journey-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               <a href="https://maps.app.goo.gl/iHi3HfNyZoqmmFkf8" target="_blank" class="journey-step-box step-finish" data-finish-maps>
-                <div class="journey-step-badge"><i class="fa-solid fa-flag-checkered"></i> 3. FINISH</div>
-                <div class="journey-step-title">Wisata Potrobayan</div>
-                <div class="journey-step-desc">Bilas &amp; penjemputan</div>
+                <div class="journey-step-badge"><i class="fa-solid fa-flag-checkered"></i> <span data-i18n="loc_step3_badge">3. FINISH</span></div>
+                <div class="journey-step-title" data-i18n="loc_step3_title">Wisata Potrobayan</div>
+                <div class="journey-step-desc" data-i18n="loc_step3_desc">Bilas &amp; penjemputan</div>
               </a>
             </div>
           </div>
@@ -1000,20 +1008,20 @@
   <section class="section section-alt" id="faq">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Bantuan &amp; Panduan</div>
-        <h2>Pertanyaan yang Sering Diajukan</h2>
-        <p>Informasi seputar persiapan, kriteria peserta, dan standar keselamatan susur sungai.</p>
+        <div class="section-eyebrow" data-i18n-html="faq_eyebrow">Bantuan &amp; Panduan</div>
+        <h2 data-i18n="faq_title">Pertanyaan yang Sering Diajukan</h2>
+        <p data-i18n="faq_desc">Informasi seputar persiapan, kriteria peserta, dan standar keselamatan susur sungai.</p>
       </div>
 
       <div class="faq-container reveal">
         <!-- FAQ 1 -->
         <div class="faq-item active">
           <div class="faq-header">
-            <span>Di mana lokasi titik kumpul (meeting point) dan start finish?</span>
+            <span data-i18n="faq_q1">Di mana lokasi titik kumpul (meeting point) dan start finish?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body" style="max-height: 350px;">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n-html="faq_a1">
               Tersedia <strong>5 pilihan Meeting Point</strong> resmi:<br>
               &bull; Rumah Makan Kongkow<br>
               &bull; Rumah Makan Kopi Klotok Paris<br>
@@ -1029,11 +1037,11 @@
         <!-- FAQ 2 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Berapa jarak dan durasi rute susur sungai?</span>
+            <span data-i18n="faq_q2">Berapa jarak dan durasi rute susur sungai?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n-html="faq_a2">
               Rute pengarungan menyusuri Sungai Opak Canden menempuh jarak <strong>4,5 kilometer</strong> dengan durasi pengarungan sekitar <strong>1,5 jam</strong>. Arus air aman namun cukup memacu adrenalin dengan pemandangan pedesaan asri dan menyejukkan pikiran.
             </div>
           </div>
@@ -1042,11 +1050,11 @@
         <!-- FAQ 3 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Apakah pemula boleh ikut packrafting?</span>
+            <span data-i18n="faq_q3">Apakah pemula boleh ikut packrafting?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n="faq_a3">
               Tentu saja! Aktivitas Packrafting Canden dirancang sangat ramah untuk pemula. Sebelum turun ke sungai, tim instruktur kami akan memberikan safety briefing serta latihan dasar mendayung dan mengendalikan perahu.
             </div>
           </div>
@@ -1055,11 +1063,11 @@
         <!-- FAQ 4 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Apakah peserta harus bisa berenang?</span>
+            <span data-i18n="faq_q4">Apakah peserta harus bisa berenang?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n="faq_a4">
               Tidak wajib. Seluruh peserta diwajibkan menggunakan rompi pelampung (life jacket) berdaya apung tinggi berstandar keselamatan dan selalu didampingi oleh river guide selama berada di air.
             </div>
           </div>
@@ -1068,11 +1076,11 @@
         <!-- FAQ 5 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Berapa minimal usia peserta yang diperbolehkan?</span>
+            <span data-i18n="faq_q5">Berapa minimal usia peserta yang diperbolehkan?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n-html="faq_a5">
               Sesuai ketentuan, kapasitas perahu adalah 1 orang dewasa. Batas usia minimal mengayuh mandiri adalah <strong>12 tahun</strong>. Bagi anak-anak (usia minimal <strong>7 tahun</strong> sesuai SOP APD), dapat melakukan <strong>tandem</strong> dalam satu perahu dengan pendampingan orang tua.
             </div>
           </div>
@@ -1081,11 +1089,11 @@
         <!-- FAQ 6 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Apa saja yang harus dibawa peserta?</span>
+            <span data-i18n="faq_q6">Apa saja yang harus dibawa peserta?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n="faq_a6">
               Bawalah pakaian ganti lengkap siap basah, sandal gunung / sepatu air yang mengikat kuat di kaki (sesuai SOP APD), kantong waterproof jika membawa smartphone, serta perlengkapan mandi pribadi.
             </div>
           </div>
@@ -1094,11 +1102,11 @@
         <!-- FAQ 7 -->
         <div class="faq-item">
           <div class="faq-header">
-            <span>Apa saja SOP keselamatan &amp; syarat kesehatan yang wajib dipatuhi?</span>
+            <span data-i18n-html="faq_q7">Apa saja SOP keselamatan &amp; syarat kesehatan yang wajib dipatuhi?</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body">
-            <div class="faq-body-inner">
+            <div class="faq-body-inner" data-i18n="faq_a7">
               Setiap peserta wajib mematuhi 8 Standar Operasional Prosedur (SOP) keselamatan Packrafting Canden:
               <ul style="margin-top:0.5rem;padding-left:1.25rem;line-height:1.7;">
                 <li><strong>1. Wajib Mengenakan APD:</strong> Helm pelindung, life jacket (pelampung), dan sepatu air / sandal gunung.</li>
@@ -1122,9 +1130,9 @@
   <section class="section" id="testimoni">
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-eyebrow">Ulasan &amp; Rating Wisatawan</div>
-        <h2>Kesan &amp; Cerita Wisatawan</h2>
-        <p>Ulasan jujur dari wisatawan yang telah merasakan sensasi petualangan Packrafting di Sungai Opak Canden.</p>
+        <div class="section-eyebrow" data-i18n-html="testi_eyebrow">Ulasan &amp; Rating Wisatawan</div>
+        <h2 data-i18n-html="testi_title">Kesan &amp; Cerita Wisatawan</h2>
+        <p data-i18n="testi_desc">Ulasan jujur dari wisatawan yang telah merasakan sensasi petualangan Packrafting di Sungai Opak Canden.</p>
         
         <!-- Google Reviews Rating Summary Header -->
         <div class="google-rating-summary">
@@ -1138,9 +1146,9 @@
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
             </div>
-            <span class="google-reviews-count">&bull; 85+ Ulasan Google Terverifikasi</span>
+            <span class="google-reviews-count" data-i18n="testi_badge_reviews">&bull; 85+ Ulasan Google Terverifikasi</span>
           </div>
-          <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-ulasan">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-ulasan" data-i18n-html="testi_btn_rate">
             <i class="fa-brands fa-google"></i> Beri Rating Google
           </button>
         </div>
@@ -1228,7 +1236,7 @@
       </div>
 
       <div class="testi-slider-meta">
-        <span class="testi-swipe-hint"><i class="fa-solid fa-arrows-left-right"></i> Geser / swipe ke kanan &amp; kiri untuk melihat ulasan lainnya</span>
+        <span class="testi-swipe-hint" data-i18n-html="testi_swipe_hint"><i class="fa-solid fa-arrows-left-right"></i> Geser / swipe ke kanan &amp; kiri untuk melihat ulasan lainnya</span>
       </div>
     </div>
   </section>
@@ -1237,41 +1245,41 @@
   <section class="cta-booking" id="booking">
     <div class="container">
       <div class="reveal">
-        <div class="section-eyebrow" style="color:#f59e0b;"><i class="fa-solid fa-calendar-check"></i> Reservasi &amp; Cara Booking</div>
-        <h2>Cara Mudah Reservasi Trip</h2>
-        <p>Hanya 3 langkah praktis untuk mengamankan jadwal petualangan susur sungai Anda di Sungai Opak!</p>
+        <div class="section-eyebrow" style="color:#f59e0b;" data-i18n-html="book_eyebrow"><i class="fa-solid fa-calendar-check"></i> Reservasi &amp; Cara Booking</div>
+        <h2 data-i18n="book_title">Cara Mudah Reservasi Trip</h2>
+        <p data-i18n="book_desc">Hanya 3 langkah praktis untuk mengamankan jadwal petualangan susur sungai Anda di Sungai Opak!</p>
         
         <!-- 3 Booking Steps -->
         <div class="booking-steps-grid">
           <div class="booking-step-card">
             <div class="booking-step-num">1</div>
             <div class="booking-step-content">
-              <h4>Hubungi Admin</h4>
-              <p>Hubungi WhatsApp Admin di <strong data-display-wa>0812 6009 2044</strong> untuk konfirmasi tanggal, paket, &amp; kuota perahu.</p>
+              <h4 data-i18n="book_step1_title">Hubungi Admin</h4>
+              <p data-i18n-html="book_step1_desc">Hubungi WhatsApp Admin untuk konfirmasi tanggal, paket, &amp; kuota perahu.</p>
             </div>
           </div>
           <div class="booking-step-card">
             <div class="booking-step-num">2</div>
             <div class="booking-step-content">
-              <h4>Pembayaran DP 50%</h4>
-              <p>Lakukan pembayaran DP 50% per paket untuk mengunci jadwal pengarungan Anda.</p>
+              <h4 data-i18n="book_step2_title">Pembayaran DP 50%</h4>
+              <p data-i18n="book_step2_desc">Lakukan pembayaran DP 50% per paket untuk mengunci jadwal pengarungan Anda.</p>
             </div>
           </div>
           <div class="booking-step-card">
             <div class="booking-step-num">3</div>
             <div class="booking-step-content">
-              <h4>Pelunasan Maks. H-1</h4>
-              <p>Pelunasan dilakukan maksimal <strong>H-1 kegiatan</strong> sebelum river guide menyambut di meeting point.</p>
+              <h4 data-i18n="book_step3_title">Pelunasan Maks. H-1</h4>
+              <p data-i18n-html="book_step3_desc">Pelunasan dilakukan maksimal <strong>H-1 kegiatan</strong> sebelum river guide menyambut di meeting point.</p>
             </div>
           </div>
         </div>
 
         <!-- Action Buttons & Contact Card -->
         <div class="cta-booking-card">
-          <h3 class="cta-booking-title">
+          <h3 class="cta-booking-title" data-i18n="book_quote">
             &ldquo;Ciptakan Kenangan Tak Terlupakan Bersama Kami di Sungai Opak Canden!&rdquo;
           </h3>
-          <p class="cta-booking-subtitle">
+          <p class="cta-booking-subtitle" data-i18n="book_quote_sub">
             Cocok untuk Anda yang sedang berlibur di Jogja bersama pasangan, teman, keluarga, ataupun tim kerja.
           </p>
 
@@ -1288,7 +1296,7 @@
             <a href="https://instagram.com/candenpackraft" target="_blank" class="cta-booking-meta-pill" data-social-ig>
               <i class="fa-brands fa-instagram"></i> Instagram: <strong>@candenpackraft</strong>
             </a>
-            <span class="cta-booking-meta-pill">
+            <span class="cta-booking-meta-pill" data-i18n-html="book_insurance_pill">
               <i class="fa-solid fa-shield-halved"></i> Terlindungi Asuransi &amp; SOP Resmi
             </span>
           </div>
@@ -1297,7 +1305,7 @@
         <div style="margin-top:2rem;">
           <div class="booking-sop-note">
             <i class="fa-solid fa-shield-halved"></i>
-            <span>Setiap peserta terlindungi asuransi resmi &amp; wajib mematuhi 8 SOP Keselamatan Packrafting Canden.</span>
+            <span data-i18n-html="book_sop_note">Setiap peserta terlindungi asuransi resmi &amp; wajib mematuhi 8 SOP Keselamatan Packrafting Canden.</span>
           </div>
         </div>
       </div>
@@ -1309,7 +1317,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col footer-brand">
-          <h4>Didukung Oleh</h4>
+          <h4 data-i18n="footer_support_title">Didukung Oleh</h4>
           <div class="footer-support-brand-grid">
             <div class="footer-support-card-mini" title="Pemerintah Kabupaten Bantul">
               <img src="assets/images/support/Logo Kabupaten Bantul PNG.png" alt="Pemerintah Kabupaten Bantul" loading="lazy">
@@ -1336,17 +1344,17 @@
               <img src="assets/images/support/02.-JRP-New-Conf-Web.png" alt="Jasa Raharja Putera Insurance" loading="lazy">
             </div>
           </div>
-          <p>
+          <p data-i18n="footer_desc">
             Destinasi wisata petualangan susur Sungai Opak dengan konsep Wellness Tourism pertama di Yogyakarta dari Starting Point Canden (Jetis) menuju Finish di Wisata Potrobayan, Bantul.
           </p>
-          <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:0.5rem;">
+          <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:0.5rem;" data-i18n="footer_route_tag">
             Rute Pengarungan Sungai Opak 4,5 km &bull; Canden ke Potrobayan
           </p>
         </div>
 
 
         <div class="footer-col">
-          <h4>Lokasi &amp; Peta</h4>
+          <h4 data-i18n-html="footer_nav_title">Lokasi &amp; Peta</h4>
           <ul class="footer-links">
             <li><a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" data-start-maps><i class="fa-solid fa-play text-accent"></i> Starting Point Canden</a></li>
             <li><a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" data-rest-maps><i class="fa-solid fa-mug-hot" style="color:#f59e0b;"></i> Rest Area &amp; Outbound</a></li>
@@ -1357,9 +1365,9 @@
         </div>
 
         <div class="footer-col">
-          <h4>Hubungi Kami</h4>
+          <h4 data-i18n="footer_contact_title">Hubungi Kami</h4>
           <p style="font-size:var(--fs-sm);margin-bottom:0.5rem;">
-            <i class="fa-solid fa-location-dot text-accent" style="margin-right:0.4rem;"></i> Starting Point Susur Sungai Opak, Canden, Bantul
+            <i class="fa-solid fa-location-dot text-accent" style="margin-right:0.4rem;"></i> <span data-i18n="footer_address">Starting Point Susur Sungai Opak, Canden, Bantul</span>
           </p>
           <p style="font-size:var(--fs-sm);margin-bottom:0.5rem;">
             <i class="fa-brands fa-whatsapp text-accent" style="margin-right:0.4rem;"></i> <span data-display-wa>0812 6009 2044</span>
@@ -1378,8 +1386,8 @@
       </div>
 
       <div class="footer-bottom">
-        <span>&copy; 2026 Packrafting Canden. All Rights Reserved.</span>
-        <span>Rute Susur Sungai Opak: Canden &rarr; Wisata Potrobayan, Bantul.</span>
+        <span data-i18n="footer_rights">&copy; 2026 Packrafting Canden. All Rights Reserved.</span>
+        <span data-i18n="footer_bottom_route">Rute Susur Sungai Opak: Canden &rarr; Wisata Potrobayan, Bantul.</span>
       </div>
     </div>
   </footer>
@@ -1390,7 +1398,7 @@
   <!-- Floating WhatsApp Button -->
   <a href="https://wa.me/6281260092044" class="float-wa-btn" id="float-wa-btn" aria-label="Chat WhatsApp Booking" data-social-wa>
     <i class="fa-brands fa-whatsapp"></i>
-    <span>Booking via WhatsApp</span>
+    <span data-i18n="float_wa_text">Booking via WhatsApp</span>
   </a>
 
   <!-- Lightbox Modal -->
@@ -1434,6 +1442,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/js/data.js?v=4.7"></script>
+  <script src="assets/js/i18n.js?v=4.7"></script>
   <script src="assets/js/main.js?v=4.6"></script>
 </body>
 </html>
