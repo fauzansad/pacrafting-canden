@@ -44,17 +44,17 @@
       </ul>
 
       <div class="nav-actions">
-        <div class="lang-switcher" id="lang-switcher" role="group" aria-label="Pilih Bahasa">
-          <button class="lang-btn active" id="lang-id" data-lang="id" aria-label="Bahasa Indonesia" title="Bahasa Indonesia">
+        <div class="lang-switcher" id="lang-switcher" role="group" aria-label="Language Selector">
+          <button type="button" class="lang-btn active" id="lang-id" data-lang="id" aria-label="Bahasa Indonesia" title="Bahasa Indonesia">
             <span class="lang-flag">&#127470;&#127465;</span>
             <span class="lang-code">ID</span>
           </button>
-          <button class="lang-btn" id="lang-en" data-lang="en" aria-label="English" title="English">
+          <button type="button" class="lang-btn" id="lang-en" data-lang="en" aria-label="English" title="English">
             <span class="lang-flag">&#127468;&#127463;</span>
             <span class="lang-code">EN</span>
           </button>
         </div>
-        <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu">
+        <button class="nav-toggle" id="nav-toggle" aria-label="Buka Menu" data-i18n-aria="nav_toggle_menu">
           <span></span>
           <span></span>
           <span></span>
@@ -153,7 +153,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col footer-brand">
-          <h4>Didukung Oleh</h4>
+          <h4 data-i18n="footer_support_title">Didukung Oleh</h4>
           <div class="footer-support-brand-grid">
             <div class="footer-support-card-mini" title="Pemerintah Kabupaten Bantul">
               <img src="assets/images/support/Logo Kabupaten Bantul PNG.png" alt="Pemerintah Kabupaten Bantul" loading="lazy">
@@ -180,16 +180,16 @@
               <img src="assets/images/support/02.-JRP-New-Conf-Web.png" alt="Jasa Raharja Putera Insurance" loading="lazy">
             </div>
           </div>
-          <p>
+          <p data-i18n="footer_desc">
             Destinasi wisata petualangan susur Sungai Opak dengan konsep Wellness Tourism pertama di Yogyakarta dari Starting Point Canden (Jetis) menuju Finish di Wisata Potrobayan, Bantul.
           </p>
-          <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:0.5rem;">
+          <p style="font-size:var(--fs-xs);color:var(--text-lighter);margin-top:0.5rem;" data-i18n="footer_route_tag">
             Rute Pengarungan Sungai Opak 4,5 km &bull; Canden ke Potrobayan
           </p>
         </div>
 
         <div class="footer-col">
-          <h4>Lokasi &amp; Peta</h4>
+          <h4 data-i18n-html="footer_nav_title">Lokasi &amp; Peta</h4>
           <ul class="footer-links">
             <li><a href="https://maps.app.goo.gl/GpmTYW2wj7u5ADnQ7" target="_blank" data-start-maps><i class="fa-solid fa-play text-accent"></i> Starting Point Canden</a></li>
             <li><a href="https://maps.app.goo.gl/9zPZVeSV58w2fNMF7" target="_blank" data-rest-maps><i class="fa-solid fa-mug-hot" style="color:#f59e0b;"></i> Rest Area &amp; Outbound</a></li>
@@ -200,9 +200,9 @@
         </div>
 
         <div class="footer-col">
-          <h4>Hubungi Kami</h4>
+          <h4 data-i18n="footer_contact_title">Hubungi Kami</h4>
           <p style="font-size:var(--fs-sm);margin-bottom:0.5rem;">
-            <i class="fa-solid fa-location-dot text-accent" style="margin-right:0.4rem;"></i> Starting Point Susur Sungai Opak, Canden, Bantul
+            <i class="fa-solid fa-location-dot text-accent" style="margin-right:0.4rem;"></i> <span data-i18n="footer_address">Starting Point Susur Sungai Opak, Canden, Bantul</span>
           </p>
           <p style="font-size:var(--fs-sm);margin-bottom:0.5rem;">
             <i class="fa-brands fa-whatsapp text-accent" style="margin-right:0.4rem;"></i> <span data-display-wa>0812 6009 2044</span>
@@ -221,8 +221,8 @@
       </div>
 
       <div class="footer-bottom">
-        <span>&copy; 2026 Packrafting Canden. All Rights Reserved.</span>
-        <span>Rute Susur Sungai Opak: Canden &rarr; Wisata Potrobayan, Bantul.</span>
+        <span data-i18n="footer_rights">&copy; 2026 Packrafting Canden. All Rights Reserved.</span>
+        <span data-i18n="footer_bottom_route">Rute Susur Sungai Opak: Canden &rarr; Wisata Potrobayan, Bantul.</span>
       </div>
     </div>
   </footer>
@@ -239,7 +239,7 @@
   <!-- Floating WA -->
   <a href="https://wa.me/6281260092044" class="float-wa-btn" id="float-wa-btn" aria-label="Chat WhatsApp Booking" data-social-wa>
     <i class="fa-brands fa-whatsapp"></i>
-    <span>Booking via WhatsApp</span>
+    <span data-i18n="float_wa_text">Booking via WhatsApp</span>
   </a>
 
   <script src="assets/js/data.js?v=4.5"></script>

@@ -629,9 +629,11 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Auto-close on resize to desktop
+    // Auto-close on resize to desktop.
+    // 1100px matches the CSS breakpoint where the inline menu is restored;
+    // between 769px and 1100px the nav is still a drawer, so keep it open there.
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 768 && navMenu.classList.contains('active')) {
+      if (window.innerWidth > 1100 && navMenu.classList.contains('active')) {
         closeMenu();
       }
     }, { passive: true });
@@ -1711,31 +1713,54 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    // Pause on hover
-    slider.addEventListener('mouseenter', stopAutoSlide);
-    slider.addEventListener('mouseleave', startAutoSlide);
+    // Swipe/hover target is the whole .hero section, not #hero-slider.
+    // .hero-content sits on top of the slider (z-index 3 vs 1), so a finger
+    // starting on the headline never reached the slider's own listeners.
+    // Capture phase makes these fire no matter which child was touched.
+    const heroEl = slider.closest('.hero') || slider;
+
+    // Pause on hover, but only for a real mouse. On touch devices the browser
+    // fires emulated mouseenter after a tap and may never fire mouseleave, which
+    // used to leave the carousel permanently frozen after the first tap.
+    // pointerenter/pointerleave expose pointerType, so touch never matches.
+    heroEl.addEventListener('pointerenter', function (e) {
+      if (e.pointerType === 'mouse') stopAutoSlide();
+    });
+    heroEl.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'mouse') startAutoSlide();
+    });
 
     // Touch swipe support (Swipe left -> next slide right-to-left)
     let touchStartX = 0;
+    let touchStartY = 0;
     let touchEndX = 0;
 
-    slider.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
+    heroEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
       stopAutoSlide();
-    }, { passive: true });
+    }, { passive: true, capture: true });
 
-    slider.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 40) {
-        if (diff < 0) {
+    heroEl.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchEndX - touchStartX;
+      const diffY = e.changedTouches[0].clientY - touchStartY;
+      // Horizontal intent only, so vertical scrolling is never hijacked.
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0) {
           nextSlide();
         } else {
           prevSlide();
         }
       }
       startAutoSlide();
-    }, { passive: true });
+    }, { passive: true, capture: true });
+
+    // A cancelled gesture (incoming call, browser UI pull-down) never fires
+    // touchend, so without this the carousel would stay stopped forever.
+    heroEl.addEventListener('touchcancel', () => {
+      startAutoSlide();
+    }, { passive: true, capture: true });
 
     // Initialize track position
     moveToSlide(0, false);
