@@ -418,11 +418,9 @@ p {
 
 .navbar.scrolled {
   background: rgba(250, 253, 251, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 0 0.75rem;
-  box-shadow: 0 4px 24px rgba(27, 67, 50, 0.08);
-  border-bottom: 1px solid rgba(45, 106, 79, 0.15);
+  box-shadow: 0 1px 0 rgba(27, 67, 50, 0.14);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.12);
 }
 
 .navbar.scrolled::before {
@@ -443,17 +441,7 @@ p {
     background: transparent !important;
   }
 
-  /* Any link currently covered by the green indicator pill */
-  .navbar.scrolled .nav-link.has-indicator,
-  .navbar.scrolled .nav-link:hover {
-    color: var(--white) !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  /* Active link when cursor is hovering over another link: stays sharp nature green on cream background */
-  .navbar.scrolled .nav-menu:hover .nav-link.active:not(:hover):not(.has-indicator),
-  .navbar.scrolled .nav-link.active:not(.has-indicator) {
+  .navbar.scrolled .nav-link.active {
     color: var(--nature) !important;
     font-weight: 800;
   }
@@ -590,7 +578,7 @@ p {
   transform: scale(1.05);
 }
 
-/* ---- Navbar Menu & Sliding Greenish Indicator ---- */
+/* ---- Navbar Menu ---- */
 .nav-menu {
   position: relative;
   display: flex;
@@ -600,59 +588,17 @@ p {
 
 @media (min-width: 769px) {
   .nav-menu {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 0.28rem 0.35rem;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.25);
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0;
+    transition: color 0.2s ease;
     flex-shrink: 0;
   }
 
   .navbar.scrolled .nav-menu {
-    background: rgba(240, 247, 243, 0.88); /* Fresh organic nature pill track */
-    border-color: rgba(45, 106, 79, 0.2);
-    box-shadow: 0 2px 12px rgba(27, 67, 50, 0.06), inset 0 1px 2px rgba(45, 106, 79, 0.05);
+    background: transparent;
   }
 
-  /* Sliding Greenish Indicator Pill */
   .nav-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: var(--radius-full);
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-    transition: 
-      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-      width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.25s ease,
-      background 0.35s ease,
-      box-shadow 0.35s ease,
-      border-color 0.35s ease;
-    
-    /* Greenish nature emerald translucent glow on dark hero */
-    background: linear-gradient(135deg, rgba(45, 106, 79, 0.88) 0%, rgba(82, 183, 136, 0.78) 100%);
-    border: 1px solid rgba(82, 183, 136, 0.65);
-    box-shadow: 
-      0 4px 18px rgba(27, 67, 50, 0.4),
-      0 0 14px rgba(82, 183, 136, 0.35),
-      inset 0 1px 1.5px rgba(255, 255, 255, 0.4);
-  }
-
-  .navbar.scrolled .nav-indicator {
-    /* Rich lush forest green on light scrolled navbar */
-    background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
-    border: 1px solid rgba(45, 106, 79, 0.9);
-    box-shadow: 
-      0 4px 16px rgba(27, 67, 50, 0.3),
-      0 2px 6px rgba(45, 106, 79, 0.25),
-      inset 0 1px 1.5px rgba(255, 255, 255, 0.3);
+    display: none;
   }
 
   .nav-menu li {
@@ -667,8 +613,8 @@ p {
     font-family: var(--font-heading);
     font-size: var(--fs-sm);
     font-weight: 700;
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--radius-full);
+    padding: 0.35rem 0.7rem;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -679,8 +625,8 @@ p {
   }
 
   .nav-link:hover,
-  .nav-link.has-indicator {
-    color: #ffffff !important;
+  .nav-link.active {
+    color: var(--white) !important;
     background: transparent !important;
   }
 }
@@ -690,13 +636,12 @@ p {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 2.5px;
+  height: 2px;
   width: 0%;
-  background: linear-gradient(90deg, #1b4332 0%, #2d6a4f 40%, #52b788 80%, #38a3a5 100%);
+  background: var(--nature);
   opacity: 0;
   transition: opacity 0.3s ease, width 0.08s linear;
   pointer-events: none;
-  box-shadow: 0 0 8px rgba(82, 183, 136, 0.6);
 }
 
 .navbar.scrolled .nav-scroll-progress {
@@ -714,21 +659,17 @@ p {
 .lang-switcher {
   display: inline-flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius-full);
-  padding: 3px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 2px;
+  transition: border-color 0.2s ease;
   user-select: none;
 }
 
 .navbar.scrolled .lang-switcher {
-  background: rgba(240, 247, 243, 0.95);
-  border-color: rgba(45, 106, 79, 0.25);
-  box-shadow: 0 2px 8px rgba(27, 67, 50, 0.08);
+  background: transparent;
+  border-color: rgba(45, 106, 79, 0.3);
 }
 
 .lang-btn {
@@ -742,9 +683,9 @@ p {
   font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: color 0.2s ease, background 0.2s ease;
   line-height: 1;
 }
 
@@ -763,9 +704,8 @@ p {
 }
 
 .lang-btn.active {
-  background: linear-gradient(135deg, #ea580c 0%, #16a34a 100%) !important;
+  background: var(--nature) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
 }
 
 .lang-flag {
