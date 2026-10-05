@@ -489,6 +489,10 @@ document.addEventListener('DOMContentLoaded', function () {
     return bar;
   })();
 
+  // Throttle to one run per animation frame. These handlers read scrollHeight /
+  // offsetTop / offsetHeight, so running them on every scroll tick forced
+  // synchronous layout and caused jank on low-end phones.
+  let navbarRafId = null;
   function checkNavbar() {
     if (!navbar) return;
     if (window.scrollY > 50) {
@@ -504,9 +508,62 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function requestNavbarCheck() {
+    if (navbarRafId !== null) return;
+    navbarRafId = requestAnimationFrame(function () {
+      navbarRafId = null;
+      checkNavbar();
+    });
+  }
+
   if (navbar) {
-    window.addEventListener('scroll', checkNavbar, { passive: true });
+    window.addEventListener('scroll', requestNavbarCheck, { passive: true });
     checkNavbar();
+    // The mobile URL bar collapsing changes innerHeight without a scroll event,
+    // which left the progress bar stale.
+    window.addEventListener('resize', requestNavbarCheck, { passive: true });
+    window.addEventListener('orientationchange', requestNavbarCheck, { passive: true });
+  }
+
+  // ---- Back to Top (desa pages) ----
+  const backToTop = document.getElementById('back-to-top');
+  if (backToTop) {
+    let backToTopRafId = null;
+    function requestBackToTop() {
+      if (backToTopRafId !== null) return;
+      backToTopRafId = requestAnimationFrame(function () {
+        backToTopRafId = null;
+        backToTop.classList.toggle('visible', window.scrollY > 320);
+      });
+    }
+    window.addEventListener('scroll', requestBackToTop, { passive: true });
+    backToTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    requestBackToTop();
+  }
+
+  // ---- Demografi bar widths (profil.html uses data-width) ----
+  const demoFills = document.querySelectorAll('.demo-bar-fill[data-width]');
+  if (demoFills.length > 0) {
+    function fillDemoBars() {
+      demoFills.forEach(function (el) {
+        el.style.width = Math.min(100, Math.max(0, parseFloat(el.getAttribute('data-width')) || 0)) + '%';
+      });
+    }
+    if (typeof IntersectionObserver !== 'undefined') {
+      const demoObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            fillDemoBars();
+            demoObserver.disconnect();
+          }
+        });
+      }, { threshold: 0.2 });
+      demoFills.forEach(function (el) { demoObserver.observe(el); });
+    } else {
+      fillDemoBars();
+    }
   }
 
   const navMenu = document.getElementById('nav-menu');
@@ -561,7 +618,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  window.addEventListener('scroll', updateActiveNavLink, { passive: true });
+  // Same rAF throttle as the navbar: this also reads offsetTop/offsetHeight for
+  // every tracked section on each scroll tick.
+  let spyRafId = null;
+  function requestActiveNavLink() {
+    if (spyRafId !== null) return;
+    spyRafId = requestAnimationFrame(function () {
+      spyRafId = null;
+      updateActiveNavLink();
+    });
+  }
+
+  window.addEventListener('scroll', requestActiveNavLink, { passive: true });
   updateActiveNavLink();
 
   // ---- 5. Mobile Menu Toggle ----
@@ -726,7 +794,24 @@ document.addEventListener('DOMContentLoaded', function () {
             item.classList.add('active');
             body.style.maxHeight = (body.scrollHeight + 50) + 'px';
           }
+          header.setAttribute('aria-expanded', isActive ? 'false' : 'true');
         };
+
+        // .faq-header is a plain div, so keyboard and screen-reader users had no
+        // way to open a question at any viewport size.
+        if (!header.hasAttribute('role')) {
+          header.setAttribute('role', 'button');
+          header.setAttribute('tabindex', '0');
+        }
+        // renderDynamicFaq pre-opens the first item, so seed the state from the DOM
+        // rather than assuming nothing is open.
+        header.setAttribute('aria-expanded', item.classList.contains('active') ? 'true' : 'false');
+        header.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            header.click();
+          }
+        });
       }
     });
   }
@@ -1100,44 +1185,47 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Horizontal Swipe & Drag-to-Scroll (Mulus Geser Kanan/Kiri tanpa tombol panah)
+    // Pointer events instead of mousedown/mousemove/mouseup: the old handlers
+    // never fired on touch, so the hasDragged click-suppression guard did
+    // nothing on phones. The stray window mouseup listener also leaked.
     function initTestiSwipe(container) {
       if (!container) return;
       let isDown = false;
+      let pointerId = null;
       let startX = 0;
       let scrollLeft = 0;
       let hasDragged = false;
 
-      container.addEventListener('mousedown', function (e) {
-        if (e.button !== 0) return; // Hanya klik kiri
+      function endDrag() {
+        if (!isDown) return;
+        isDown = false;
+        pointerId = null;
+        container.classList.remove('is-dragging');
+      }
+
+      container.addEventListener('pointerdown', function (e) {
+        if (e.button !== undefined && e.button !== 0) return; // Hanya klik kiri
         isDown = true;
+        pointerId = e.pointerId;
         hasDragged = false;
         container.classList.add('is-dragging');
-        startX = e.pageX - container.offsetLeft;
+        startX = e.clientX - container.offsetLeft;
         scrollLeft = container.scrollLeft;
       });
 
-      window.addEventListener('mouseup', function () {
-        if (!isDown) return;
-        isDown = false;
-        container.classList.remove('is-dragging');
-      });
-
-      container.addEventListener('mouseleave', function () {
-        if (!isDown) return;
-        isDown = false;
-        container.classList.remove('is-dragging');
-      });
-
-      container.addEventListener('mousemove', function (e) {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
+      container.addEventListener('pointermove', function (e) {
+        if (!isDown || e.pointerId !== pointerId) return;
+        const x = e.clientX - container.offsetLeft;
         const walk = (x - startX) * 1.5;
         if (Math.abs(walk) > 4) {
           hasDragged = true;
         }
         container.scrollLeft = scrollLeft - walk;
       });
+
+      container.addEventListener('pointerup', endDrag);
+      container.addEventListener('pointercancel', endDrag);
+      container.addEventListener('pointerleave', endDrag);
 
       // Cegah klik tidak disengaja saat menyeret / drag
       container.addEventListener('click', function (e) {
@@ -1197,6 +1285,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (modalSlot) {
         modalSlot.innerHTML = '';
         try {
+          // Was hard-coded to 320px, which overflowed the ~301px inner width of
+          // .google-auth-card on a 360px phone. Fit the slot instead.
+          const slotWidth = Math.max(180, Math.floor(modalSlot.clientWidth || 320));
           window.google.accounts.id.renderButton(modalSlot, {
             type: 'standard',
             theme: 'filled_blue',
@@ -1204,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', function () {
             text: 'continue_with',
             shape: 'rectangular',
             logo_alignment: 'left',
-            width: 320
+            width: slotWidth
           });
         } catch (e) {
           console.warn('GSI renderButton modal error:', e);
@@ -1776,5 +1867,23 @@ document.addEventListener('DOMContentLoaded', function () {
       initHeroSlider();
     }
   });
+
+  // ---- FAQ: keep open answers correct after a reflow ----
+  // The accordion animates with a pixel max-height computed at open time. After
+  // a rotation or font-size change that value is stale and can clip the text.
+  function refreshFaqHeights() {
+    document.querySelectorAll('.faq-item.active .faq-body').forEach(function (body) {
+      if (body.style.maxHeight) {
+        body.style.maxHeight = body.scrollHeight + 60 + 'px';
+      }
+    });
+  }
+
+  if (typeof ResizeObserver !== 'undefined' && document.querySelector('.faq-body')) {
+    const faqResizeObserver = new ResizeObserver(refreshFaqHeights);
+    document.querySelectorAll('.faq-body').forEach(function (b) { faqResizeObserver.observe(b); });
+  }
+  window.addEventListener('resize', refreshFaqHeights, { passive: true });
+  window.addEventListener('orientationchange', refreshFaqHeights, { passive: true });
 
 });
