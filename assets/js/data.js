@@ -209,8 +209,8 @@ const PackraftData = {
   ],
 
   operationSchedule: {
-    closedDates: [],
-    closedReason: 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.'
+    operationDates: [],
+    closedReason: 'Tanggal ini belum dijadwalkan beroperasi oleh Packrafting Canden karena air sungai sedang tidak memenuhi syarat.'
   },
 
   // ---- Fasilitas Tambahan (Opsional) Sesuai Brosur ----
@@ -604,7 +604,7 @@ const DataStore = {
       try {
         const parsed = JSON.parse(stored);
         return Object.assign({}, PackraftData.operationSchedule, parsed, {
-          closedDates: Array.isArray(parsed.closedDates) ? parsed.closedDates : []
+          operationDates: Array.isArray(parsed.operationDates) ? parsed.operationDates : []
         });
       } catch (e) {}
     }
@@ -612,13 +612,13 @@ const DataStore = {
   },
   saveOperationSchedule(data) {
     const clean = Object.assign({}, PackraftData.operationSchedule, data, {
-      closedDates: Array.isArray(data && data.closedDates) ? data.closedDates : []
+      operationDates: Array.isArray(data && data.operationDates) ? data.operationDates : []
     });
     return this.saveToCloud('operation_schedule', clean);
   },
-  isClosedDate(dateKey) {
+  isOperationDate(dateKey) {
     const schedule = this.getOperationSchedule();
-    return Array.isArray(schedule.closedDates) && schedule.closedDates.includes(dateKey);
+    return Array.isArray(schedule.operationDates) && schedule.operationDates.includes(dateKey);
   },
 
   getFasilitasTambahan() {

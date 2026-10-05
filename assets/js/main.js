@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="booking-calendar-head">
           <span>Pilih Tanggal Reservasi</span>
           <h3 id="booking-calendar-paket">Reservasi Paket</h3>
-          <p>Tanggal abu-abu berarti packrafting tidak beroperasi karena air sedang surut.</p>
+          <p>Hanya tanggal hijau yang bisa dipesan. Tanggal lain belum beroperasi.</p>
         </div>
         <div class="booking-calendar-nav">
           <button type="button" data-calendar-nav="prev"><i class="fa-solid fa-chevron-left"></i></button>
@@ -272,8 +272,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const { paket, month, year } = bookingCalendarState;
     const firstDate = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { closedDates: [] };
-    const closedDates = Array.isArray(schedule.closedDates) ? schedule.closedDates : [];
+    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { operationDates: [] };
+    const operationDates = Array.isArray(schedule.operationDates) ? schedule.operationDates : [];
     const monthName = firstDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
     if (title) title.textContent = paket ? `Reservasi ${paket.nama}` : 'Reservasi Paket';
@@ -285,17 +285,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     for (let day = 1; day <= daysInMonth; day++) {
       const dateKey = formatDateKey(new Date(year, month, day));
-      const closed = closedDates.includes(dateKey);
-      html += `<button type="button" class="booking-date ${closed ? 'is-closed' : ''}" data-booking-date="${dateKey}">${day}</button>`;
+      const open = operationDates.includes(dateKey);
+      html += `<button type="button" class="booking-date ${open ? 'is-open' : 'is-closed'}" data-booking-date="${dateKey}">${day}</button>`;
     }
     grid.innerHTML = html;
   }
 
   function handleBookingDate(dateKey) {
-    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { closedDates: [] };
-    const closedDates = Array.isArray(schedule.closedDates) ? schedule.closedDates : [];
-    if (closedDates.includes(dateKey)) {
-      alert(schedule.closedReason || 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.');
+    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { operationDates: [] };
+    const operationDates = Array.isArray(schedule.operationDates) ? schedule.operationDates : [];
+    if (!operationDates.includes(dateKey)) {
+      alert(schedule.closedReason || 'Tanggal ini belum dijadwalkan beroperasi oleh Packrafting Canden.');
       return;
     }
     const paket = bookingCalendarState.paket;

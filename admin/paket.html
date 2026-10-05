@@ -80,23 +80,23 @@
         <div class="admin-card-body admin-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="closed-date-input">Tambah Tanggal Tidak Beroperasi</label>
-              <input type="date" id="closed-date-input">
+              <label for="operation-date-input">Tambah Tanggal Beroperasi</label>
+              <input type="date" id="operation-date-input">
             </div>
             <div class="form-group" style="align-self:flex-end;">
-              <button class="btn-admin btn-admin-outline" type="button" onclick="addClosedDate()">
+              <button class="btn-admin btn-admin-outline" type="button" onclick="addOperationDate()">
                 <i class="fa-solid fa-plus"></i> Tambah Tanggal
               </button>
             </div>
           </div>
           <div class="form-group">
-            <label for="closed-dates-list">Tanggal Tidak Beroperasi</label>
-            <textarea id="closed-dates-list" rows="5" placeholder="2026-10-12&#10;2026-10-13"></textarea>
-            <small style="color:#64748b;display:block;margin-top:0.35rem;">Satu tanggal per baris. Format: YYYY-MM-DD. Tanggal ini akan tampil abu-abu di kalender reservasi.</small>
+            <label for="operation-dates-list">Tanggal Beroperasi</label>
+            <textarea id="operation-dates-list" rows="5" placeholder="2026-10-12&#10;2026-10-13"></textarea>
+            <small style="color:#64748b;display:block;margin-top:0.35rem;">Satu tanggal per baris. Format: YYYY-MM-DD. Hanya tanggal ini yang bisa dipesan di kalender reservasi.</small>
           </div>
           <div class="form-group">
-            <label for="closed-reason">Pesan Saat Tanggal Abu-abu Diklik</label>
-            <textarea id="closed-reason" rows="2" placeholder="Air sungai sedang surut..."></textarea>
+            <label for="operation-closed-reason">Pesan Saat Tanggal Abu-abu Diklik</label>
+            <textarea id="operation-closed-reason" rows="2" placeholder="Air sungai sedang surut..."></textarea>
           </div>
           <button class="btn-admin btn-admin-primary" type="button" onclick="saveOperationScheduleAdmin()">
             <i class="fa-solid fa-floppy-disk"></i> Simpan Jadwal Operasional

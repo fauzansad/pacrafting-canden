@@ -730,15 +730,15 @@ function normalizeDateLines(value) {
 function loadOperationScheduleAdmin() {
   if (typeof DataStore === 'undefined' || typeof DataStore.getOperationSchedule !== 'function') return;
   const schedule = DataStore.getOperationSchedule();
-  const datesEl = document.getElementById('closed-dates-list');
-  const reasonEl = document.getElementById('closed-reason');
-  if (datesEl) datesEl.value = (schedule.closedDates || []).join('\n');
+  const datesEl = document.getElementById('operation-dates-list');
+  const reasonEl = document.getElementById('operation-closed-reason');
+  if (datesEl) datesEl.value = (schedule.operationDates || []).join('\n');
   if (reasonEl) reasonEl.value = schedule.closedReason || '';
 }
 
-function addClosedDate() {
-  const input = document.getElementById('closed-date-input');
-  const list = document.getElementById('closed-dates-list');
+function addOperationDate() {
+  const input = document.getElementById('operation-date-input');
+  const list = document.getElementById('operation-dates-list');
   if (!input || !list || !input.value) {
     showToast('Pilih tanggal terlebih dahulu', 'warning');
     return;
@@ -750,14 +750,14 @@ function addClosedDate() {
 
 function saveOperationScheduleAdmin() {
   if (typeof DataStore === 'undefined' || typeof DataStore.saveOperationSchedule !== 'function') return;
-  const datesEl = document.getElementById('closed-dates-list');
-  const reasonEl = document.getElementById('closed-reason');
-  const closedDates = normalizeDateLines(datesEl ? datesEl.value : '');
-  const closedReason = (reasonEl && reasonEl.value.trim()) || 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.';
-  DataStore.saveOperationSchedule({ closedDates, closedReason })
+  const datesEl = document.getElementById('operation-dates-list');
+  const reasonEl = document.getElementById('operation-closed-reason');
+  const operationDates = normalizeDateLines(datesEl ? datesEl.value : '');
+  const closedReason = (reasonEl && reasonEl.value.trim()) || 'Tanggal ini belum dijadwalkan beroperasi oleh Packrafting Canden.';
+  DataStore.saveOperationSchedule({ operationDates, closedReason })
     .then(() => showToast('Jadwal operasional berhasil disimpan', 'success'))
     .catch(() => showToast('Jadwal tersimpan lokal, tetapi sinkron cloud gagal', 'warning'));
-  if (datesEl) datesEl.value = closedDates.join('\n');
+  if (datesEl) datesEl.value = operationDates.join('\n');
 }
 
 // ---- 6. Kontak & Rute Settings ----
@@ -1574,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('hero-slots-container')) renderHeroSlotsAdmin();
     if (document.getElementById('banner-list') || document.getElementById('banner-admin-list')) renderBannerList();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
-    if (document.getElementById('closed-dates-list')) loadOperationScheduleAdmin();
+    if (document.getElementById('operation-dates-list')) loadOperationScheduleAdmin();
     if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();
     if (document.getElementById('stat-paket')) renderDashboardStats();
     if (document.getElementById('testimoni-admin-list')) renderTestimoniAdmin();

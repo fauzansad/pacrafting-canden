@@ -2970,6 +2970,17 @@ p {
   border-color: #cbd5e1;
 }
 
+.booking-date.is-open {
+  color: #ffffff;
+  background: var(--nature);
+  border-color: var(--nature);
+}
+
+.booking-date.is-open:hover {
+  background: var(--nature-dark);
+  border-color: var(--nature-dark);
+}
+
 .booking-calendar-note {
   display: flex;
   align-items: center;
