@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const imgSrc = p.gambar || defaultImg;
       const btnClass = idx === 0 ? 'btn btn-primary' : 'btn btn-accent';
       const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join('');
-      const waUrl = DataStore.getBookingWhatsAppUrl(p.nama);
 
       // Handle price formatting
       let displayPrice = p.harga || '110.000';
@@ -159,14 +158,150 @@ document.addEventListener('DOMContentLoaded', function () {
             </ul>
 
             <div class="paket-footer">
-              <a href="${waUrl}" target="_blank" data-booking-wa="${p.nama}" class="${btnClass}">
+              <button type="button" data-reserve-paket="${p.id}" data-booking-wa="${p.nama}" class="${btnClass}">
                 <i class="fa-brands fa-whatsapp"></i> Reservasi ${p.nama}
-              </a>
+              </button>
             </div>
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  function formatDateKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatDisplayDate(dateKey) {
+    const parts = dateKey.split('-').map(Number);
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    return date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  let bookingCalendarState = {
+    paket: null,
+    month: new Date().getMonth(),
+    year: new Date().getFullYear()
+  };
+
+  function ensureBookingCalendarModal() {
+    let modal = document.getElementById('booking-calendar-modal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'booking-calendar-modal';
+    modal.className = 'modal-overlay booking-calendar-modal';
+    modal.innerHTML = `
+      <div class="modal-card booking-calendar-card">
+        <button type="button" class="booking-calendar-close" aria-label="Tutup Kalender">&times;</button>
+        <div class="booking-calendar-head">
+          <span>Pilih Tanggal Reservasi</span>
+          <h3 id="booking-calendar-paket">Reservasi Paket</h3>
+          <p>Tanggal abu-abu berarti packrafting tidak beroperasi karena air sedang surut.</p>
+        </div>
+        <div class="booking-calendar-nav">
+          <button type="button" data-calendar-nav="prev"><i class="fa-solid fa-chevron-left"></i></button>
+          <strong id="booking-calendar-month"></strong>
+          <button type="button" data-calendar-nav="next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="booking-calendar-weekdays">
+          <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+        </div>
+        <div class="booking-calendar-grid" id="booking-calendar-grid"></div>
+        <div class="booking-calendar-note"><span></span> Tidak beroperasi</div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal || e.target.closest('.booking-calendar-close')) {
+        closeBookingCalendar();
+        return;
+      }
+      const navBtn = e.target.closest('[data-calendar-nav]');
+      if (navBtn) {
+        bookingCalendarState.month += navBtn.dataset.calendarNav === 'next' ? 1 : -1;
+        if (bookingCalendarState.month < 0) {
+          bookingCalendarState.month = 11;
+          bookingCalendarState.year -= 1;
+        }
+        if (bookingCalendarState.month > 11) {
+          bookingCalendarState.month = 0;
+          bookingCalendarState.year += 1;
+        }
+        renderBookingCalendar();
+        return;
+      }
+      const dateBtn = e.target.closest('[data-booking-date]');
+      if (dateBtn) {
+        handleBookingDate(dateBtn.dataset.bookingDate);
+      }
+    });
+    return modal;
+  }
+
+  function openBookingCalendar(paket) {
+    bookingCalendarState = {
+      paket,
+      month: new Date().getMonth(),
+      year: new Date().getFullYear()
+    };
+    const modal = ensureBookingCalendarModal();
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
+    renderBookingCalendar();
+  }
+
+  function closeBookingCalendar() {
+    const modal = document.getElementById('booking-calendar-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    document.documentElement.classList.remove('modal-open');
+  }
+
+  function renderBookingCalendar() {
+    const grid = document.getElementById('booking-calendar-grid');
+    const title = document.getElementById('booking-calendar-paket');
+    const monthTitle = document.getElementById('booking-calendar-month');
+    if (!grid || !monthTitle) return;
+
+    const { paket, month, year } = bookingCalendarState;
+    const firstDate = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { closedDates: [] };
+    const closedDates = Array.isArray(schedule.closedDates) ? schedule.closedDates : [];
+    const monthName = firstDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+    if (title) title.textContent = paket ? `Reservasi ${paket.nama}` : 'Reservasi Paket';
+    monthTitle.textContent = monthName;
+
+    let html = '';
+    for (let i = 0; i < firstDate.getDay(); i++) {
+      html += '<span class="booking-calendar-empty"></span>';
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateKey = formatDateKey(new Date(year, month, day));
+      const closed = closedDates.includes(dateKey);
+      html += `<button type="button" class="booking-date ${closed ? 'is-closed' : ''}" data-booking-date="${dateKey}">${day}</button>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  function handleBookingDate(dateKey) {
+    const schedule = (typeof DataStore !== 'undefined' && DataStore.getOperationSchedule) ? DataStore.getOperationSchedule() : { closedDates: [] };
+    const closedDates = Array.isArray(schedule.closedDates) ? schedule.closedDates : [];
+    if (closedDates.includes(dateKey)) {
+      alert(schedule.closedReason || 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.');
+      return;
+    }
+    const paket = bookingCalendarState.paket;
+    const url = DataStore.getBookingWhatsAppUrl(paket ? paket.nama : '', null, formatDisplayDate(dateKey));
+    window.open(url, '_blank');
+    closeBookingCalendar();
   }
 
   // ---- 3. Dynamic Hero Banner Content Sync ----
@@ -332,6 +467,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // Re-render automatically whenever Supabase Cloud syncs new data or local tab changes
   window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
   window.addEventListener('storage', refreshAllDynamicContent);
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-reserve-paket]');
+    if (!btn || typeof DataStore === 'undefined') return;
+    const paket = DataStore.getPaketById(btn.dataset.reservePaket);
+    if (paket) openBookingCalendar(paket);
+  });
 
   // ---- 4. Navbar Scroll Effect & Scroll Progress ----
   const navbar = document.getElementById('navbar');

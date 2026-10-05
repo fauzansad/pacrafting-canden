@@ -718,6 +718,48 @@ function deletePaket(id) {
   }
 }
 
+function normalizeDateLines(value) {
+  return (value || '')
+    .split(/\r?\n|,/)
+    .map(d => d.trim())
+    .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .filter((d, index, arr) => arr.indexOf(d) === index)
+    .sort();
+}
+
+function loadOperationScheduleAdmin() {
+  if (typeof DataStore === 'undefined' || typeof DataStore.getOperationSchedule !== 'function') return;
+  const schedule = DataStore.getOperationSchedule();
+  const datesEl = document.getElementById('closed-dates-list');
+  const reasonEl = document.getElementById('closed-reason');
+  if (datesEl) datesEl.value = (schedule.closedDates || []).join('\n');
+  if (reasonEl) reasonEl.value = schedule.closedReason || '';
+}
+
+function addClosedDate() {
+  const input = document.getElementById('closed-date-input');
+  const list = document.getElementById('closed-dates-list');
+  if (!input || !list || !input.value) {
+    showToast('Pilih tanggal terlebih dahulu', 'warning');
+    return;
+  }
+  const dates = normalizeDateLines(list.value + '\n' + input.value);
+  list.value = dates.join('\n');
+  input.value = '';
+}
+
+function saveOperationScheduleAdmin() {
+  if (typeof DataStore === 'undefined' || typeof DataStore.saveOperationSchedule !== 'function') return;
+  const datesEl = document.getElementById('closed-dates-list');
+  const reasonEl = document.getElementById('closed-reason');
+  const closedDates = normalizeDateLines(datesEl ? datesEl.value : '');
+  const closedReason = (reasonEl && reasonEl.value.trim()) || 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.';
+  DataStore.saveOperationSchedule({ closedDates, closedReason })
+    .then(() => showToast('Jadwal operasional berhasil disimpan', 'success'))
+    .catch(() => showToast('Jadwal tersimpan lokal, tetapi sinkron cloud gagal', 'warning'));
+  if (datesEl) datesEl.value = closedDates.join('\n');
+}
+
 // ---- 6. Kontak & Rute Settings ----
 function loadKontakAdmin() {
   const brand = DataStore.getBrandInfo();
@@ -1532,6 +1574,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('hero-slots-container')) renderHeroSlotsAdmin();
     if (document.getElementById('banner-list') || document.getElementById('banner-admin-list')) renderBannerList();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
+    if (document.getElementById('closed-dates-list')) loadOperationScheduleAdmin();
     if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();
     if (document.getElementById('stat-paket')) renderDashboardStats();
     if (document.getElementById('testimoni-admin-list')) renderTestimoniAdmin();

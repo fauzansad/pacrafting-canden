@@ -208,6 +208,11 @@ const PackraftData = {
     }
   ],
 
+  operationSchedule: {
+    closedDates: [],
+    closedReason: 'Air sungai sedang surut, Packrafting Canden tidak beroperasi pada tanggal ini.'
+  },
+
   // ---- Fasilitas Tambahan (Opsional) Sesuai Brosur ----
   fasilitasTambahan: [
     {
@@ -593,6 +598,29 @@ const DataStore = {
     return this.getPaket().find(p => p.id === parseInt(id));
   },
 
+  getOperationSchedule() {
+    const stored = localStorage.getItem('packraft_operation_schedule');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        return Object.assign({}, PackraftData.operationSchedule, parsed, {
+          closedDates: Array.isArray(parsed.closedDates) ? parsed.closedDates : []
+        });
+      } catch (e) {}
+    }
+    return PackraftData.operationSchedule;
+  },
+  saveOperationSchedule(data) {
+    const clean = Object.assign({}, PackraftData.operationSchedule, data, {
+      closedDates: Array.isArray(data && data.closedDates) ? data.closedDates : []
+    });
+    return this.saveToCloud('operation_schedule', clean);
+  },
+  isClosedDate(dateKey) {
+    const schedule = this.getOperationSchedule();
+    return Array.isArray(schedule.closedDates) && schedule.closedDates.includes(dateKey);
+  },
+
   getFasilitasTambahan() {
     return PackraftData.fasilitasTambahan;
   },
@@ -837,13 +865,14 @@ const DataStore = {
     return { valid: true };
   },
 
-  getBookingWhatsAppUrl(paketNama, lang) {
+  getBookingWhatsAppUrl(paketNama, lang, tanggal) {
     const brand = this.getBrandInfo();
     const phone = this.normalizePhone(brand.whatsapp);
     const activeLang = lang || (typeof localStorage !== 'undefined' ? localStorage.getItem('packraft_lang') : 'id');
     const isEn = activeLang === 'en';
 
     const defaultPaket = paketNama ? paketNama : (isEn ? '[Select Package]' : '[Pilih Paket]');
+    const defaultTanggal = tanggal || (isEn ? '[Preferred Date]' : '[Tanggal Reservasi]');
     let message = '';
 
     if (isEn) {
@@ -852,7 +881,7 @@ const DataStore = {
 Full Name:
 Number of Guests:
 Package Choice: ${defaultPaket}
-Preferred Date:
+Preferred Date: ${defaultTanggal}
 Time Slot:
 
 Please provide availability and booking details. Thank you!`;
@@ -862,7 +891,7 @@ Please provide availability and booking details. Thank you!`;
 Nama:
 Jumlah peserta:
 Pilihan paket: ${defaultPaket}
-Tanggal:
+Tanggal: ${defaultTanggal}
 Jam:
 
 Mohon informasi ketersediaannya.`;
@@ -938,4 +967,3 @@ if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => DataStore.initCloudSync());
   }
 }
-

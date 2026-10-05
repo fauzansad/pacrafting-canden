@@ -73,6 +73,37 @@
         </div>
       </div>
 
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>Jadwal Operasional Reservasi</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="closed-date-input">Tambah Tanggal Tidak Beroperasi</label>
+              <input type="date" id="closed-date-input">
+            </div>
+            <div class="form-group" style="align-self:flex-end;">
+              <button class="btn-admin btn-admin-outline" type="button" onclick="addClosedDate()">
+                <i class="fa-solid fa-plus"></i> Tambah Tanggal
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="closed-dates-list">Tanggal Tidak Beroperasi</label>
+            <textarea id="closed-dates-list" rows="5" placeholder="2026-10-12&#10;2026-10-13"></textarea>
+            <small style="color:#64748b;display:block;margin-top:0.35rem;">Satu tanggal per baris. Format: YYYY-MM-DD. Tanggal ini akan tampil abu-abu di kalender reservasi.</small>
+          </div>
+          <div class="form-group">
+            <label for="closed-reason">Pesan Saat Tanggal Abu-abu Diklik</label>
+            <textarea id="closed-reason" rows="2" placeholder="Air sungai sedang surut..."></textarea>
+          </div>
+          <button class="btn-admin btn-admin-primary" type="button" onclick="saveOperationScheduleAdmin()">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Jadwal Operasional
+          </button>
+        </div>
+      </div>
+
       <!-- Form Paket -->
       <div class="admin-card" id="paket-form" style="display:none;" data-mode="add" data-edit-id="">
         <div class="admin-card-header">
@@ -131,7 +162,10 @@
   <script src="../assets/js/data.js?v=4.7"></script>
   <script src="../assets/js/admin.js?v=4.7"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => renderPaketAdmin());
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPaketAdmin();
+      loadOperationScheduleAdmin();
+    });
   </script>
 </body>
 </html>
