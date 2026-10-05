@@ -471,6 +471,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .nav-brand,
@@ -607,6 +608,7 @@ p {
     -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
   }
 
   .navbar.scrolled .nav-menu {
@@ -665,7 +667,7 @@ p {
     font-family: var(--font-heading);
     font-size: var(--fs-sm);
     font-weight: 700;
-    padding: 0.5rem 1.05rem;
+    padding: 0.5rem 0.85rem;
     border-radius: var(--radius-full);
     display: inline-flex;
     align-items: center;
@@ -673,6 +675,7 @@ p {
     text-decoration: none;
     background: transparent !important;
     transition: color 0.25s ease;
+    white-space: nowrap;
   }
 
   .nav-link:hover,
@@ -705,6 +708,7 @@ p {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-left: 0.75rem;
 }
 
 .lang-switcher {
