@@ -53,6 +53,26 @@ function clientIp(req) {
   return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : 'unknown';
 }
 
+// Alfabet & format ini harus sama persis dengan api/recovery.js, kalau tidak
+// kode yang dibuat di panel tidak akan diterima endpoint pemulihan.
+const RECOVERY_ALPHABET = '34679ACDEFGHJKMNPQRTUVWXY';
+
+function normalizeRecoveryCode(input) {
+  return String(input || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function buildRecoveryCode() {
+  const groups = [];
+  for (let g = 0; g < 4; g++) {
+    let chunk = '';
+    for (let i = 0; i < 4; i++) {
+      chunk += RECOVERY_ALPHABET[crypto.randomInt(0, RECOVERY_ALPHABET.length)];
+    }
+    groups.push(chunk);
+  }
+  return groups.join('-');
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -92,6 +112,66 @@ module.exports = async function handler(req, res) {
       success: true,
       username: cred.username || 'admin',
       email: cred.email || ''
+    });
+  }
+
+  // ---- Lihat status kode pemulihan --------------------------------------
+  if (body.action === 'recovery-status') {
+    const res2 = await fetch(`${SUPABASE_URL}/rest/v1/site_data?key=eq.admin_recovery&select=value`, {
+      headers: {
+        apikey: SUPABASE_WRITE_KEY,
+        Authorization: `Bearer ${SUPABASE_WRITE_KEY}`,
+        'Cache-Control': 'no-cache'
+      }
+    });
+    const rec2 = await res2.json();
+    const record = Array.isArray(rec2) && rec2.length ? rec2[0].value : null;
+    return res.status(200).json({
+      success: true,
+      active: !!(record && record.hash && !record.usedAt),
+      createdAt: record ? record.createdAt || null : null,
+      usedAt: record ? record.usedAt || null : null
+    });
+  }
+
+  // ---- Buat kode pemulihan baru ----------------------------------------
+  // Hanya bisa dilakukan dengan sesi admin yang sah. Kode yang dihasilkan
+  // dikembalikan ke browser SEKALI SAJA; database hanya menyimpan
+  // SHA-256 + salt, jadi kode asli tidak pernah tersimpan di mana pun.
+  if (body.action === 'recovery-generate') {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const code = buildRecoveryCode();
+    const createdAt = new Date().toISOString();
+
+    const writeRes = await fetch(`${SUPABASE_URL}/rest/v1/site_data`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_WRITE_KEY,
+        Authorization: `Bearer ${SUPABASE_WRITE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        key: 'admin_recovery',
+        value: {
+          salt,
+          hash: crypto.createHash('sha256').update(salt + normalizeRecoveryCode(code)).digest('hex'),
+          createdAt,
+          usedAt: null,
+          failures: 0
+        },
+        updated_at: createdAt
+      })
+    });
+    if (!writeRes.ok) {
+      return res.status(502).json({ success: false, message: `Database menolak penyimpanan (${writeRes.status}).` });
+    }
+
+    return res.status(200).json({
+      success: true,
+      code,
+      createdAt,
+      message: 'Kode pemulihan dibuat. Simpan sekarang — kode ini tidak akan ditampilkan lagi.'
     });
   }
 

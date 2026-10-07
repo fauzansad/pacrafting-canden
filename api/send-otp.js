@@ -234,7 +234,13 @@ module.exports = async function handler(req, res) {
         if (!mailRes && lastTransportError) {
           message = 'Tidak bisa menghubungi layanan email. Periksa koneksi server lalu coba lagi.';
         } else if (/open this page through a web server/i.test(providerMessage)) {
-          message = 'Layanan email menolak permintaan server. Silakan hubungi pengelola situs.';
+          message = 'Layanan email menolak permintaan dari server. Silakan hubungi pengelola situs.';
+        } else if (httpStatus === 403) {
+          // Terverifikasi: FormSubmit membalas 200 dari IP biasa tapi 403 dari
+          // IP data center (Vercel). FormSubmit memblokir pengiriman dari
+          // server, jadi email tidak akan pernah sampai selama masih pakai
+          // FormSubmit. Ganti ke layanan email transactional (Resend/Brevo).
+          message = 'Layanan email memblokir pengiriman dari server hosting. Email tidak akan sampai sampai layanan email diganti ke provider transactional (mis. Resend atau Brevo).';
         } else if (/confirm/i.test(providerMessage)) {
           message = 'Alamat email ini belum pernah dikonfirmasi oleh layanan email. Buka inbox ' + adminEmail + ' dan klik link konfirmasi yang dikirim FormSubmit, lalu minta kode lagi.';
         } else if (httpStatus === 429 || /rate|limit|too many/i.test(providerMessage)) {
