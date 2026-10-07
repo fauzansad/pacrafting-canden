@@ -389,8 +389,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (heroSlideArt && b.gambar) {
       const imgSrc = resolveAssetUrl(b.gambar);
       if (imgSrc) {
-        heroSlideArt.style.setProperty('--hero-banner-image', `url("${imgSrc.replace(/"/g, '%22')}")`);
-        heroSlideArt.style.backgroundImage = `url("${imgSrc.replace(/"/g, '%22')}")`;
+        const safeSrc = imgSrc.replace(/"/g, '%22');
+        heroSlideArt.style.backgroundImage = `url("${safeSrc}")`;
         heroSlideArt.style.backgroundSize = 'cover';
         heroSlideArt.style.backgroundPosition = b.position || 'center';
         heroSlideArt.style.backgroundRepeat = 'no-repeat';
@@ -547,6 +547,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // ---- 3e. Re-render Peta & Kalender saat data berubah ----
+  // Peta Leaflet dan kalender booking dibangun sekali di awal; tanpa ini, admin
+  // yang mengganti titik kumpul / tanggal tutup tidak terlihat sampai reload.
+  //
+  // PENTING: blok ini WAJIB di atas refreshAllDynamicContent(). Kalau `let`
+  // ini belum diinialisasi saat fungsi dipanggil (Temporal Dead Zone),
+  // ReferenceError-nya keluar dari handler DOMContentLoaded dan menghentikan
+  // SEMUA kode setelahnya — termasuk animasi reveal, scrollspy, map, testimonial
+  // dan hero slider. Gejalanya: seluruh section tetap opacity: 0 / halaman kosong.
+  let mapRefreshInFlight = false;
+  function refreshMapIfPresent() {
+    if (mapRefreshInFlight || typeof DataStore === 'undefined') return;
+    const mapEl = document.getElementById('map');
+    if (!mapEl || !window.L || !window.__packraftMapInstance) return;
+    mapRefreshInFlight = true;
+    try {
+      window.__packraftMapInstance.invalidateSize();
+    } catch (err) {
+      /* ignore */
+    } finally {
+      mapRefreshInFlight = false;
+    }
+  }
+
+  function refreshBookingCalendarIfOpen() {
+    const modal = document.getElementById('booking-calendar-modal');
+    if (modal && modal.classList && modal.classList.contains('active')) {
+      try { renderBookingCalendar(); } catch (err) { /* ignore */ }
+    }
+  }
+
   // Execute dynamic rendering
   // Setiap renderer dibungkus try/catch sendiri. Sebelumnya satu nilai JSON
   // rusak di salah satu getter menghentikan seluruh DOMContentLoaded handler,
@@ -609,31 +640,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const paket = DataStore.getPaketById(btn.dataset.reservePaket);
     if (paket) openBookingCalendar(paket);
   });
-
-  // ---- 3e. Re-render Peta & Kalender saat data berubah ----
-  // Peta Leaflet dan kalender booking dibangun sekali di awal; tanpa ini, admin
-  // yang mengganti titik kumpul / tanggal tutup tidak terlihat sampai reload.
-  let mapRefreshInFlight = false;
-  function refreshMapIfPresent() {
-    if (mapRefreshInFlight || typeof DataStore === 'undefined') return;
-    const mapEl = document.getElementById('map');
-    if (!mapEl || !window.L || !window.__packraftMapInstance) return;
-    mapRefreshInFlight = true;
-    try {
-      window.__packraftMapInstance.invalidateSize();
-    } catch (err) {
-      /* ignore */
-    } finally {
-      mapRefreshInFlight = false;
-    }
-  }
-
-  function refreshBookingCalendarIfOpen() {
-    const modal = document.getElementById('booking-calendar-modal');
-    if (modal && modal.classList && modal.classList.contains('active')) {
-      try { renderBookingCalendar(); } catch (err) { /* ignore */ }
-    }
-  }
 
   // ---- 4. Navbar Scroll Effect & Scroll Progress ----
   const navbar = document.getElementById('navbar');
