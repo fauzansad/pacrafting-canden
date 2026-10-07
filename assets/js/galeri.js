@@ -5,6 +5,31 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  // Nilai dari database bisa masih berupa HTML entity ("&bull;", "&amp;").
+  // Kalau langsung di-escape, "&bull;" tampil mentah di layar. Decode dulu,
+  // baru escape untuk mencegah XSS.
+  var _entityDecoder = null;
+  function decodeEntities(str) {
+    if (typeof str !== 'string' || str.indexOf('&') === -1) return str;
+    try {
+      if (!_entityDecoder) _entityDecoder = document.createElement('textarea');
+      _entityDecoder.innerHTML = str;
+      return _entityDecoder.value;
+    } catch (e) {
+      return str;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(decodeEntities(String(str)))
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   // ---- Galeri Page Dynamic Rendering ----
   const galeriContainer = document.getElementById('galeri-container') || document.querySelector('.gallery-grid');
   if (galeriContainer) {
@@ -38,6 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
           imgSrc = imgSrc.replace(/^\/+/, '');
         }
         const hasImg = Boolean(imgSrc);
+        const safeTitle = escapeHtml(g.judul);
+        const safeKategori = escapeHtml(g.kategori || 'Packrafting Canden');
+        const safeCaption = escapeHtml(g.caption || g.judul);
 
         const isFirst = (idx === 0 && galeri.length >= 4);
         const isWide = (galeri.length === 8 && idx === 7) || (galeri.length === 6 && (idx === 4 || idx === 5));
@@ -46,21 +74,21 @@ document.addEventListener('DOMContentLoaded', function () {
         else if (isWide) spanClass = 'span-2-col';
 
         const content = hasImg
-          ? `<img src="${imgSrc}" alt="${g.judul}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
+          ? `<img src="${escapeHtml(imgSrc)}" alt="${safeTitle}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
           : `
             <div class="gallery-card-placeholder">
               <i class="fa-solid fa-water"></i>
-              <h5>${g.judul}</h5>
-              <span>${g.kategori || 'Packrafting Canden'}</span>
+              <h5>${safeTitle}</h5>
+              <span>${safeKategori}</span>
             </div>
           `;
 
         return `
-          <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${imgSrc}" data-caption="${g.caption || g.judul}">
+          <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${escapeHtml(imgSrc)}" data-caption="${safeCaption}">
             ${content}
             <div class="gallery-card-overlay">
-              <h5>${g.judul}</h5>
-              <span>${g.kategori || 'Dokumentasi'}</span>
+              <h5>${safeTitle}</h5>
+              <span>${escapeHtml(g.kategori || 'Dokumentasi')}</span>
             </div>
           </div>
         `;

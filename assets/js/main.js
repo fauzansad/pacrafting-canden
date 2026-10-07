@@ -8,9 +8,27 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---- 0. Shared helpers ----
   // Nilai yang berasal dari database/cloud adalah input yang tidak dipercaya:
   // setiap renderer wajib escape sebelum masuk ke innerHTML.
+
+  // Cache satu elemen textarea untuk decode entity. Using innerHTML pada
+  // <textarea> tidak mengeksekusi skrip, jadi aman dipakai untuk decode.
+  let _entityDecoder = null;
+  function decodeEntities(str) {
+    if (typeof str !== 'string' || str.indexOf('&') === -1) return str;
+    try {
+      if (!_entityDecoder) _entityDecoder = document.createElement('textarea');
+      _entityDecoder.innerHTML = str;
+      return _entityDecoder.value;
+    } catch (err) {
+      return str;
+    }
+  }
+
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
-    return String(str)
+    // Decode dulu supaya entity dari database (&bull; &amp; &ldquo; dst) tampil
+    // sebagai karakter aslinya, bukan "&bull;". Setelah di-decode, baru di-escape
+    // untuk mencegah XSS.
+    return String(decodeEntities(String(str)))
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -24,12 +42,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // mengubahnya, tandai `data-db-driven` supaya kamus statis tidak menimpa.
   function applyDbText(el, value, defaultValue, useHtml) {
     if (!el || !value) return;
-    const isCustomized = String(value) !== String(defaultValue || '');
+    const decoded = decodeEntities(String(value));
+    const isCustomized = decoded !== decodeEntities(String(defaultValue || ''));
     if (isCustomized) {
       if (useHtml) {
-        el.innerHTML = escapeHtml(value);
+        el.innerHTML = decoded;
       } else {
-        el.textContent = value;
+        el.textContent = decoded;
       }
       el.setAttribute('data-db-driven', '1');
     } else {
@@ -402,9 +421,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Kalau admin belum mengubah nilai bawaan, teks tetap diserahkan ke i18n
     // supaya versi English tidak berubah jadi Indonesia.
     if (b.judul && heroTitleEl) {
-      const customized = String(b.judul) !== String(defaultBanner.judul || '');
+      const customized = decodeEntities(String(b.judul)) !== decodeEntities(String(defaultBanner.judul || ''));
       if (customized) {
-        const safeTitle = escapeHtml(b.judul);
+        const safeTitle = escapeHtml(decodeEntities(String(b.judul)));
         heroTitleEl.innerHTML = safeTitle.replace('CANDEN', '<span>CANDEN</span>');
         heroTitleEl.setAttribute('data-db-driven', '1');
       } else {
@@ -415,9 +434,9 @@ document.addEventListener('DOMContentLoaded', function () {
     applyDbText(heroLeadEl, b.lead, defaultBanner.lead, false);
 
     if (b.ctaText && heroCtaBtn) {
-      const customized = String(b.ctaText) !== String(defaultBanner.ctaText || '');
+      const customized = decodeEntities(String(b.ctaText)) !== decodeEntities(String(defaultBanner.ctaText || ''));
       if (customized) {
-        heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${escapeHtml(b.ctaText)}`;
+        heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${escapeHtml(decodeEntities(String(b.ctaText)))}`;
         heroCtaBtn.setAttribute('data-db-driven', '1');
       } else {
         heroCtaBtn.removeAttribute('data-db-driven');
@@ -427,9 +446,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (ctaHref) heroCtaBtn.href = ctaHref;
     }
     if (b.lokasiTag && heroLocationEl) {
-      const customized = String(b.lokasiTag) !== String(defaultBanner.lokasiTag || '');
+      const customized = decodeEntities(String(b.lokasiTag)) !== decodeEntities(String(defaultBanner.lokasiTag || ''));
       if (customized) {
-        const cleanTag = escapeHtml(b.lokasiTag.replace(/^[📍\s]+/, ''));
+        const cleanTag = escapeHtml(decodeEntities(String(b.lokasiTag)).replace(/^[📍\s]+/, ''));
         heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
         heroLocationEl.setAttribute('data-db-driven', '1');
       } else {

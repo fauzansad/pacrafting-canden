@@ -46,9 +46,9 @@
       about_p2: "Menyusuri jernihnya aliran Sungai Opak sejauh <strong>4,5 km selama ± 1,5 jam</strong>, Anda akan disuguhi rimbunnya pepohonan, tebing alami tepian kali, serta sajian jamu tradisional khas Canden yang menyegarkan tubuh dan pikiran.",
       about_badge_km: "4,5 KM",
       about_badge_duration: "Durasi ± 1,5 Jam",
-      about_manager_title: "Pokdarwis &amp; Pengelola Susur Sungai Desa Canden",
+      about_manager_title: "Pokdarwis & Pengelola Susur Sungai Desa Canden",
       about_manager_desc: "Pengelola resmi aktivitas wisata petualangan air Packrafting di Sungai Opak, Desa Canden, Kapanewon Jetis, Kabupaten Bantul. Tim pemandu lokal bersertifikat siap mendampingi setiap perjalanan susur kali Anda.",
-      about_manager_cert: "Binaan Dinas Pariwisata &amp; Pemerintah Kalurahan Canden — Standar Keamanan &amp; River Guide Bersertifikasi.",
+      about_manager_cert: "Binaan Dinas Pariwisata & Pemerintah Kalurahan Canden — Standar Keamanan & River Guide Bersertifikasi.",
       about_btn: 'Pilih Paket Wisata <i class="fa-solid fa-arrow-right"></i>',
 
       // Why Us
@@ -58,7 +58,7 @@
       why_1_title: "Petualangan Air Alami",
       why_1_desc: "Menyusuri arus Sungai Opak yang ramah pemula namun tetap memacu adrenalin di atas perahu packraft yang stabil.",
       why_2_title: "Standar Keamanan Terjamin",
-      why_2_desc: "Peralatan APD lengkap berstandar resmi (helm, life jacket, dayung) dengan pendampingan river guide &amp; tim rescue.",
+      why_2_desc: "Peralatan APD lengkap berstandar resmi (helm, life jacket, dayung) dengan pendampingan river guide & tim rescue.",
       why_3_title: "Kebugaran &amp; Jamu Desa",
       why_3_desc: "Sentra jamu tradisional Desa Canden dan kelapa muda segar untuk memulihkan vitalitas setelah menyusuri sungai.",
       why_4_title: "Finish Wisata Potrobayan",
@@ -91,7 +91,7 @@
       pkg_2_sub: "Pengarungan Lengkap + Sajian Makan Prasmanan Khas Ndeso",
       pkg_f_all_pkg1: "<strong>Semua fasilitas Paket 1 lengkap</strong>",
       pkg_f_buffet: "<strong>Makan Menu Prasmanan sajian masakan khas Ndeso Canden</strong>",
-      pkg_f_transport_start_finish: "Transportasi Lokal Antar-Jemput Start &amp; Finish",
+      pkg_f_transport_start_finish: "Transportasi Lokal Antar-Jemput Start & Finish",
       pkg_btn_2: '<i class="fa-brands fa-whatsapp"></i> Reservasi Paket 2',
 
       // Addons & Info
@@ -114,8 +114,8 @@
       info_tandem: "Tandem untuk Anak-anak:",
       info_tandem_val: "Bisa dilakukan dengan pendampingan orang tua (anak usia mulai 7 tahun).",
       info_age: "Batas Usia Minimal:",
-      info_age_val: "12 tahun untuk mendayung mandiri (kondisi fisik sehat &amp; bugar).",
-      info_route: "Jalur &amp; Durasi:",
+      info_age_val: "12 tahun untuk mendayung mandiri (kondisi fisik sehat & bugar).",
+      info_route: "Jalur & Durasi:",
       info_route_val: "Rute pengarungan sungai sepanjang ± 4,5 KM dengan durasi ± 1,5 jam.",
       meeting_points_title: '<i class="fa-solid fa-location-dot text-accent"></i> 5 Pilihan Lokasi Titik Kumpul (Meeting Point):',
       meeting_points_desc: "Lokasi titik kumpul fleksibel dan akan diinformasikan serta dikoordinasikan lebih lanjut oleh tim admin:",
@@ -227,7 +227,7 @@
       loc_rest_desc: "Spot istirahat di pertengahan rute pengarungan susur sungai, rehat sejenak, menikmati kelapa muda segar, dan area outbound alam terbuka tepi kali.",
       loc_rest_btn: '<i class="fa-solid fa-location-dot"></i> Buka Google Maps Rest Area',
       loc_finish_badge: "TITIK FINISH &amp; BILAS",
-      loc_finish_desc: "Titik akhir pendaratan di pertemuan Sungai Opak &amp; Oya, area bilas bersih, dokumentasi, dan penjemputan kembali.",
+      loc_finish_desc: "Titik akhir pendaratan di pertemuan Sungai Opak & Oya, area bilas bersih, dokumentasi, dan penjemputan kembali.",
       loc_finish_btn: '<i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Finish',
       loc_hours_label: "Jam Operasional:",
       loc_meeting_label: "Titik Kumpul:",
@@ -255,7 +255,7 @@
       loc_step2_desc: "Rehat kelapa muda",
       loc_step3_badge: "3. FINISH",
       loc_step3_title: "Wisata Potrobayan",
-      loc_step3_desc: "Bilas &amp; penjemputan",
+      loc_step3_desc: "Bilas & penjemputan",
 
       // FAQ
       faq_eyebrow: "Bantuan &amp; Panduan",
@@ -303,7 +303,7 @@
       book_step2_desc: "Lakukan pembayaran DP 50% per paket untuk mengunci jadwal pengarungan Anda.",
       book_step3_title: "Pelunasan Maks. H-1",
       book_step3_desc: "Pelunasan dilakukan maksimal <strong>H-1 kegiatan</strong> sebelum river guide menyambut di meeting point.",
-      book_quote: "&ldquo;Ciptakan Kenangan Tak Terlupakan Bersama Kami di Sungai Opak Canden!&rdquo;",
+      book_quote: "“Ciptakan Kenangan Tak Terlupakan Bersama Kami di Sungai Opak Canden!”",
       book_quote_sub: "Cocok untuk Anda yang sedang berlibur di Jogja bersama pasangan, teman, keluarga, ataupun tim kerja.",
       book_wa_btn_text: '<i class="fa-brands fa-whatsapp"></i> Chat WhatsApp: <span data-display-wa>0812 6009 2044</span>',
       book_insurance_pill: '<i class="fa-solid fa-shield-halved"></i> Terlindungi Asuransi &amp; SOP Resmi',
@@ -312,12 +312,12 @@
       // Footer
       footer_support_title: "Didukung Oleh",
       footer_desc: "Destinasi wisata petualangan susur Sungai Opak dengan konsep Wellness Tourism pertama di Yogyakarta dari Starting Point Canden (Jetis) menuju Finish di Wisata Potrobayan, Bantul.",
-      footer_route_tag: "Rute Pengarungan Sungai Opak 4,5 km &bull; Canden ke Potrobayan",
+      footer_route_tag: "Rute Pengarungan Sungai Opak 4,5 km • Canden ke Potrobayan",
       footer_nav_title: "Lokasi &amp; Peta",
       footer_contact_title: "Hubungi Kami",
       footer_address: "Starting Point Susur Sungai Opak, Canden, Bantul",
-      footer_rights: "&copy; 2026 Packrafting Canden. All Rights Reserved.",
-      footer_bottom_route: "Rute Susur Sungai Opak: Canden &rarr; Wisata Potrobayan, Bantul.",
+      footer_rights: "© 2026 Packrafting Canden. All Rights Reserved.",
+      footer_bottom_route: "Rute Susur Sungai Opak: Canden → Wisata Potrobayan, Bantul.",
 
       // Floating WA
       float_wa_text: "Booking via WhatsApp",
@@ -365,9 +365,9 @@
       about_p2: "Paddling along the clear currents of Opak River for <strong>4.5 km over ± 1.5 hours</strong>, you will enjoy lush canopy trees, natural riverbank cliffs, and authentic traditional herbal wellness drinks (jamu) native to Canden.",
       about_badge_km: "4.5 KM",
       about_badge_duration: "Duration ± 1.5 Hours",
-      about_manager_title: "Tourism Awareness Group &amp; River Management of Canden",
+      about_manager_title: "Tourism Awareness Group & River Management of Canden",
       about_manager_desc: "Official management of Packrafting water adventure tourism on the Opak River, Canden Village, Jetis, Bantul Regency. Certified local river guides are dedicated to ensuring a safe, exciting journey.",
-      about_manager_cert: "Supervised by Bantul Tourism Office &amp; Canden Village Government — Certified River Guides &amp; Safety Standards.",
+      about_manager_cert: "Supervised by Bantul Tourism Office & Canden Village Government — Certified River Guides & Safety Standards.",
       about_btn: 'Choose Tour Package <i class="fa-solid fa-arrow-right"></i>',
 
       // Why Us
@@ -410,7 +410,7 @@
       pkg_2_sub: "Complete Paddling + Traditional Village Buffet Lunch",
       pkg_f_all_pkg1: "<strong>All Package 1 amenities included</strong>",
       pkg_f_buffet: "<strong>Authentic Canden Village Buffet Lunch</strong>",
-      pkg_f_transport_start_finish: "Local Shuttle Transport between Start &amp; Finish",
+      pkg_f_transport_start_finish: "Local Shuttle Transport between Start & Finish",
       pkg_btn_2: '<i class="fa-brands fa-whatsapp"></i> Book Package 2',
 
       // Addons & Info
@@ -434,7 +434,7 @@
       info_tandem_val: "Children aged 7+ can ride tandem in one boat with a parent/guardian.",
       info_age: "Minimum Age Limit:",
       info_age_val: "12 years old for solo paddling (good physical condition required).",
-      info_route: "Route &amp; Duration:",
+      info_route: "Route & Duration:",
       info_route_val: "River course length ± 4.5 KM with an average duration of ± 1.5 hours.",
       meeting_points_title: '<i class="fa-solid fa-location-dot text-accent"></i> 5 Official Meeting Point Options:',
       meeting_points_desc: "Meeting points are flexible and will be coordinated directly by our admin team:",
@@ -481,9 +481,9 @@
       sop_p1_title: "Certified Safety Gear",
       sop_p1_desc: "Certified safety helmets &amp; high-buoyancy life vests.",
       sop_p2_title: "Certified River Guides",
-      sop_p2_desc: "Experienced river instructors &amp; rescue team.",
+      sop_p2_desc: "Experienced river instructors & rescue team.",
       sop_p3_title: "Safety Briefing",
-      sop_p3_desc: "Paddle drill &amp; water safety protocols before launch.",
+      sop_p3_desc: "Paddle drill & water safety protocols before launch.",
       sop_p4_title: "Real-time Monitoring",
       sop_p4_desc: "Regular river discharge checks and meteorological forecasts.",
       
@@ -504,7 +504,7 @@
       sop_3_desc: "Pregnant women are <strong>advised not to participate</strong> in packrafting to prioritize maternal and fetal health and safety.",
       sop_4_title: "Pre-existing Medical Conditions",
       sop_4_desc: "Participants with chronic conditions such as <strong>epilepsy, severe asthma, or heart disease are NOT PERMITTED</strong> to participate to prevent emergency medical risks in the water.",
-      sop_5_title: "Weather &amp; Stoppage Protocol",
+      sop_5_title: "Weather & Stoppage Protocol",
       sop_5_desc: "Activities will be immediately <strong>halted or rerouted</strong> in case of extreme weather changes (gale, storms, surge in river discharge) or emergency evacuation situations.",
       sop_6_title: "Retain Ticket for Insurance",
       sop_6_desc: "Visitors <strong>must keep their official ticket</strong> as valid proof of participation to facilitate <strong>insurance claim</strong> processing if needed.",
@@ -546,7 +546,7 @@
       loc_rest_desc: "Mid-way rest stop on the river route to relax, enjoy fresh young coconut, and experience the riverside outdoor area.",
       loc_rest_btn: '<i class="fa-solid fa-location-dot"></i> Open Rest Area on Google Maps',
       loc_finish_badge: "FINISH &amp; SHOWER POINT",
-      loc_finish_desc: "Final landing point at the confluence of Opak &amp; Oya Rivers, fresh showers, photos, and return shuttle pickup.",
+      loc_finish_desc: "Final landing point at the confluence of Opak & Oya Rivers, fresh showers, photos, and return shuttle pickup.",
       loc_finish_btn: '<i class="fa-solid fa-location-dot"></i> Open Finish Point on Google Maps',
       loc_meeting_label: "Meeting Point:",
       loc_meeting_val: "Susur Sungai Opak Starting Point",
@@ -574,7 +574,7 @@
       loc_step2_desc: "Fresh coconut break",
       loc_step3_badge: "3. FINISH",
       loc_step3_title: "Potrobayan Tourism",
-      loc_step3_desc: "Shower &amp; pickup",
+      loc_step3_desc: "Shower & pickup",
 
       // FAQ
       faq_eyebrow: "Help &amp; Guidelines",
@@ -622,7 +622,7 @@
       book_step2_desc: "Make a 50% deposit payment per package to secure your reserved schedule.",
       book_step3_title: "Final Payment by Day-1",
       book_step3_desc: "Complete payment by <strong>D-1</strong> before your river guides greet you at the meeting point.",
-      book_quote: "&ldquo;Create Unforgettable Memories With Us on the Opak River Canden!&rdquo;",
+      book_quote: "“Create Unforgettable Memories With Us on the Opak River Canden!”",
       book_quote_sub: "Perfect for couples, friends, families, or corporate team outings visiting Yogyakarta.",
       book_wa_btn_text: '<i class="fa-brands fa-whatsapp"></i> Chat WhatsApp: <span data-display-wa>0812 6009 2044</span>',
       book_insurance_pill: '<i class="fa-solid fa-shield-halved"></i> Official Insurance &amp; Certified Safety',
@@ -631,12 +631,12 @@
       // Footer
       footer_support_title: "Supported By",
       footer_desc: "The premier Wellness Tourism river packrafting destination in Yogyakarta, paddling from Canden Starting Point (Jetis) to Potrobayan Finish Point, Bantul.",
-      footer_route_tag: "Opak River Paddling Route 4.5 km &bull; Canden to Potrobayan",
+      footer_route_tag: "Opak River Paddling Route 4.5 km • Canden to Potrobayan",
       footer_nav_title: "Location &amp; Maps",
       footer_contact_title: "Contact Us",
       footer_address: "Opak River Starting Point, Canden, Bantul, Yogyakarta",
-      footer_rights: "&copy; 2026 Packrafting Canden. All Rights Reserved.",
-      footer_bottom_route: "Opak River Route: Canden &rarr; Potrobayan Tourism, Bantul.",
+      footer_rights: "© 2026 Packrafting Canden. All Rights Reserved.",
+      footer_bottom_route: "Opak River Route: Canden → Potrobayan Tourism, Bantul.",
 
       // Floating WA
       float_wa_text: "Book via WhatsApp",

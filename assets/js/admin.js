@@ -1271,15 +1271,31 @@ async function saveFaqAdmin() {
 let adminTestiFilterRating = 'all';
 let adminTestiSearchQuery = '';
 
-function escapeHtmlAdmin(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+// <textarea> dengan innerHTML memperlakukan isi sebagai TEKS, jadi aman dipakai
+// untuk decode entity tanpa risiko eksekusi skrip.
+let _adminEntityDecoder = null;
+function decodeEntitiesAdmin(str) {
+  if (typeof str !== 'string' || str.indexOf('&') === -1) return str;
+  try {
+    if (!_adminEntityDecoder) _adminEntityDecoder = document.createElement('textarea');
+    _adminEntityDecoder.innerHTML = str;
+    return _adminEntityDecoder.value;
+  } catch (err) {
+    return str;
+  }
 }
+
+function escapeHtmlAdmin(str) {
+      if (!str) return '';
+      // Decode dulu supaya entity dari database tampil sebagai karakter aslinya
+      // (mis. "&bull;" menjadi "•"), baru escape untuk mencegah XSS.
+      return String(decodeEntitiesAdmin(String(str)))
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
 
 function hasReplyHelper(item) {
   if (!item || !item.balasan) return false;
