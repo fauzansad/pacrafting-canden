@@ -164,9 +164,24 @@ module.exports = async function handler(req, res) {
         attempts: 0
       });
 
+      // Kirim lewat FormSubmit.
+      //
+      // Dua hal wajib agar request ini diterima:
+      // 1. Header Origin/Referer/User-Agent. Tanpa itu FormSubmit membalas
+      //    "Make sure you open this page through a web server".
+      // 2. Body HARUS dicek. FormSubmit membalas HTTP 200 bahkan saat menolak,
+      //    jadi `mailRes.ok` saja tidak cukup — itulah bug yang membuat UI
+      //    menampilkan "kode berhasil dikirim" padahal email tidak pernah keluar.
+      const siteOrigin = 'https://' + (req.headers['x-forwarded-host'] || req.headers.host || 'packrafting-canden.vercel.app');
       const mailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Origin: siteOrigin,
+          Referer: siteOrigin + '/admin/login',
+          'User-Agent': 'Mozilla/5.0 (compatible; PackraftingCaden/1.0)'
+        },
         body: JSON.stringify({
           _subject: '[Packrafting Canden] Kode OTP Reset Password Admin',
           _template: 'box',
@@ -178,8 +193,18 @@ module.exports = async function handler(req, res) {
         })
       });
 
-      if (!mailRes.ok) {
+      let mailBody = {};
+      try {
+        mailBody = await mailRes.json();
+      } catch (e) {
+        mailBody = {};
+      }
+      // `success` dikirim sebagai string "true"/"false", bukan boolean.
+      const mailAccepted = mailRes.ok && String(mailBody.success) === 'true';
+
+      if (!mailAccepted) {
         await supabaseUpsertRow(OTP_ROW_KEY, { email: adminEmail, salt: null, hash: null, expiry: 0, sentAt: 0, attempts: 0 });
+        console.error('[send-otp] FormSubmit menolak:', mailRes.status, JSON.stringify(mailBody));
         return res.status(502).json({
           success: false,
           message: 'Email gagal dikirim. Silakan coba lagi beberapa saat lagi.'
