@@ -113,6 +113,44 @@
         </div>
       </div>
 
+      <!-- Ketentuan Perahu & Fasilitas Tambahan -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-ship" style="color:#0e7490;margin-right:0.4rem;"></i> 4. Ketentuan Perahu &amp; Layanan Tambahan</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label for="info-ketentuan-perahu">Ketentuan Perahu &amp; Syarat Usia</label>
+            <input type="text" id="info-ketentuan-perahu" placeholder="Contoh: 1 Orang dewasa per perahu. Anak mulai 7 tahun dengan pendampingan orang tua.">
+          </div>
+          <div class="form-group">
+            <label for="info-fasilitas-tambahan">Fasilitas Tambahan (Opsional)</label>
+            <textarea id="info-fasilitas-tambahan" rows="3" placeholder="Contoh: Dokumentasi foto Rp 200.000/paket. Video drone Rp 250.000/baterai/paket."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-circle-question" style="color:#ea580c;margin-right:0.4rem;"></i> 5. Pertanyaan Umum (FAQ)</h3>
+          <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="addFaqAdmin()">
+            <i class="fa-solid fa-plus"></i> Tambah Pertanyaan
+          </button>
+        </div>
+        <div class="admin-card-body">
+          <p style="font-size:0.85rem;color:#64748b;margin:0 0 1rem;">
+            Pertanyaan di bawah ini tampil persis seperti di landing page. Gunakan teks biasa, bukan kode HTML.
+          </p>
+          <div id="faq-admin-list"></div>
+          <div style="margin-top:1rem;">
+            <button type="button" class="btn-admin btn-admin-primary" id="btn-save-faq" onclick="saveFaqAdmin()">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Pertanyaan Umum
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Save Button -->
       <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;margin-bottom:2rem;">
         <button type="button" class="btn-admin btn-admin-primary" onclick="saveWisataInfoAdmin()" style="padding:0.85rem 2.25rem;font-size:0.95rem;">
@@ -144,10 +182,12 @@
       setVal('info-fasilitas-basecamp', info.fasilitasBasecamp);
       setVal('info-fasilitas-sekitar', info.fasilitasSekitar);
       setVal('info-jam-operasional', info.jamOperasional);
+      setVal('info-ketentuan-perahu', info.ketentuanPerahu);
+      setVal('info-fasilitas-tambahan', info.fasilitasTambahan);
     }
 
-    function saveWisataInfoAdmin() {
-      const info = DataStore.getWisataInfo() || {};
+    async function saveWisataInfoAdmin() {
+      const info = Object.assign({}, DataStore.getWisataInfo() || {});
       info.namaPengelola = document.getElementById('info-nama-pengelola').value.trim();
       info.deskripsiPengelola = document.getElementById('info-deskripsi-pengelola').value.trim();
       info.legalitas = document.getElementById('info-legalitas').value.trim();
@@ -156,9 +196,16 @@
       info.fasilitasBasecamp = document.getElementById('info-fasilitas-basecamp').value.trim();
       info.fasilitasSekitar = document.getElementById('info-fasilitas-sekitar').value.trim();
       info.jamOperasional = document.getElementById('info-jam-operasional').value.trim();
+      info.ketentuanPerahu = document.getElementById('info-ketentuan-perahu').value.trim();
+      info.fasilitasTambahan = document.getElementById('info-fasilitas-tambahan').value.trim();
 
-      DataStore.saveWisataInfo(info);
-      showToast('Informasi & Panduan Wisata berhasil disimpan!', 'success');
+      try {
+        await DataStore.saveWisataInfo(info);
+        showToast('Informasi & Panduan Wisata berhasil disimpan!', 'success');
+      } catch (err) {
+        console.error('Gagal menyimpan informasi:', err);
+        showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function() {

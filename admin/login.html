@@ -334,24 +334,32 @@
         return;
       }
 
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
+submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
       submitBtn.disabled = true;
 
-      // Dapatkan kredensial terbaru langsung dari cloud database Supabase
-      const cred = await DataStore.getAdminCredentialsAsync();
-      const inputHash = await DataStore.hashPassword(p);
+      // Verifikasi dilakukan di server: password dicocokkan dengan hash di
+      // database yang tidak lagi bisa dibaca publik, dan server mengembalikan
+      // token sesi yang dibutuhkan untuk menyimpan data.
+      let auth = { success: false, message: 'Login gagal.' };
+      try {
+        const res = await fetch('/api/admin-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        try { auth = await res.json(); } catch (e) {}
+      } catch (err) {
+        console.error('Auth request failed:', err);
+        auth = { success: false, message: 'Gagal menghubungi server. Periksa koneksi Anda.' };
+      }
 
-      // Check username or email and hash match
-      const isUserMatch = (u.toLowerCase() === cred.username.toLowerCase() || (cred.email && u.toLowerCase() === cred.email.toLowerCase()));
-      const isPassMatch = (inputHash === cred.passwordHash || (cred.legacyHash && inputHash === cred.legacyHash));
-
-      if (isUserMatch && isPassMatch) {
-        // Success
+      if (auth && auth.success && auth.token) {
         localStorage.setItem('packraft_failed_attempts', '0');
         localStorage.removeItem('packraft_lockout_until');
         sessionStorage.setItem('admin_logged_in', 'true');
-        sessionStorage.setItem('admin_user', cred.username);
+        sessionStorage.setItem('admin_user', auth.username || u);
         sessionStorage.setItem('admin_session_time', Date.now().toString());
+        sessionStorage.setItem('admin_session_token', auth.token);
 
         showToast('Login berhasil! Mengalihkan...', 'success');
         const isFile = window.location.protocol === 'file:';
@@ -359,8 +367,7 @@
           window.location.href = isFile ? 'index.html' : '/admin/index.html';
         }, 600);
       } else {
-        // Failed
-        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Dashboard';
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Masuk ke Dashboard';
         submitBtn.disabled = false;
 
         let failed = parseInt(localStorage.getItem('packraft_failed_attempts') || '0') + 1;
@@ -373,7 +380,7 @@
           showToast(`Terlalu banyak percobaan gagal. Akun dikunci selama ${LOCKOUT_SECONDS} detik!`, 'error');
         } else {
           const remaining = MAX_ATTEMPTS - failed;
-          showToast(`Username atau Password salah! Sisa percobaan: ${remaining}`, 'error');
+          showToast((auth && auth.message ? auth.message + ' ' : '') + `Sisa percobaan: ${remaining}`, 'error');
         }
       }
     });
@@ -393,7 +400,6 @@
     const displayTargetEmail = document.getElementById('display-target-email');
 
     let currentResetEmail = 'fauzansadidaramadhan@gmail.com';
-    let verifiedOtpCode = '';
     let resendTimerInterval = null;
 
     async function openForgotPasswordModal() {
@@ -488,6 +494,19 @@
       }, 1000);
     }
 
+    // Semua langkah OTP divalidasi di server (/api/send-otp). Browser hanya
+    // menampilkan hasilnya dan tidak pernah memegang atau memeriksa kodenya.
+    async function callOtpApi(payload) {
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, message: data.message || 'Terjadi kesalahan sistem. Silakan coba lagi.' };
+    }
+
     // Step 1: Request OTP
     formForgotRequest.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -500,13 +519,14 @@
       btnSendOtp.disabled = true;
       btnSendOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Kode ke Gmail...';
 
-      // 1. Generate OTP in DataStore
-      const { otp } = DataStore.generateOtp(email);
-
-      // 2. Dispatch email to linked Gmail
       try {
-        await sendOtpEmail(email, otp);
-        showToast(`Kode OTP 6 digit berhasil dikirim ke ${email}!`, 'success');
+        const result = await callOtpApi({ action: 'request', email });
+        // Kegagalan tidak pernah di Reporting sukses: mail gagal = tetap di step 1.
+        if (!result.ok) {
+          showToast(result.message, 'error');
+          return;
+        }
+        showToast(result.message, 'success');
         setForgotStep(2);
         startResendCountdown();
         setTimeout(() => {
@@ -515,9 +535,7 @@
         }, 200);
       } catch (err) {
         console.error('Send OTP error:', err);
-        showToast('Kode OTP berhasil dibuat. Silakan periksa email Anda.', 'info');
-        setForgotStep(2);
-        startResendCountdown();
+        showToast('Gagal menghubungi server. Periksa koneksi Anda lalu coba lagi.', 'error');
       } finally {
         btnSendOtp.disabled = false;
         btnSendOtp.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Kode OTP ke Gmail';
@@ -525,7 +543,7 @@
     });
 
     // Step 2: Verify OTP
-    formForgotVerify.addEventListener('submit', function(e) {
+    formForgotVerify.addEventListener('submit', async function(e) {
       e.preventDefault();
       const inputOtp = document.getElementById('forgot-otp').value.trim();
       if (!inputOtp || inputOtp.length !== 6) {
@@ -536,20 +554,24 @@
       btnVerifyOtp.disabled = true;
       btnVerifyOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memvalidasi...';
 
-      const check = DataStore.verifyOtp(currentResetEmail, inputOtp);
-      btnVerifyOtp.disabled = false;
-      btnVerifyOtp.innerHTML = '<i class="fa-solid fa-check-double"></i> Verifikasi Kode';
-
-      if (check.valid) {
-        verifiedOtpCode = inputOtp;
+      try {
+        const result = await callOtpApi({ action: 'verify', otp: inputOtp });
+        if (!result.ok) {
+          showToast(result.message, 'error');
+          return;
+        }
         showToast('Kode verifikasi cocok! Silakan buat password baru.', 'success');
         setForgotStep(3);
         setTimeout(() => {
           const pwd = document.getElementById('reset-new-pwd');
           if (pwd) pwd.focus();
         }, 200);
-      } else {
-        showToast(check.message || 'Kode OTP tidak valid atau kedaluwarsa!', 'error');
+      } catch (err) {
+        console.error('Verify OTP error:', err);
+        showToast('Gagal menghubungi server. Silakan coba lagi.', 'error');
+      } finally {
+        btnVerifyOtp.disabled = false;
+        btnVerifyOtp.innerHTML = '<i class="fa-solid fa-check-double"></i> Verifikasi Kode';
       }
     });
 
@@ -558,12 +580,11 @@
       if (this.disabled) return;
       this.disabled = true;
       this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Ulang...';
-      const { otp } = DataStore.generateOtp(currentResetEmail);
       try {
-        await sendOtpEmail(currentResetEmail, otp);
-        showToast(`Kode OTP baru telah dikirim ke ${currentResetEmail}!`, 'success');
+        const result = await callOtpApi({ action: 'request', email: currentResetEmail });
+        showToast(result.message, result.ok ? 'success' : 'error');
       } catch (e) {
-        showToast('Kode OTP baru telah digenerate.', 'info');
+        showToast('Gagal menghubungi server. Silakan coba lagi.', 'error');
       }
       startResendCountdown();
     });
@@ -593,60 +614,23 @@
       btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
 
       try {
-        const res = await DataStore.resetAdminPasswordWithOtp(currentResetEmail, verifiedOtpCode, newPwd);
-        btnSaveNewPwd.disabled = false;
-        btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
-
-        if (res.valid) {
-          showToast('Password berhasil diubah & disinkronkan ke seluruh perangkat!', 'success');
-          setForgotStep(4);
-        } else {
-          showToast(res.message || 'Gagal mengubah password. Silakan coba kembali.', 'error');
+        const result = await callOtpApi({ action: 'reset', newPassword: newPwd });
+        if (!result.ok) {
+          showToast(result.message, 'error');
+          return;
         }
+        showToast('Password berhasil diubah & disinkronkan ke seluruh perangkat!', 'success');
+        setForgotStep(4);
       } catch (err) {
+        console.error('Reset password error:', err);
+        showToast('Terjadi kesalahan saat menyimpan password ke cloud.', 'error');
+      } finally {
         btnSaveNewPwd.disabled = false;
         btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
-        showToast('Terjadi kesalahan saat menyimpan password ke cloud: ' + (err.message || err), 'error');
       }
     });
 
-    // Service to send email with OTP
-    async function sendOtpEmail(email, otp) {
-      // 1. Try serverless endpoint first (if available on Vercel)
-      try {
-        const sRes = await fetch('/api/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, otp })
-        });
-        if (sRes.ok) return true;
-      } catch(e) {}
-
-      // 2. Client-side FormSubmit AJAX delivery directly to Gmail
-      try {
-        const fRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            _subject: `[Packrafting Canden] Kode OTP Reset Password Admin: ${otp}`,
-            _template: 'box',
-            "Pemberitahuan": "Permintaan Reset Password Admin Packrafting Canden",
-            "KODE OTP ANDA": otp,
-            "Waktu Berlaku": "10 Menit sejak permohonan dibuat",
-            "Email Tujuan": email,
-            "Peringatan Keamanan": "Abaikan email ini jika Anda tidak meminta penggantian password. Jangan berikan kode ini kepada pihak manapun demi keamanan data desa."
-          })
-        });
-        return fRes.ok;
-      } catch(err) {
-        console.warn('FormSubmit AJAX fallback error:', err);
-        return false;
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
 

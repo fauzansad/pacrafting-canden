@@ -912,6 +912,10 @@
           <!-- Basecamp & Jam Operasional Sync Block -->
           <div style="background:#f8fafc;padding:0.9rem 1.25rem;border-radius:var(--radius);border:1px solid #e2e8f0;font-size:var(--fs-xs);color:var(--text);margin-bottom:0.75rem;">
             <div style="margin-bottom:0.35rem;">
+              <i class="fa-solid fa-location-dot text-accent" style="margin-right:0.4rem;"></i>
+              <strong data-i18n="loc_meeting_label">Titik Kumpul:</strong> <span data-info-titik-kumpul data-i18n="loc_meeting_val">Starting Point Susur Sungai Opak</span>
+            </div>
+            <div style="margin-bottom:0.35rem;">
               <i class="fa-regular fa-clock text-accent" style="margin-right:0.4rem;"></i>
               <strong data-i18n="loc_hours_label">Jam Operasional:</strong> <span data-info-jam data-i18n="loc_hours_val">Setiap Hari: 07.30 – 16.30 WIB</span>
             </div>
@@ -922,6 +926,10 @@
             <div style="margin-bottom:0.35rem;">
               <i class="fa-solid fa-store text-accent" style="margin-right:0.4rem;"></i>
               <strong data-i18n="loc_surround_label">Fasilitas Sekitar:</strong> <span data-info-sekitar data-i18n-html="loc_surround_val">Area Parkir Luas &amp; Aman, Warung Makan Tradisional, Spot Foto Alami Tepi Sungai.</span>
+            </div>
+            <div style="margin-bottom:0.35rem;">
+              <i class="fa-solid fa-ship text-accent" style="margin-right:0.4rem;"></i>
+              <strong data-i18n="loc_boat_label">Ketentuan Perahu:</strong> <span data-info-ketentuan-perahu data-i18n="loc_boat_val">1 orang dewasa per perahu</span>
             </div>
             <div>
               <i class="fa-solid fa-route text-accent" style="margin-right:0.4rem;"></i>
@@ -1138,7 +1146,7 @@
         <div class="google-rating-summary">
           <div class="google-badge-pill">
             <i class="fa-brands fa-google google-icon"></i>
-            <span class="google-rating-score">5.0</span>
+            <span class="google-rating-score" data-testi-avg-rating data-testi-stars-avg>5.0</span>
             <div class="google-stars">
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
@@ -1146,7 +1154,7 @@
               <i class="fa-solid fa-star"></i>
               <i class="fa-solid fa-star"></i>
             </div>
-            <span class="google-reviews-count" data-i18n="testi_badge_reviews">&bull; 85+ Ulasan Google Terverifikasi</span>
+            <span class="google-reviews-count" data-i18n-html="testi_badge_reviews">&bull; <span data-testi-count>0</span> Ulasan Google Terverifikasi</span>
           </div>
           <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-ulasan" data-i18n-html="testi_btn_rate">
             <i class="fa-brands fa-google"></i> Beri Rating Google

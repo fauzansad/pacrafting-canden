@@ -230,11 +230,15 @@
       loc_finish_desc: "Titik akhir pendaratan di pertemuan Sungai Opak &amp; Oya, area bilas bersih, dokumentasi, dan penjemputan kembali.",
       loc_finish_btn: '<i class="fa-solid fa-location-dot"></i> Buka Google Maps Titik Finish',
       loc_hours_label: "Jam Operasional:",
+      loc_meeting_label: "Titik Kumpul:",
+      loc_meeting_val: "Starting Point Susur Sungai Opak",
       loc_hours_val: "Setiap Hari: 07.30 – 16.30 WIB",
       loc_basecamp_label: "Basecamp:",
       loc_basecamp_val: "Toilet, Kamar Mandi Bilas, Tempat Ganti, Mushola, Gazebo, Loker",
       loc_surround_label: "Fasilitas Sekitar:",
       loc_surround_val: "Area Parkir Luas &amp; Aman, Warung Makan Tradisional, Spot Foto Alami Tepi Sungai.",
+      loc_boat_label: "Ketentuan Perahu:",
+      loc_boat_val: "1 orang dewasa per perahu",
       loc_access_label: "Akses Jalan:",
       loc_access_val: "Dapat diakses dengan mobil, motor, maupun bus pariwisata.",
       loc_transport_banner: '<i class="fa-solid fa-van-shuttle" style="margin-right:0.4rem;"></i> <strong>Fasilitas Transportasi:</strong> Disediakan kendaraan penjemputan dari titik finish Potrobayan kembali ke starting point Canden.',
@@ -276,7 +280,7 @@
       testi_eyebrow: "Ulasan &amp; Rating Wisatawan",
       testi_title: "Kesan &amp; Cerita Wisatawan",
       testi_desc: "Ulasan jujur dari wisatawan yang telah merasakan sensasi petualangan Packrafting di Sungai Opak Canden.",
-      testi_badge_reviews: "&bull; 85+ Ulasan Google Terverifikasi",
+      testi_badge_reviews: "&bull; <span data-testi-count>0</span> Ulasan Google Terverifikasi",
       testi_btn_rate: '<i class="fa-brands fa-google"></i> Beri Rating Google',
       testi_swipe_hint: '<i class="fa-solid fa-arrows-left-right"></i> Geser / swipe ke kanan &amp; kiri untuk melihat ulasan lainnya',
       testi_form_banner_title: "Beri Rating dengan Akun Google",
@@ -544,12 +548,16 @@
       loc_finish_badge: "FINISH &amp; SHOWER POINT",
       loc_finish_desc: "Final landing point at the confluence of Opak &amp; Oya Rivers, fresh showers, photos, and return shuttle pickup.",
       loc_finish_btn: '<i class="fa-solid fa-location-dot"></i> Open Finish Point on Google Maps',
+      loc_meeting_label: "Meeting Point:",
+      loc_meeting_val: "Susur Sungai Opak Starting Point",
       loc_hours_label: "Operating Hours:",
       loc_hours_val: "Daily: 07:30 AM – 04:30 PM (UTC+7)",
       loc_basecamp_label: "Basecamp Amenities:",
       loc_basecamp_val: "Restrooms, Fresh Showers, Changing Rooms, Prayer Room (Mushola), Gazebos, Lockers",
       loc_surround_label: "Surrounding Amenities:",
       loc_surround_val: "Spacious &amp; Secure Parking, Traditional Food Stalls, Scenic Riverside Photo Spots.",
+      loc_boat_label: "Boat Rules:",
+      loc_boat_val: "1 adult per raft",
       loc_access_label: "Road Access:",
       loc_access_val: "Easily accessible by car, motorcycle, and tourist buses.",
       loc_transport_banner: '<i class="fa-solid fa-van-shuttle" style="margin-right:0.4rem;"></i> <strong>Transport Service:</strong> Return shuttle pickup service provided from Potrobayan finish point back to Canden starting point.',
@@ -591,7 +599,7 @@
       testi_eyebrow: "Guest Reviews &amp; Ratings",
       testi_title: "What Adventurers Say",
       testi_desc: "Real experiences shared by adventurers who have explored Packrafting on the Opak River Canden.",
-      testi_badge_reviews: "&bull; 85+ Verified Google Reviews",
+      testi_badge_reviews: "&bull; <span data-testi-count>0</span> Verified Google Reviews",
       testi_btn_rate: '<i class="fa-brands fa-google"></i> Leave a Review',
       testi_swipe_hint: '<i class="fa-solid fa-arrows-left-right"></i> Swipe left &amp; right to see more guest reviews',
       testi_form_banner_title: "Rate with Your Google Account",
@@ -689,13 +697,25 @@
       // Update html lang attribute
       document.documentElement.lang = lang;
 
-      // Update Page Title if translation exists
-      if (dict.page_title && window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
-        document.title = dict.page_title;
+      // Update Page Title if translation exists.
+      // Perhatikan kurung: tanpa itu, operator precedence membuat judul tetap
+      // ditulis di '/' walau `page_title` tidak ada, dan tidak pernah ditulis
+      // pada URL bersih seperti '/galeri'.
+      if (dict.page_title) {
+        const path = window.location.pathname;
+        if (path.endsWith('index.html') || path === '/' || path === '' || path.endsWith('/')) {
+          document.title = dict.page_title;
+        }
       }
+
+      // Elemen yang teksnya berasal dari database (diisi oleh main.js) DAN sudah
+      // diubah admin tidak boleh ditimpa kamus statis, karena edit admin adalah
+      // sumber kebenaran yang lebih baru.
+      const isDbDriven = (el) => el.hasAttribute('data-db-driven');
 
       // Update text elements with data-i18n
       document.querySelectorAll('[data-i18n]').forEach(el => {
+        if (isDbDriven(el)) return;
         const key = el.getAttribute('data-i18n');
         if (dict[key] !== undefined) {
           el.textContent = dict[key];
@@ -704,6 +724,7 @@
 
       // Update HTML elements with data-i18n-html
       document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        if (isDbDriven(el)) return;
         const key = el.getAttribute('data-i18n-html');
         if (dict[key] !== undefined) {
           el.innerHTML = dict[key];

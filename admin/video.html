@@ -65,8 +65,14 @@
           <div class="form-group">
             <label for="video-url">Link / URL Video YouTube <span class="required">*</span></label>
             <input type="text" id="video-url" placeholder="Contoh: https://www.youtube.com/watch?v=xxxx atau https://youtu.be/xxxx" oninput="previewVideo(this.value)">
-            <small style="display:block;color:#64748b;margin-top:0.35rem;font-size:0.75rem;">Mendukung link video YouTube biasa, YouTube Shorts, atau link channel.</small>
-          </div>
+<small style="display:block;color:#64748b;margin-top:0.35rem;font-size:0.75rem;">Mendukung link video YouTube biasa, YouTube Shorts, atau link channel.</small>
+  </div>
+
+  <div class="form-group">
+    <label for="video-embed-url">URL Embed YouTube (opsional)</label>
+    <input type="text" id="video-embed-url" placeholder="Contoh: https://www.youtube.com/embed/xxxxxxxxxxx">
+    <small style="display:block;color:#64748b;margin-top:0.35rem;font-size:0.75rem;">Hanya dipakai bila Link YouTube di atas dikosongkan. Kosongkan untuk memakai tautan di atas.</small>
+  </div>
 
           <!-- Video Live Preview -->
           <div class="form-group" style="margin-bottom:1.5rem;">
@@ -231,26 +237,41 @@
       document.getElementById('video-url').value = v.youtubeUrl || '';
       document.getElementById('video-title').value = v.title || 'Feel the Ride — Packrafting Canden';
       document.getElementById('video-subtitle').value = v.subtitle || '';
+      const embedEl = document.getElementById('video-embed-url');
+      if (embedEl) embedEl.value = v.embedUrl || '';
       previewVideo(v.youtubeUrl);
 
       currentCoverImage = v.coverImg || '';
-      document.getElementById('video-cover-url').value = (currentCoverImage.startsWith('data:') ? '' : currentCoverImage);
+      // Data URL tetap ditampilkan agar admin tahu ada gambar yang sedang dipakai
+      // (sebelumnya field selalu kosong sehingga admin tidak bisa mengetahuinya).
+      document.getElementById('video-cover-url').value = currentCoverImage;
       updateCoverPreview(currentCoverImage || 'assets/images/hero/hero-packraft.jpg');
     }
 
-    function saveVideoAdmin() {
+    async function saveVideoAdmin() {
       const url = document.getElementById('video-url').value.trim();
       const title = document.getElementById('video-title').value.trim();
       const subtitle = document.getElementById('video-subtitle').value.trim();
+      const embedInput = document.getElementById('video-embed-url');
+      const embedUrl = embedInput ? embedInput.value.trim() : '';
 
-      const v = DataStore.getVideo() || {};
+      const v = Object.assign({}, DataStore.getVideo() || {});
       v.youtubeUrl = url;
       v.title = title || 'Feel the Ride — Packrafting Canden';
       v.subtitle = subtitle;
       v.coverImg = currentCoverImage || 'assets/images/hero/hero-packraft.jpg';
+      // embedUrl ikut diperbarui; sebelumnya selalu tertinggal di nilai bawaan
+      // yang menunjuk channel YouTube yang tidak ada.
+      if (embedUrl) v.embedUrl = embedUrl;
+      else delete v.embedUrl;
 
-      DataStore.saveVideo(v);
-      showToast('Pengaturan video & foto thumbnail berhasil disimpan!', 'success');
+      try {
+        await DataStore.saveVideo(v);
+        showToast('Pengaturan video & foto thumbnail berhasil disimpan!', 'success');
+      } catch (err) {
+        console.error('Gagal menyimpan video:', err);
+        showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function() {

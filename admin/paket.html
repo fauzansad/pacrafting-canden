@@ -114,25 +114,69 @@
           <div class="form-row">
             <div class="form-group">
               <label for="paket-nama">Nama Paket Wisata *</label>
-              <input type="text" id="paket-nama" placeholder="Contoh: PACKRAFTING EXPERIENCE">
+              <input type="text" id="paket-nama" placeholder="Contoh: PAKET 1">
             </div>
 
             <div class="form-group">
-              <label for="paket-harga">Harga (Placeholder / Angka) *</label>
-              <input type="text" id="paket-harga" placeholder="Contoh: [HARGA] atau 150.000">
+              <label for="paket-badge">Label / Ribbon</label>
+              <input type="text" id="paket-badge" placeholder="Contoh: PROMO SPESIAL">
+              <small style="color:#64748b;display:block;margin-top:0.35rem;">Tampil sebagai pita di pojok foto paket. Kosongkan untuk menyembunyikan.</small>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="paket-durasi">Estimasi Durasi</label>
-              <input type="text" id="paket-durasi" placeholder="Contoh: ± [DURASI] atau ± 2 Jam">
+              <label for="paket-harga-normal">Harga Normal ( dicoret)</label>
+              <input type="text" id="paket-harga-normal" placeholder="Contoh: Rp 125.000">
+              <small style="color:#64748b;display:block;margin-top:0.35rem;">Ditampilkan bergaris coret di atas harga utama. Isi hanya jika harga promo.</small>
             </div>
 
+            <div class="form-group">
+              <label for="paket-harga">Harga Finale *</label>
+              <input type="text" id="paket-harga" placeholder="Contoh: Rp 110.000 atau 150.000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paket-unit">Satuan Harga</label>
+              <input type="text" id="paket-unit" placeholder="Contoh: / orang">
+            </div>
+
+            <div class="form-group">
+              <label for="paket-durasi">Estimasi Durasi</label>
+              <input type="text" id="paket-durasi" placeholder="Contoh: ± 1,5 Jam (4,5 km)">
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
               <label for="paket-level">Tingkat Kesulitan / Cocok Untuk</label>
               <input type="text" id="paket-level" placeholder="Contoh: Pemula &amp; Keluarga">
             </div>
+
+            <div class="form-group">
+              <label for="paket-gambar">URL Foto Paket</label>
+              <input type="text" id="paket-gambar" placeholder="Contoh: assets/images/galeri/3.jpg">
+              <small style="color:#64748b;display:block;margin-top:0.35rem;">Kosongkan untuk memakai foto bawaan.</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paket-min-peserta">Minimum Peserta</label>
+              <input type="text" id="paket-min-peserta" placeholder="Contoh: 1 Orang">
+            </div>
+
+            <div class="form-group">
+              <label for="paket-max-peserta">Maksimum Peserta</label>
+              <input type="text" id="paket-max-peserta" placeholder="Contoh: 20 Orang">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="paket-usia-min">Syarat Usia</label>
+            <input type="text" id="paket-usia-min" placeholder="Contoh: 12 Tahun (Mandiri) / Mulai 7 Th (Tandem)">
           </div>
 
           <div class="form-group">
@@ -143,6 +187,19 @@
           <div class="form-group">
             <label for="paket-fasilitas">Daftar Fasilitas (Satu fasilitas per baris)</label>
             <textarea id="paket-fasilitas" rows="5" placeholder="Perahu Packraft &amp; Dayung&#10;Pelampung Standar&#10;Helm Pengaman&#10;River Guide"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="paket-bawaan">Yang Perlu Dihadirkan (Satu item per baris)</label>
+            <textarea id="paket-bawaan" rows="4" placeholder="Pakaian ganti&#10;Sandal gunung&#10;Kantong waterproof"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="paket-status">Status Tampil</label>
+            <select id="paket-status">
+              <option value="active">Ditampilkan di Website</option>
+              <option value="inactive">Disembunyikan (tidak tampil di website)</option>
+            </select>
           </div>
 
           <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">

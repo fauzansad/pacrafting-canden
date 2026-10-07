@@ -254,7 +254,7 @@ const PackraftData = {
     { step: '02', title: 'BRIEFING', desc: 'Guide memberikan pengarahan rute sungai & safety briefing mendalam.' },
     { step: '03', title: 'PREPARATION', desc: 'Fitting life jacket, helm, dan perlengkapan packrafting.' },
     { step: '04', title: 'START RIDE', desc: 'Mulai mendayung menyusuri arus Sungai Opak yang jernih & segar.' },
-    { step: '05', title: 'RIVER TRAIL', desc: 'Menikmati rute ± 3,5 km dengan spot foto alami & keseruan jeram.' },
+    { step: '05', title: 'RIVER TRAIL', desc: 'Menikmati rute ± 4,5 km dengan spot foto alami & keseruan jeram.' },
     { step: '06', title: 'FINISH POTROBAYAN', desc: 'Tiba di Wisata Potrobayan, bilas bersih, dokumentasi & santap snack.' }
   ],
 
@@ -394,7 +394,7 @@ const PackraftData = {
     },
     {
       q: 'Berapa jarak dan durasi rute susur sungai?',
-      a: 'Rute pengarungan sungai menempuh jarak sekitar 3,5 kilometer dengan durasi pengarungan sekitar 1,5 hingga 2 jam tergantung debit arus air dan kecepatan mendayung.'
+      a: 'Rute pengarungan sungai menempuh jarak sekitar 4,5 kilometer dengan durasi pengarungan sekitar 1,5 jam tergantung debit arus air dan kecepatan mendayung.'
     },
     {
       q: 'Apakah pemula boleh ikut packrafting?',
@@ -428,9 +428,22 @@ const DataStore = {
   SUPABASE_URL: 'https://fnyocuashzlrklduehzu.supabase.co',
   SUPABASE_KEY: 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv',
 
+  // Keys that must NEVER be mirrored into a visitor's localStorage.
+  // admin_cred holds the admin password hash; copying it to every visitor's
+  // browser is what made the credential readable by anyone who opened DevTools.
+  CREDENTIAL_KEYS: ['admin_cred', 'admin_otp'],
+
   // Save to localStorage immediately and sync to Supabase Cloud
   async saveToCloud(key, data) {
     const storageKey = 'packraft_' + key;
+    const isCredential = this.CREDENTIAL_KEYS.includes(key);
+
+    // Kredensial hanya boleh diubah lewat endpoint server yang memverifikasi
+    // password lama / OTP. Menolak di sisi klien agar tidak pernah terkirim.
+    if (isCredential) {
+      throw new Error('Kredensial admin tidak dapat disimpan dari browser. Gunakan alur ganti password atau reset OTP.');
+    }
+
     try {
       localStorage.setItem(storageKey, JSON.stringify(data));
     } catch (e) {
@@ -440,34 +453,43 @@ const DataStore = {
     // Trigger local page update immediately
     window.dispatchEvent(new CustomEvent('packraft_data_updated', { detail: { key, data } }));
 
-    // Send to Supabase Cloud
+    // Send to Supabase Cloud.
+    // Front-end hanya boleh MEMBACA. Setiap tulisan lewat /api/admin-save,
+    // yang memvalidasi token sesi admin di server memakai service_role key.
+    // Menulis langsung dari browser dengan anon key membuat siapa pun bisa
+    // menimpa isi website (termasuk admin_cred).
     try {
-      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data`, {
+      const res = await fetch('/api/admin-save', {
         method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_KEY,
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({
-          key: key,
-          value: data,
-          updated_at: new Date().toISOString()
-        })
+        headers: Object.assign({ 'Content-Type': 'application/json' }, this.adminAuthHeader()),
+        body: JSON.stringify({ key: key, value: data })
       });
-      if (res.ok) {
-        console.log(`[Supabase Cloud] Berhasil sinkronisasi '${key}'`);
+
+      let payload = {};
+      try { payload = await res.json(); } catch (e) {}
+
+      if (res.ok && payload.success) {
+        console.log(`[Cloud] Berhasil sinkronisasi '${key}'`);
         return true;
-      } else {
-        const errText = await res.text();
-        console.warn(`[Supabase Cloud] Status respon ${res.status} untuk '${key}':`, errText);
-        throw new Error(`Cloud sync error (${res.status}): ${errText}`);
       }
+
+      // 503 dari Vercel = endpoint belum ter-deploy (mis. dibuka lewat file://
+      // atau preview lokal). Jangan sampai admin mengira data sudah tersimpan.
+      if (res.status === 404 || res.status === 503) {
+        throw new Error('Endpoint penyimpanan belum tersedia. Pastikan deploy ulang ke Vercel, atau login melalui https (bukan file://).');
+      }
+      throw new Error(payload.message || `Cloud sync error (${res.status})`);
     } catch (err) {
-      console.warn(`[Supabase Cloud] Gagal sinkronisasi '${key}':`, err);
+      console.warn(`[Cloud] Gagal sinkronisasi '${key}':`, err);
       throw err;
     }
+  },
+
+  // Token sesi admin disimpan di sessionStorage, bukan localStorage, supaya
+  // tidak ikut tersalin ke backup browser.
+  adminAuthHeader() {
+    const token = sessionStorage.getItem('admin_session_token');
+    return token ? { 'X-Admin-Token': token } : {};
   },
 
   // Initial Sync from Supabase Cloud
@@ -486,9 +508,11 @@ const DataStore = {
         const records = await res.json();
         if (!Array.isArray(records)) return;
 
-        let hasChanges = false;
         records.forEach(item => {
           if (!item.key || item.value === undefined) return;
+          // Jangan pernah salin kredensial admin ke localStorage pengunjung
+          if (this.CREDENTIAL_KEYS.includes(item.key)) return;
+
           const storageKey = 'packraft_' + item.key;
           const currentLocal = localStorage.getItem(storageKey);
           const remoteString = JSON.stringify(item.value);
@@ -496,9 +520,14 @@ const DataStore = {
           if (currentLocal !== remoteString) {
             try {
               localStorage.setItem(storageKey, remoteString);
-              hasChanges = true;
             } catch (e) {}
           }
+        });
+
+        // Bersihkan salinan kredensial lama yang sudah terlanjur tersimpan di browser
+        // pengguna (dari versi lama situs) supaya tidak terus terekspos.
+        this.CREDENTIAL_KEYS.forEach(k => {
+          try { localStorage.removeItem('packraft_' + k); } catch (e) {}
         });
 
         // Always notify UI when cloud data finishes syncing (critical for incognito / fresh sessions)
@@ -522,17 +551,23 @@ const DataStore = {
     return cleaned;
   },
 
+  // Read + parse a localStorage key without ever throwing on corrupt data.
+  // Returns null when the value is missing, unparseable, or unreadable.
+  safeRead(storageKey) {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored === null || stored === undefined || stored === '') return null;
+      return JSON.parse(stored);
+    } catch (e) {
+      console.warn('[DataStore] Gagal membaca "' + storageKey + '", memakai data bawaan:', e);
+      return null;
+    }
+  },
+
   getBrandInfo() {
-    const stored = localStorage.getItem('packraft_brand');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.whatsapp === '081260092004' || !parsed.meetingPoints) {
-          localStorage.setItem('packraft_brand', JSON.stringify(PackraftData.brand));
-          return PackraftData.brand;
-        }
-        return Object.assign({}, PackraftData.brand, parsed);
-      } catch (e) {}
+    const parsed = this.safeRead('packraft_brand');
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return Object.assign({}, PackraftData.brand, parsed);
     }
     return PackraftData.brand;
   },
@@ -541,15 +576,8 @@ const DataStore = {
   },
 
   getBanners() {
-    const stored = localStorage.getItem('packraft_banners');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {}
-    }
+    const parsed = this.safeRead('packraft_banners');
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     return PackraftData.banners;
   },
   saveBanners(data) {
@@ -561,16 +589,24 @@ const DataStore = {
 
   // ---- Manajemen 3 Foto Banner Slider Hero ----
   getHeroSlides() {
-    const stored = localStorage.getItem('packraft_hero_slides');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length >= 3) {
-          return parsed.slice(0, 3);
-        }
-      } catch (e) {}
+    const parsed = this.safeRead('packraft_hero_slides');
+    // Normalisasi ke 3 slot: gambar kosong diisi default agar admin & front-end
+    // selalu melihat data yang sama (tidak ada slot "hantu" yang tak terlihat).
+    const fallback = PackraftData.heroSlides;
+    if (!Array.isArray(parsed) || parsed.length === 0) return fallback.slice(0, 3);
+
+    const normalized = [];
+    for (let i = 0; i < 3; i++) {
+      const src = parsed[i] || {};
+      const def = fallback[i] || fallback[0];
+      normalized.push({
+        id: i + 1,
+        gambar: (typeof src.gambar === 'string' && src.gambar.trim() !== '') ? src.gambar.trim() : def.gambar,
+        judul: (typeof src.judul === 'string' && src.judul.trim() !== '') ? src.judul : def.judul,
+        caption: (typeof src.caption === 'string' && src.caption.trim() !== '') ? src.caption : def.caption
+      });
     }
-    return PackraftData.heroSlides;
+    return normalized;
   },
   saveHeroSlides(data) {
     const validSlides = Array.isArray(data) ? data.slice(0, 3) : PackraftData.heroSlides;
@@ -578,17 +614,8 @@ const DataStore = {
   },
 
   getPaket() {
-    const stored = localStorage.getItem('packraft_paket');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.length > 0 && parsed[0].harga && (parsed[0].harga.includes('[') || parsed[0].nama === 'PACKRAFTING EXPERIENCE')) {
-          localStorage.setItem('packraft_paket', JSON.stringify(PackraftData.paket));
-          return PackraftData.paket;
-        }
-        return parsed;
-      } catch (e) {}
-    }
+    const stored = this.safeRead('packraft_paket');
+    if (Array.isArray(stored) && stored.length > 0) return stored;
     return PackraftData.paket;
   },
   savePaket(data) {
@@ -599,16 +626,11 @@ const DataStore = {
   },
 
   getOperationSchedule() {
-    const stored = localStorage.getItem('packraft_operation_schedule');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return Object.assign({}, PackraftData.operationSchedule, parsed, {
-          operationDates: Array.isArray(parsed.operationDates) ? parsed.operationDates : []
-        });
-      } catch (e) {}
-    }
-    return PackraftData.operationSchedule;
+    const parsed = this.safeRead('packraft_operation_schedule');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return PackraftData.operationSchedule;
+    return Object.assign({}, PackraftData.operationSchedule, parsed, {
+      operationDates: Array.isArray(parsed.operationDates) ? parsed.operationDates : []
+    });
   },
   saveOperationSchedule(data) {
     const clean = Object.assign({}, PackraftData.operationSchedule, data, {
@@ -630,9 +652,8 @@ const DataStore = {
   },
 
   getWisataInfo() {
-    const stored = localStorage.getItem('packraft_wisata_info');
-    if (stored) {
-      const parsed = JSON.parse(stored);
+    const parsed = this.safeRead('packraft_wisata_info');
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return Object.assign({}, PackraftData.wisataInfo, parsed);
     }
     return PackraftData.wisataInfo;
@@ -642,15 +663,8 @@ const DataStore = {
   },
 
   getGaleri() {
-    const stored = localStorage.getItem('packraft_galeri');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {}
-    }
+    const parsed = this.safeRead('packraft_galeri');
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     return PackraftData.galeri;
   },
   getPublishedGaleri() {
@@ -664,25 +678,19 @@ const DataStore = {
   },
 
   getMedia() {
-    const stored = localStorage.getItem('packraft_media');
-    return stored ? JSON.parse(stored) : PackraftData.media;
+    const parsed = this.safeRead('packraft_media');
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : PackraftData.media;
   },
   saveMedia(data) {
     return this.saveToCloud('media', data);
   },
 
   getVideo() {
-    const stored = localStorage.getItem('packraft_video');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object') {
-          if (!parsed.coverImg) {
-            parsed.coverImg = PackraftData.video.coverImg;
-          }
-          return Object.assign({}, PackraftData.video, parsed);
-        }
-      } catch (e) {}
+    const parsed = this.safeRead('packraft_video');
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return Object.assign({}, PackraftData.video, parsed, {
+        coverImg: parsed.coverImg || PackraftData.video.coverImg
+      });
     }
     return PackraftData.video;
   },
@@ -691,23 +699,18 @@ const DataStore = {
   },
 
   getTestimonials() {
-    const stored = localStorage.getItem('packraft_testimonials');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Pastikan sampel balasan awal tersedia pada ulasan bawaan jika belum pernah diubah
-          PackraftData.testimonials.forEach(defItem => {
-            if (defItem.balasan) {
-              const matched = parsed.find(p => p.id === defItem.id);
-              if (matched && !matched.balasan) {
-                matched.balasan = defItem.balasan;
-              }
-            }
-          });
-          return parsed;
+    const parsed = this.safeRead('packraft_testimonials');
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Pastikan sampel balasan awal tersedia pada ulasan bawaan jika belum pernah diubah
+      PackraftData.testimonials.forEach(defItem => {
+        if (defItem.balasan) {
+          const matched = parsed.find(p => p.id === defItem.id);
+          if (matched && !matched.balasan) {
+            matched.balasan = defItem.balasan;
+          }
         }
-      } catch (e) {}
+      });
+      return parsed;
     }
     return PackraftData.testimonials;
   },
@@ -716,8 +719,8 @@ const DataStore = {
   },
 
   getFAQ() {
-    const stored = localStorage.getItem('packraft_faq');
-    return stored ? JSON.parse(stored) : PackraftData.faq;
+    const parsed = this.safeRead('packraft_faq');
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : PackraftData.faq;
   },
   saveFAQ(data) {
     return this.saveToCloud('faq', data);
@@ -742,128 +745,54 @@ const DataStore = {
   },
 
   getAdminCredentials() {
-    const stored = localStorage.getItem('packraft_admin_cred');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (!parsed.email) parsed.email = 'fauzansadidaramadhan@gmail.com';
-        return parsed;
-      } catch(e) {}
+    const parsed = this.safeRead('packraft_admin_cred');
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      if (!parsed.email) parsed.email = 'fauzansadidaramadhan@gmail.com';
+      return parsed;
     }
-    // Default admin credential (Default password: AdminCanden2026!)
-    // SHA-256 of "AdminCanden2026!" = 58a98bca4dbd715df68c5b058ad9081e62aa21e428cf12ea662ad783a30fc3b0
-    // We also support "admin123" legacy hash = 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
+    // Hanya untuk tampilan label di form ganti password. Hash password BAWAAN
+    // sengaja dihapus dari source: sebelumnya `AdminCanden2026!` dan `admin123`
+    // tertanam di file frontend yang bisa diunduh siapa pun. Autentikasi kini
+    // dilakukan server (/api/admin-auth).
     return {
       username: 'admin',
       email: 'fauzansadidaramadhan@gmail.com',
-      passwordHash: '58a98bca4dbd715df68c5b058ad9081e62aa21e428cf12ea662ad783a30fc3b0',
-      legacyHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
+      passwordHash: null
     };
   },
 
+  // Hanya mengembalikan username + email untuk mengisi label form.
+  // Hash password TIDAK pernah dikirim ke browser. Membutuhkan token sesi
+  // admin; tanpa itu, fell back ke label default.
   async getAdminCredentialsAsync() {
-    // 1. Tunggu inisialisasi cloud sync jika sedang berjalan
-    if (this._cloudSyncPromise) {
-      try {
-        await this._cloudSyncPromise;
-      } catch(e) {}
-    }
+    const fallback = this.getAdminCredentials();
+    const token = sessionStorage.getItem('admin_session_token');
+    if (!token) return fallback;
 
-    // 2. Fetch langsung kredensial terbaru dari Supabase Cloud untuk menjamin sinkronisasi antar perangkat
     try {
-      const res = await fetch(`${this.SUPABASE_URL}/rest/v1/site_data?key=eq.admin_cred&select=*`, {
-        headers: {
-          'apikey': this.SUPABASE_KEY,
-          'Authorization': `Bearer ${this.SUPABASE_KEY}`,
-          'Cache-Control': 'no-cache'
-        }
+      const res = await fetch('/api/admin-save', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, this.adminAuthHeader()),
+        body: JSON.stringify({ action: 'info' })
       });
-      if (res.ok) {
-        const records = await res.json();
-        if (Array.isArray(records) && records.length > 0 && records[0].value) {
-          const remoteCred = records[0].value;
-          localStorage.setItem('packraft_admin_cred', JSON.stringify(remoteCred));
-          return remoteCred;
-        } else {
-          // Jika Supabase belum memiliki data admin_cred, periksa apakah device saat ini memiliki password kustom lokal
-          const localStored = localStorage.getItem('packraft_admin_cred');
-          if (localStored) {
-            try {
-              const parsed = JSON.parse(localStored);
-              if (parsed && parsed.passwordHash) {
-                // Auto-upload kredensial lokal ke cloud agar device lain langsung tersinkron
-                this.saveToCloud('admin_cred', parsed).catch(err => {
-                  console.warn('[DataStore] Auto-upload local cred ke Supabase gagal:', err);
-                });
-                return parsed;
-              }
-            } catch(e) {}
-          }
-        }
+      if (!res.ok) return fallback;
+      const payload = await res.json();
+      if (payload && payload.success) {
+        return {
+          username: payload.username || fallback.username,
+          email: payload.email || fallback.email,
+          passwordHash: null
+        };
       }
     } catch (err) {
-      console.warn('[DataStore] Gagal mengambil admin_cred dari cloud, menggunakan cache lokal:', err);
+      console.warn('[DataStore] Gagal mengambil info akun:', err);
     }
-
-    return this.getAdminCredentials();
+    return fallback;
   },
 
-  async saveAdminCredentials(username, passwordHash, email) {
-    const current = this.getAdminCredentials();
-    const credData = {
-      username: username || current.username || 'admin',
-      email: email || current.email || 'fauzansadidaramadhan@gmail.com',
-      passwordHash: passwordHash || current.passwordHash,
-      updatedAt: new Date().toISOString()
-    };
-    // Simpan ke localStorage & sinkronkan secara real-time ke database cloud Supabase
-    return await this.saveToCloud('admin_cred', credData);
-  },
-
-  generateOtp(email) {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
-    const otpData = {
-      otp: otp,
-      email: (email || '').trim().toLowerCase(),
-      expiry: expiry,
-      createdAt: Date.now()
-    };
-    sessionStorage.setItem('packraft_pwd_reset_otp', JSON.stringify(otpData));
-    return { otp, expiry };
-  },
-
-  verifyOtp(email, inputOtp) {
-    try {
-      const stored = sessionStorage.getItem('packraft_pwd_reset_otp');
-      if (!stored) return { valid: false, message: 'Kode OTP belum dibuat atau sudah kedaluwarsa. Silakan minta kode baru.' };
-      const data = JSON.parse(stored);
-      if (Date.now() > data.expiry) {
-        sessionStorage.removeItem('packraft_pwd_reset_otp');
-        return { valid: false, message: 'Kode OTP telah kedaluwarsa (lebih dari 10 menit). Silakan kirim ulang.' };
-      }
-      if (data.email !== (email || '').trim().toLowerCase()) {
-        return { valid: false, message: 'Alamat email tidak sesuai dengan permohonan OTP.' };
-      }
-      if (data.otp !== (inputOtp || '').trim()) {
-        return { valid: false, message: 'Kode OTP yang Anda masukkan salah. Periksa kembali kotak masuk Gmail Anda.' };
-      }
-      return { valid: true };
-    } catch(e) {
-      return { valid: false, message: 'Terjadi kesalahan sistem saat verifikasi kode.' };
-    }
-  },
-
-  async resetAdminPasswordWithOtp(email, inputOtp, newPassword) {
-    const check = this.verifyOtp(email, inputOtp);
-    if (!check.valid) return check;
-
-    const newHash = await this.hashPassword(newPassword);
-    const cred = await this.getAdminCredentialsAsync();
-    await this.saveAdminCredentials(cred.username, newHash, email);
-    sessionStorage.removeItem('packraft_pwd_reset_otp');
-    return { valid: true };
-  },
+  // Reset password via OTP is handled entirely server-side by /api/send-otp
+  // (actions: request -> verify -> reset). The OTP never reaches the browser,
+  // so there is deliberately no client-side generate/verify implementation.
 
   getBookingWhatsAppUrl(paketNama, lang, tanggal) {
     const brand = this.getBrandInfo();
@@ -962,6 +891,9 @@ if (typeof window !== 'undefined') {
   window.Security = Security;
 
   // Start cloud sync immediately
+  // Halaman admin tetap memuat data cloud (supaya panel melihat data terbaru),
+  // tapi `initCloudSync` sudah tidak pernah menyalin `admin_cred` ke storage
+  // dan tidak lagi menulis ke database.
   DataStore.initCloudSync();
   if (typeof document !== 'undefined' && document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => DataStore.initCloudSync());

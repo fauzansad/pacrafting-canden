@@ -128,5 +128,77 @@ Karena website ini dibangun murni menggunakan **HTML5, CSS3, dan Vanilla JavaScr
 ## 🔐 Portal Admin
 
 - **URL**: [`admin/login.html`](file:///d:/PROJEK/DESA%20CANDEN/admin/login.html)
-- **Demo Login**: Masukkan username dan password apa saja untuk masuk ke dashboard admin.
-- Data yang diubah melalui admin otomatis tersimpan di `localStorage` browser dan siap disinkronkan ke API backend jika diperlukan di masa mendatang.
+- Login diverifikasi di **server** (`/api/admin-auth`), bukan di browser. Password tidak pernah
+  tersimpan di `localStorage` dan hash-nya tidak pernah dikirim ke klien.
+- Panel hanya bisa **menulis lewat** `/api/admin-save` dengan token sesi. Front-end publik
+  hanya punya hak **membaca**.
+
+> ⚠️ Login hanya bisa dipakai lewat `https://` (localhost atau Vercel). Membuka
+> `admin/login.html` lewat `file://` akan membuat verifikasi & penyimpanan gagal,
+> karena fungsi serverless tidak tersedia.
+
+---
+
+## 🚨 Checklist Wajib Sebelum Go-Live
+
+Perubahan keamanan berikut **tidak aktif** sampai langkah manual ini dikerjakan.
+
+Perubahan keamanan berikut **tidak aktif** sampai langkah manual ini dikerjakan.
+
+### 1. Jalankan RLS di Supabase (paling penting)
+
+Sebelum Oktober 2026, tabel `site_data` bisa read/write/delete oleh siapa pun yang
+memiliki publishable key. Buka **Supabase Dashboard → SQL Editor**, jalankan
+[`supabase-rls.sql`](supabase-rls.sql). Setelah itu peran `anon` hanya bisa
+membaca, dan semua tulisan harus lewat server.
+
+### 2. Set environment variables di Vercel
+
+| Name | Isi |
+| --- | --- |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role key dari Supabase → Project Settings → API |
+| `ADMIN_SESSION_SECRET` | string acak panjang, mis. hasil `openssl rand -hex 32` |
+
+Tanpa `SUPABASE_SERVICE_ROLE_KEY`, login dan penyimpanan dari panel akan gagal
+dengan pesan "belum dikonfigurasi di server".
+
+### 3. Rotasi password admin
+
+Baris `admin_cred` pernah bisa dibaca publik, jadi **wajib** ganti password
+sekarang lewat panel (menu *Ganti Password*). Password bawaan yang lama sudah
+dihapus dari source code dan tidak lagi diterima. FormSubmit juga perlu
+konfirmasi sekali untuk alamat email admin baru.
+
+### 4. Deploy ulang
+
+```powershell
+npx vercel --prod
+```
+
+`vercel.json` sekarang mengatur `functions`, CSP, dan `no-store` untuk `/admin/*`.
+
+### 5. Perbarui baris FAQ di database
+
+Teks FAQ sudah dikoreksi di `data.js` menjadi **4,5 km** (bukan 3,5 km), tapi
+database masih menyimpan versi lama. Buka **Panduan & Info Wisata → 5.
+Pertanyaan Umum (FAQ)**, klik *Simpan*, atau ubah nilainya langsung di
+Supabase. Section 5 baru itulah yang membuat data ini bisa diperbaiki admin.
+
+---
+
+## 🧪 Verifikasi
+
+Tidak ada framework test di proyek ini. Pemeriksaan dilakukan dengan:
+
+```powershell
+node --check assets/js/data.js
+node --check assets/js/main.js
+node --check assets/js/admin.js
+node --check assets/js/i18n.js
+node --check api/admin-auth.js
+node --check api/admin-save.js
+node --check api/send-otp.js
+```
+
+Untuk uji perilaku `DataStore` (getter tahan data rusak, `admin_cred` tidak bocor,
+penulisan lewat server), lihat bagian pengujian pada dokumentasi internal.

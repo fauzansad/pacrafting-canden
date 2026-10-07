@@ -16,25 +16,33 @@ function formatAdminAssetUrl(url) {
   return '../' + clean;
 }
 
+function clearAdminSession() {
+  sessionStorage.removeItem('admin_logged_in');
+  sessionStorage.removeItem('admin_user');
+  sessionStorage.removeItem('admin_session_time');
+  sessionStorage.removeItem('admin_session_token');
+}
+
+function redirectToLogin() {
+  const isFile = window.location.protocol === 'file:';
+  window.location.href = isFile ? 'login.html' : '/admin/login.html';
+}
+
 function checkAuth() {
   if (window.location.pathname.includes('login')) {
     return true;
   }
   const loggedIn = sessionStorage.getItem('admin_logged_in');
   const sessionTime = sessionStorage.getItem('admin_session_time');
+  const token = sessionStorage.getItem('admin_session_token');
   const now = Date.now();
   const maxSessionDuration = 2 * 60 * 60 * 1000; // 2 jam timeout
 
-  if (!loggedIn || !sessionTime || (now - parseInt(sessionTime)) > maxSessionDuration) {
-    sessionStorage.removeItem('admin_logged_in');
-    sessionStorage.removeItem('admin_user');
-    sessionStorage.removeItem('admin_session_time');
-    const isFile = window.location.protocol === 'file:';
-    if (isFile) {
-      window.location.href = 'login.html';
-    } else {
-      window.location.href = '/admin/login.html';
-    }
+  // Token sesi dari server WAJIB ada: tanpa itu, panel tidak akan bisa
+  // menyimpan apa pun karena peran anon tidak lagi punya hak tulis.
+  if (!loggedIn || !sessionTime || !token || (now - parseInt(sessionTime)) > maxSessionDuration) {
+    clearAdminSession();
+    redirectToLogin();
     return false;
   }
   // Refresh activity timestamp
@@ -44,15 +52,8 @@ function checkAuth() {
 
 function logout() {
   if (confirm('Apakah Anda yakin ingin keluar (logout)?')) {
-    sessionStorage.removeItem('admin_logged_in');
-    sessionStorage.removeItem('admin_user');
-    sessionStorage.removeItem('admin_session_time');
-    const isFile = window.location.protocol === 'file:';
-    if (isFile) {
-      window.location.href = 'login.html';
-    } else {
-      window.location.href = '/admin/login.html';
-    }
+    clearAdminSession();
+    redirectToLogin();
   }
 }
 
@@ -168,36 +169,44 @@ function openChangePasswordModal() {
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
       }
 
+      // Verifikasi password lama & penyimpanan hash dilakukan di server, bukan
+      // di browser, supaya tidak ada hash password yang terekspos di storage.
       try {
-        const oldHash = await DataStore.hashPassword(oldPwd);
-        const currentCred = await DataStore.getAdminCredentialsAsync();
+        const res = await fetch('/api/admin-save', {
+          method: 'POST',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, DataStore.adminAuthHeader()),
+          body: JSON.stringify({
+            action: 'credentials',
+            currentPassword: oldPwd,
+            newPassword: newPwd,
+            newUsername: newUsername,
+            newEmail: newEmail
+          })
+        });
 
-        const isOldValid = (oldHash === currentCred.passwordHash || (currentCred.legacyHash && oldHash === currentCred.legacyHash));
-        if (!isOldValid) {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = origBtnHtml;
-          }
-          showToast('Password saat ini salah!', 'error');
+        let payload = {};
+        try { payload = await res.json(); } catch (e) {}
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origBtnHtml;
+        }
+
+        if (!res.ok || !payload.success) {
+          showToast(payload.message || 'Gagal menyimpan kredensial ke cloud.', 'error');
           return;
         }
 
-        const newHash = await DataStore.hashPassword(newPwd);
-        await DataStore.saveAdminCredentials(newUsername, newHash, newEmail);
-        sessionStorage.setItem('admin_user', newUsername);
-
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = origBtnHtml;
-        }
+        sessionStorage.setItem('admin_user', payload.username || newUsername);
         showToast('Kredensial berhasil diperbarui & disinkronkan ke seluruh perangkat!', 'success');
         closeChangePasswordModal();
       } catch (err) {
+        console.error('Gagal mengganti password:', err);
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHtml;
         }
-        showToast('Gagal menyimpan kredensial ke cloud: ' + (err.message || err), 'error');
+        showToast('Gagal menghubungi server. Periksa koneksi Anda.', 'error');
       }
     });
   } else {
@@ -338,7 +347,7 @@ function renderHeroSlotsAdmin() {
           <span class="slot-badge ${badgeClasses[idx]}">${slotLabels[idx]}</span>
         </div>
         <div class="slot-preview-box">
-          <img src="${previewSrc}" id="slot-img-preview-${idx}" class="slot-preview-img" alt="Slide ${idx + 1}" onerror="this.onerror=null;this.src='../assets/images/galeri/1.jpg';">
+          <img src="${escapeHtmlAdmin(previewSrc)}" id="slot-img-preview-${idx}" class="slot-preview-img" alt="Slide ${idx + 1}" onerror="this.onerror=null;this.src=this.dataset.fallback;" data-fallback="${escapeHtmlAdmin(formatAdminAssetUrl('assets/images/galeri/1.jpg'))}">
         </div>
         <div class="slot-body" style="padding:1rem;display:flex;flex-direction:column;gap:0.75rem;">
           <div class="slot-btn-group" style="display:flex;gap:0.5rem;">
@@ -352,8 +361,9 @@ function renderHeroSlotsAdmin() {
           </div>
 
           <!-- Hidden inputs for background data sync -->
-          <input type="hidden" id="slot-url-input-${idx}" value="${slide.gambar || ''}">
-          <input type="hidden" id="slot-title-input-${idx}" value="${slide.judul || ''}">
+          <input type="hidden" id="slot-url-input-${idx}" value="${escapeHtmlAdmin(slide.gambar || '')}">
+          <input type="hidden" id="slot-title-input-${idx}" value="${escapeHtmlAdmin(slide.judul || '')}">
+          <input type="hidden" id="slot-caption-input-${idx}" value="${escapeHtmlAdmin(slide.caption || '')}">
         </div>
       </div>
     `;
@@ -410,21 +420,28 @@ function openGaleriPickerModal(slotIdx) {
   if (!galeriList || galeriList.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:2rem;">Belum ada foto di Galeri Foto. Anda dapat mengunggah foto baru lewat tombol Upload.</p>';
   } else {
-    grid.innerHTML = galeriList.map(g => {
+    grid.innerHTML = galeriList.map((g, idx) => {
       const imgSrc = formatAdminAssetUrl(g.gambar || 'assets/images/galeri/1.jpg');
-      const safeTitle = (g.judul || 'Foto Galeri').replace(/"/g, '&quot;');
-      const safeImg = (g.gambar || '').replace(/'/g, "\\'");
-      const safeJsTitle = (g.judul || '').replace(/'/g, "\\'");
+      const title = g.judul || 'Foto Galeri';
       return `
-        <div class="picker-photo-card" onclick="selectPhotoFromGallery('${safeImg}', '${safeJsTitle}')">
-          <img src="${imgSrc}" class="picker-photo-img" alt="${safeTitle}" onerror="this.onerror=null;this.src='../assets/images/galeri/1.jpg';">
+        <div class="picker-photo-card" data-picker-index="${idx}">
+          <img src="${escapeHtmlAdmin(imgSrc)}" class="picker-photo-img" alt="${escapeHtmlAdmin(title)}" onerror="this.onerror=null;this.src=this.dataset.fallback;" data-fallback="${escapeHtmlAdmin(formatAdminAssetUrl('assets/images/galeri/1.jpg'))}">
           <div class="picker-photo-info">
-            <h5 class="picker-photo-title" title="${safeTitle}">${safeTitle}</h5>
+            <h5 class="picker-photo-title" title="${escapeHtmlAdmin(title)}">${escapeHtmlAdmin(title)}</h5>
             <span class="picker-photo-tag"><i class="fa-solid fa-check-circle"></i> Gunakan Foto Ini</span>
           </div>
         </div>
       `;
     }).join('');
+
+    // Delegasi event, bukan onclick inline: judul berisi tanda kutip tidak lagi
+    // bisa merusak markup.
+    grid.querySelectorAll('[data-picker-index]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        const item = galeriList[parseInt(this.getAttribute('data-picker-index'), 10)];
+        if (item) selectPhotoFromGallery(item.gambar || '', item.judul || '');
+      });
+    });
   }
 
   modal.classList.add('active');
@@ -463,15 +480,27 @@ async function saveAllHeroSlides() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
   }
 
+  // Pastikan state terisi 3 slot sebelum disimpan, supaya pemanggilan dari
+  // halaman lain (mis. tombol reset) tidak melempar TypeError.
+  if (!Array.isArray(adminHeroSlidesState) || adminHeroSlidesState.length < 3) {
+    renderHeroSlotsAdmin();
+  }
+
   // Ensure current inputs are synced
   for (let i = 0; i < 3; i++) {
+    if (!adminHeroSlidesState[i]) adminHeroSlidesState[i] = { id: i + 1, gambar: '', judul: '', caption: '' };
     const urlInput = document.getElementById(`slot-url-input-${i}`);
     const titleInput = document.getElementById(`slot-title-input-${i}`);
+    const captionInput = document.getElementById(`slot-caption-input-${i}`);
     if (urlInput && urlInput.value.trim() && !urlInput.value.startsWith('(Foto Hasil')) {
       adminHeroSlidesState[i].gambar = urlInput.value.trim().replace(/^\/+/, '');
     }
     if (titleInput) {
       adminHeroSlidesState[i].judul = titleInput.value.trim();
+    }
+    // caption ikut dipertahankan; sebelumnya hilang setiap kali admin menyimpan.
+    if (captionInput && captionInput.value.trim()) {
+      adminHeroSlidesState[i].caption = captionInput.value.trim();
     }
     adminHeroSlidesState[i].id = i + 1;
   }
@@ -508,17 +537,18 @@ function loadBannerHeadlineAdmin() {
   if (!banners || banners.length === 0) return;
   const b = banners[0];
 
-  const judulInput = document.getElementById('banner-judul');
-  const subInput = document.getElementById('banner-sub');
-  const leadInput = document.getElementById('banner-lead');
-  const ctaInput = document.getElementById('banner-cta');
-  const lokasiInput = document.getElementById('banner-lokasi');
+  const setVal = (id, val, fallback) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || fallback || '';
+  };
 
-  if (judulInput) judulInput.value = b.judul || 'PACKRAFTING CANDEN';
-  if (subInput) subInput.value = b.subheading || 'Adventure on the River';
-  if (leadInput) leadInput.value = b.lead || '';
-  if (ctaInput) ctaInput.value = b.ctaText || 'JELAJAHI PAKET WISATA';
-  if (lokasiInput) lokasiInput.value = b.lokasiTag || 'Rute Sungai Opak • 4,5 KM (± 1,5 Jam) • Canden ke Potrobayan';
+  setVal('banner-judul', b.judul, 'PACKRAFTING CANDEN');
+  setVal('banner-sub', b.subheading, 'Adventure on the River');
+  setVal('banner-lead', b.lead, '');
+  setVal('banner-cta', b.ctaText, 'JELAJAHI PAKET WISATA');
+  setVal('banner-lokasi', b.lokasiTag, 'Rute Sungai Opak • 4,5 KM (± 1,5 Jam) • Canden ke Potrobayan');
+  setVal('banner-cta-link', b.ctaLink, '#paket');
+  setVal('banner-gambar', b.gambar, '');
 }
 
 async function saveBannerHeadlineText() {
@@ -529,8 +559,10 @@ async function saveBannerHeadlineText() {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
   }
 
-  const banners = DataStore.getBanners();
-  const b = banners[0] || { id: 1, status: 'active', urutan: 1 };
+  // Pertahankan banner lain yang mungkin tersimpan; sebelumnya seluruh array
+  // ditimpa menjadi satu elemen.
+  const banners = DataStore.getBanners().map(function (x) { return Object.assign({}, x); });
+  const b = banners[0] || Object.assign({}, PackraftData.banners[0], { id: 1, status: 'active', urutan: 1 });
 
   b.judul = (document.getElementById('banner-judul') ? document.getElementById('banner-judul').value.trim() : '') || 'PACKRAFTING CANDEN';
   b.subheading = document.getElementById('banner-sub') ? document.getElementById('banner-sub').value.trim() : 'Adventure on the River';
@@ -538,9 +570,17 @@ async function saveBannerHeadlineText() {
   b.ctaText = document.getElementById('banner-cta') ? document.getElementById('banner-cta').value.trim() : 'JELAJAHI PAKET WISATA';
   b.lokasiTag = document.getElementById('banner-lokasi') ? document.getElementById('banner-lokasi').value.trim() : '';
 
+  const ctaLinkInput = document.getElementById('banner-cta-link');
+  if (ctaLinkInput) b.ctaLink = ctaLinkInput.value.trim();
+  const gambarInput = document.getElementById('banner-gambar');
+  if (gambarInput) b.gambar = gambarInput.value.trim();
+
+  // Simpan seluruh array, bukan hanya elemen pertama.
+  banners[0] = b;
+
   try {
     showToast('Menyimpan teks headline banner...', 'info');
-    await DataStore.saveBanners([b]);
+    await DataStore.saveBanners(banners);
     showToast('Teks headline banner berhasil disimpan!', 'success');
   } catch (err) {
     console.error(err);
@@ -610,11 +650,17 @@ function renderPaketAdmin() {
   const paketList = DataStore.getPaket();
   container.innerHTML = paketList.map(function (p) {
       const formattedHarga = p.harga ? (p.harga.startsWith('Rp') ? p.harga : 'Rp ' + p.harga) : '-';
+      const normalHarga = (p.hargaNormal && p.hargaNormal !== p.harga)
+        ? `<br><small style="color:#94a3b8;text-decoration:line-through;">${escapeHtmlAdmin(p.hargaNormal)}</small>`
+        : '';
+      const statusBadge = (p.status === 'inactive')
+        ? '<span style="display:inline-block;background:#fef2f2;color:#dc2626;padding:0.1rem 0.45rem;border-radius:4px;font-size:0.7rem;font-weight:700;border:1px solid #fecaca;">Disembunyikan</span>'
+        : '<span style="display:inline-block;background:#ecfdf5;color:#059669;padding:0.1rem 0.45rem;border-radius:4px;font-size:0.7rem;font-weight:700;border:1px solid #a7f3d0;">Tampil</span>';
       return `
       <tr>
-        <td><strong>${p.nama}</strong><br><small style="color:#64748b;">${p.level || ''}</small></td>
-        <td><span style="color:#ea580c;font-weight:700;">${formattedHarga}</span></td>
-        <td>${p.durasi}</td>
+        <td><strong>${escapeHtmlAdmin(p.nama)}</strong> ${statusBadge}<br><small style="color:#64748b;">${escapeHtmlAdmin(p.level || '')}</small></td>
+        <td><span style="color:#ea580c;font-weight:700;">${escapeHtmlAdmin(formattedHarga)}</span>${normalHarga}</td>
+        <td>${escapeHtmlAdmin(p.durasi || '-')}</td>
         <td>${p.fasilitas ? p.fasilitas.length : 0} Fasilitas</td>
         <td>
           <div style="display:flex;gap:0.4rem;">
@@ -627,18 +673,57 @@ function renderPaketAdmin() {
   }).join('');
 }
 
+const PAKET_FORM_FIELDS = [
+  'paket-nama', 'paket-badge', 'paket-harga-normal', 'paket-harga', 'paket-unit',
+  'paket-durasi', 'paket-level', 'paket-gambar', 'paket-min-peserta',
+  'paket-max-peserta', 'paket-usia-min', 'paket-deskripsi', 'paket-fasilitas',
+  'paket-bawaan', 'paket-status'
+];
+
+function setPaketFormValues(values) {
+  PAKET_FORM_FIELDS.forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.value = values[id] !== undefined ? values[id] : '';
+  });
+}
+
+function readPaketFormValues() {
+  const get = (id) => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  };
+  const lines = (id) => get(id).split('\n').map(s => s.trim()).filter(Boolean);
+
+  return {
+    nama: get('paket-nama'),
+    badge: get('paket-badge'),
+    hargaNormal: get('paket-harga-normal'),
+    harga: get('paket-harga'),
+    unit: get('paket-unit') || '/ orang',
+    durasi: get('paket-durasi'),
+    level: get('paket-level'),
+    gambar: get('paket-gambar'),
+    minPeserta: get('paket-min-peserta'),
+    maxPeserta: get('paket-max-peserta'),
+    usiaMin: get('paket-usia-min'),
+    deskripsi: get('paket-deskripsi'),
+    fasilitas: lines('paket-fasilitas'),
+    yangPerluDihadirkan: lines('paket-bawaan'),
+    status: get('paket-status') || 'active'
+  };
+}
+
 function addPaket() {
   const form = document.getElementById('paket-form');
   if (form) {
     form.style.display = 'block';
     form.dataset.mode = 'add';
     form.dataset.editId = '';
-    document.getElementById('paket-nama').value = '';
-    document.getElementById('paket-harga').value = '';
-    document.getElementById('paket-durasi').value = '';
-    document.getElementById('paket-level').value = 'Pemula & Menengah';
-    document.getElementById('paket-deskripsi').value = '';
-    document.getElementById('paket-fasilitas').value = '';
+    setPaketFormValues({
+      'paket-level': 'Pemula & Keluarga',
+      'paket-unit': '/ orang',
+      'paket-status': 'active'
+    });
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
   }
 }
@@ -652,69 +737,72 @@ function editPaket(id) {
     form.style.display = 'block';
     form.dataset.mode = 'edit';
     form.dataset.editId = id;
-    document.getElementById('paket-nama').value = paket.nama || '';
-    document.getElementById('paket-harga').value = paket.harga || '';
-    document.getElementById('paket-durasi').value = paket.durasi || '';
-    document.getElementById('paket-level').value = paket.level || '';
-    document.getElementById('paket-deskripsi').value = paket.deskripsi || '';
-    document.getElementById('paket-fasilitas').value = (paket.fasilitas || []).join('\n');
+    setPaketFormValues({
+      'paket-nama': paket.nama || '',
+      'paket-badge': paket.badge || '',
+      'paket-harga-normal': paket.hargaNormal || '',
+      'paket-harga': paket.harga || '',
+      'paket-unit': paket.unit || '',
+      'paket-durasi': paket.durasi || '',
+      'paket-level': paket.level || '',
+      'paket-gambar': paket.gambar || '',
+      'paket-min-peserta': paket.minPeserta || '',
+      'paket-max-peserta': paket.maxPeserta || '',
+      'paket-usia-min': paket.usiaMin || '',
+      'paket-deskripsi': paket.deskripsi || '',
+      'paket-fasilitas': (paket.fasilitas || []).join('\n'),
+      'paket-bawaan': (paket.yangPerluDihadirkan || []).join('\n'),
+      'paket-status': paket.status || 'active'
+    });
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
   }
 }
 
-function savePaket() {
+async function savePaket() {
   const form = document.getElementById('paket-form');
+  if (!form) return;
+
   const mode = form.dataset.mode;
-  const nama = document.getElementById('paket-nama').value.trim();
-  const harga = document.getElementById('paket-harga').value.trim();
-  const durasi = document.getElementById('paket-durasi').value.trim();
-  const level = document.getElementById('paket-level').value.trim();
-  const deskripsi = document.getElementById('paket-deskripsi').value.trim();
-  const fasilitas = document.getElementById('paket-fasilitas').value.trim().split('\n').filter(f => f.trim());
+  const values = readPaketFormValues();
 
-  if (!nama) { showToast('Nama paket harus diisi', 'error'); return; }
+  if (!values.nama) { showToast('Nama paket harus diisi', 'error'); return; }
+  if (!values.harga) { showToast('Harga finale harus diisi', 'error'); return; }
 
-  const paketList = DataStore.getPaket();
+  const paketList = DataStore.getPaket().map(function (p) { return Object.assign({}, p); });
 
   if (mode === 'edit') {
-    const id = parseInt(form.dataset.editId);
-    const item = paketList.find(p => p.id === id);
-    if (item) {
-      item.nama = nama;
-      item.harga = harga;
-      item.durasi = durasi;
-      item.level = level;
-      item.deskripsi = deskripsi;
-      item.fasilitas = fasilitas;
-      showToast('Paket berhasil diperbarui', 'success');
-    }
+    const id = parseInt(form.dataset.editId, 10);
+    const index = paketList.findIndex(p => p.id === id);
+    if (index === -1) { showToast('Paket tidak ditemukan', 'error'); return; }
+    paketList[index] = Object.assign({}, paketList[index], values);
   } else {
-    paketList.push({
+    paketList.push(Object.assign({}, values, {
       id: DataStore.generateId(paketList),
-      nama: nama,
-      badge: 'PAKET BARU',
-      harga: harga || '[HARGA]',
-      unit: '/ orang',
-      durasi: durasi || '± [DURASI]',
-      level: level,
-      deskripsi: deskripsi,
-      fasilitas: fasilitas,
-      status: 'active'
-    });
-    showToast('Paket baru berhasil ditambahkan', 'success');
+      featured: false
+    }));
   }
 
-  DataStore.savePaket(paketList);
-  form.style.display = 'none';
-  renderPaketAdmin();
+  try {
+    await DataStore.savePaket(paketList);
+    form.style.display = 'none';
+    renderPaketAdmin();
+    showToast(mode === 'edit' ? 'Paket berhasil diperbarui' : 'Paket baru berhasil ditambahkan', 'success');
+  } catch (err) {
+    console.error('Gagal menyimpan paket:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+  }
 }
 
-function deletePaket(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
-    let list = DataStore.getPaket().filter(p => p.id !== id);
-    DataStore.savePaket(list);
+async function deletePaket(id) {
+  if (!confirm('Apakah Anda yakin ingin menghapus paket ini?')) return;
+  const list = DataStore.getPaket().filter(p => p.id !== id);
+  try {
+    await DataStore.savePaket(list);
     showToast('Paket berhasil dihapus', 'success');
     renderPaketAdmin();
+  } catch (err) {
+    console.error('Gagal menghapus paket:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
   }
 }
 
@@ -781,8 +869,8 @@ function loadKontakAdmin() {
   setVal('kontak-youtube', brand.youtube);
 }
 
-function saveKontakAdmin() {
-  const brand = DataStore.getBrandInfo();
+async function saveKontakAdmin() {
+  const brand = Object.assign({}, DataStore.getBrandInfo());
   brand.meetingPoint = document.getElementById('kontak-start-name').value.trim();
   brand.startMapsUrl = document.getElementById('kontak-start-url').value.trim();
   if (document.getElementById('kontak-rest-name')) {
@@ -799,8 +887,20 @@ function saveKontakAdmin() {
   brand.tiktok = document.getElementById('kontak-tiktok').value.trim();
   brand.youtube = document.getElementById('kontak-youtube').value.trim();
 
-  DataStore.saveBrandInfo(brand);
-  showToast('Pengaturan rute sungai, kontak & WhatsApp berhasil disimpan!', 'success');
+  // Cegah nomor WhatsApp kosong / placeholder: tanpa ini semua tautan booking
+  // di situs menghasilkan wa.me/[NOMOR_WHATSAPP] yang tidak bisa diklik.
+  if (!brand.whatsapp || brand.whatsapp.includes('[')) {
+    showToast('Nomor WhatsApp wajib diisi dengan angka yang valid!', 'error');
+    return;
+  }
+
+  try {
+    await DataStore.saveBrandInfo(brand);
+    showToast('Pengaturan rute sungai, kontak & WhatsApp berhasil disimpan!', 'success');
+  } catch (err) {
+    console.error('Gagal menyimpan kontak:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+  }
 }
 
 // ---- 7. Galeri Foto Management -----
@@ -820,14 +920,20 @@ function filterGaleriAdmin(status, btn) {
   renderGaleriAdmin();
 }
 
-function toggleGaleriStatus(id) {
-  const list = DataStore.getGaleri();
+async function toggleGaleriStatus(id) {
+  const list = DataStore.getGaleri().map(function (g) { return Object.assign({}, g); });
   const item = list.find(g => g.id === id);
-  if (item) {
-    const isCurrentlyActive = (item.status !== 'hidden');
-    item.status = isCurrentlyActive ? 'hidden' : 'active';
-    DataStore.saveGaleri(list);
+  if (!item) return;
+
+  const isCurrentlyActive = (item.status !== 'hidden');
+  item.status = isCurrentlyActive ? 'hidden' : 'active';
+  try {
+    await DataStore.saveGaleri(list);
     showToast(`Foto "${item.judul}" ${item.status === 'active' ? 'DITAMPILKAN di website' : 'TIDAK DITAMPILKAN (disembunyikan)'}!`, item.status === 'active' ? 'success' : 'warning');
+    renderGaleriAdmin();
+  } catch (err) {
+    console.error('Gagal mengubah status galeri:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
     renderGaleriAdmin();
   }
 }
@@ -888,15 +994,15 @@ function renderGaleriAdmin() {
     return `
       <div class="media-item" ${cardStyle}>
         <div style="position:relative;">
-          <img src="${imgSrc}" alt="${g.judul}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60';" style="height:150px;width:100%;object-fit:cover;">
+          <img src="${escapeHtmlAdmin(imgSrc)}" alt="${escapeHtmlAdmin(g.judul)}" onerror="this.onerror=null;this.src=this.dataset.fallback;" data-fallback="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&auto=format&fit=crop&q=60" style="height:150px;width:100%;object-fit:cover;">
           <div style="position:absolute;top:8px;right:8px;">
             ${statusBadge}
           </div>
         </div>
         <div class="media-item-info">
-          <h4 class="media-item-title">${g.judul}</h4>
+          <h4 class="media-item-title">${escapeHtmlAdmin(g.judul)}</h4>
           <div style="font-size:0.775rem;color:#64748b;margin-bottom:0.5rem;">
-            <span><i class="fa-solid fa-tag"></i> ${g.kategori || 'Petualangan'}</span>
+            <span><i class="fa-solid fa-tag"></i> ${escapeHtmlAdmin(g.kategori || 'Petualangan')}</span>
           </div>
           <div class="media-item-meta" style="flex-wrap:wrap;gap:0.4rem;padding-top:0.4rem;border-top:1px solid #f1f5f9;">
             ${toggleBtn}
@@ -956,8 +1062,9 @@ function editGaleriAdmin(id) {
   }
 }
 
-function saveGaleriAdmin() {
+async function saveGaleriAdmin() {
   const form = document.getElementById('galeri-form');
+  if (!form) return;
   const mode = form.dataset.mode;
   const judul = document.getElementById('galeri-judul').value.trim();
   const kategori = document.getElementById('galeri-kategori').value;
@@ -969,10 +1076,10 @@ function saveGaleriAdmin() {
     return;
   }
 
-  const list = DataStore.getGaleri();
+  const list = DataStore.getGaleri().map(function (g) { return Object.assign({}, g); });
 
   if (mode === 'edit') {
-    const id = parseInt(form.dataset.editId);
+    const id = parseInt(form.dataset.editId, 10);
     const item = list.find(g => g.id === id);
     if (item) {
       item.judul = judul;
@@ -995,7 +1102,7 @@ function saveGaleriAdmin() {
   }
 
   try {
-    DataStore.saveGaleri(list);
+    await DataStore.saveGaleri(list);
     form.style.display = 'none';
     currentGaleriImageData = '';
     const prev = document.getElementById('galeri-preview-img');
@@ -1003,26 +1110,23 @@ function saveGaleriAdmin() {
     renderGaleriAdmin();
     showToast(mode === 'edit' ? 'Foto galeri berhasil diperbarui!' : 'Foto baru berhasil ditambahkan ke galeri!', 'success');
   } catch (err) {
-    console.error('Storage error:', err);
-    try {
-      const trimmedList = list.slice(0, 15);
-      DataStore.saveGaleri(trimmedList);
-      form.style.display = 'none';
-      currentGaleriImageData = '';
-      renderGaleriAdmin();
-      showToast('Foto galeri berhasil disimpan!', 'success');
-    } catch(e2) {
-      showToast('Memori browser penuh. Silakan gunakan foto yang lebih kecil atau bersihkan data browser.', 'error');
-    }
+    console.error('Gagal menyimpan galeri:', err);
+    // Jangan diam-diam memotong daftar foto jadi 15 item; itu membuat data
+    // hilang tanpa sepengetahuan admin.
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
   }
 }
 
-function deleteGaleriAdmin(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus foto galeri ini?')) {
-    let list = DataStore.getGaleri().filter(g => g.id !== id);
-    DataStore.saveGaleri(list);
+async function deleteGaleriAdmin(id) {
+  if (!confirm('Apakah Anda yakin ingin menghapus foto galeri ini?')) return;
+  const list = DataStore.getGaleri().filter(g => g.id !== id);
+  try {
+    await DataStore.saveGaleri(list);
     showToast('Foto galeri berhasil dihapus', 'success');
     renderGaleriAdmin();
+  } catch (err) {
+    console.error('Gagal menghapus foto galeri:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
   }
 }
 
@@ -1056,6 +1160,110 @@ function initGaleriFileListener() {
           });
       }
     };
+  }
+}
+
+// ---- 8.4 FAQ / Pertanyaan Umum Admin Management ----
+// Sebelumnya tidak ada UI sama sekali untuk FAQ, padahal landing page
+// merender isinya dari database. Admin tidak bisa memperbaiki teks salah ketik.
+let adminFaqDraft = [];
+
+function initFaqAdminPage() {
+  renderFaqAdmin();
+}
+
+function renderFaqAdmin() {
+  const container = document.getElementById('faq-admin-list');
+  if (!container || typeof DataStore === 'undefined') return;
+
+  const list = DataStore.getFAQ();
+  adminFaqDraft = list.map(function (item) {
+    return Object.assign({}, item);
+  });
+
+  if (adminFaqDraft.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#64748b;padding:2rem;">Belum ada pertanyaan. Klik "Tambah Pertanyaan" untuk membuat.</p>';
+    return;
+  }
+
+  container.innerHTML = adminFaqDraft.map(function (item, idx) {
+    return `
+      <div style="border:1px solid var(--admin-border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;background:#fff;">
+        <div class="form-group" style="margin-bottom:0.65rem;">
+          <label for="faq-q-${idx}">Pertanyaan</label>
+          <input type="text" id="faq-q-${idx}" value="${escapeHtmlAdmin(item.q || '')}">
+        </div>
+        <div class="form-group" style="margin-bottom:0.65rem;">
+          <label for="faq-a-${idx}">Jawaban</label>
+          <textarea id="faq-a-${idx}" rows="3">${escapeHtmlAdmin(item.a || '')}</textarea>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="moveFaqAdmin(${idx}, -1)" title="Naik"><i class="fa-solid fa-arrow-up"></i></button>
+          <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="moveFaqAdmin(${idx}, 1)" title="Turun"><i class="fa-solid fa-arrow-down"></i></button>
+          <button type="button" class="btn-admin btn-admin-danger btn-admin-sm" style="margin-left:auto;" onclick="deleteFaqAdmin(${idx})"><i class="fa-solid fa-trash"></i> Hapus</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addFaqAdmin() {
+  adminFaqDraft.push({ q: '', a: '' });
+  renderFaqAdmin();
+}
+
+function moveFaqAdmin(index, delta) {
+  const target = index + delta;
+  if (target < 0 || target >= adminFaqDraft.length) return;
+  const item = adminFaqDraft.splice(index, 1)[0];
+  adminFaqDraft.splice(target, 0, item);
+  renderFaqAdmin();
+}
+
+function deleteFaqAdmin(index) {
+  if (!confirm('Hapus pertanyaan ini dari website?')) return;
+  adminFaqDraft.splice(index, 1);
+  renderFaqAdmin();
+}
+
+async function saveFaqAdmin() {
+  if (typeof DataStore === 'undefined') return;
+
+  // Kumpulkan nilai input terbaru sebelum menyimpan.
+  const collected = [];
+  for (let i = 0; i < adminFaqDraft.length; i++) {
+    const qEl = document.getElementById('faq-q-' + i);
+    const aEl = document.getElementById('faq-a-' + i);
+    const q = qEl ? qEl.value.trim() : '';
+    const a = aEl ? aEl.value.trim() : '';
+    if (!q) continue;
+    collected.push({ q: q, a: a });
+  }
+
+  if (collected.length === 0) {
+    showToast('Minimal satu pertanyaan harus diisi!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-save-faq');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  }
+
+  try {
+    await DataStore.saveFAQ(collected);
+    showToast('Pertanyaan umum berhasil disimpan!', 'success');
+    renderFaqAdmin();
+  } catch (err) {
+    console.error('Gagal menyimpan FAQ:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   }
 }
 
@@ -1193,7 +1401,7 @@ function renderTestimoniAdmin() {
     const avatarInitial = (item.avatar || (item.nama ? item.nama.charAt(0) : 'G')).toUpperCase();
     const photoHtml = item.foto 
       ? `<img src="${escapeHtmlAdmin(item.foto)}" alt="${escapeHtmlAdmin(item.nama)}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;">` 
-      : `<div style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;color:#334155;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${avatarInitial}</div>`;
+      : `<div style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;color:#334155;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${escapeHtmlAdmin(avatarInitial)}</div>`;
 
     const isGoogle = item.isGoogle !== false;
     const badgeSourceHtml = isGoogle 
@@ -1264,7 +1472,7 @@ function renderTestimoniAdmin() {
           </div>
           <div style="margin:0.85rem 0 0.5rem;display:flex;align-items:center;gap:0.25rem;">
             ${starsHtml}
-            <span style="font-size:0.82rem;font-weight:700;color:#f59e0b;margin-left:0.35rem;">${rating}.0</span>
+            <span style="font-size:0.82rem;font-weight:700;color:#f59e0b;margin-left:0.35rem;">${escapeHtmlAdmin(String(rating))}.0</span>
           </div>
           <p style="margin:0 0 0.5rem 0;font-size:0.88rem;color:#334155;line-height:1.6;white-space:pre-line;">
             ${escapeHtmlAdmin(item.pesan)}
@@ -1355,7 +1563,7 @@ function applyReplyTemplate(templateType) {
   textarea.focus();
 }
 
-function saveReplyAdmin(e) {
+async function saveReplyAdmin(e) {
   if (e) e.preventDefault();
   const id = document.getElementById('reply-testi-id').value;
   const author = document.getElementById('reply-author-name').value.trim() || 'Pengelola Packrafting Canden';
@@ -1384,40 +1592,50 @@ function saveReplyAdmin(e) {
   list[idx].balasanTanggal = todayStr;
   list[idx].balasanOleh = author;
 
-  DataStore.saveTestimonials(list);
-
-  showToast('Jawaban pengelola berhasil dipublikasikan!', 'success');
-  closeReplyTestimoniModal();
-  renderTestimoniAdmin();
-  renderDashboardStats();
-}
-
-function deleteReplyAdmin(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus balasan/tanggapan resmi untuk ulasan ini?')) {
-    let list = DataStore.getTestimonials() || [];
-    const idx = list.findIndex(t => String(t.id) === String(id));
-
-    if (idx !== -1) {
-      delete list[idx].balasan;
-      delete list[idx].balasanTanggal;
-      delete list[idx].balasanOleh;
-
-      DataStore.saveTestimonials(list);
-      showToast('Balasan resmi berhasil dihapus!', 'success');
-      renderTestimoniAdmin();
-      renderDashboardStats();
-    }
+  try {
+    await DataStore.saveTestimonials(list);
+    showToast('Jawaban pengelola berhasil dipublikasikan!', 'success');
+    closeReplyTestimoniModal();
+    renderTestimoniAdmin();
+    renderDashboardStats();
+  } catch (err) {
+    console.error('Gagal menyimpan balasan:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
   }
 }
 
-function deleteTestimoniAdmin(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus ulasan ini dari website?')) {
-    let list = DataStore.getTestimonials() || [];
-    list = list.filter(t => String(t.id) !== String(id));
-    DataStore.saveTestimonials(list);
+async function deleteReplyAdmin(id) {
+  if (!confirm('Apakah Anda yakin ingin menghapus balasan/tanggapan resmi untuk ulasan ini?')) return;
+  const list = DataStore.getTestimonials() || [];
+  const idx = list.findIndex(t => String(t.id) === String(id));
+  if (idx === -1) return;
+
+  delete list[idx].balasan;
+  delete list[idx].balasanTanggal;
+  delete list[idx].balasanOleh;
+
+  try {
+    await DataStore.saveTestimonials(list);
+    showToast('Balasan resmi berhasil dihapus!', 'success');
+    renderTestimoniAdmin();
+    renderDashboardStats();
+  } catch (err) {
+    console.error('Gagal menghapus balasan:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+  }
+}
+
+async function deleteTestimoniAdmin(id) {
+  if (!confirm('Apakah Anda yakin ingin menghapus ulasan ini dari website?')) return;
+  const list = (DataStore.getTestimonials() || []).filter(t => String(t.id) !== String(id));
+  try {
+    await DataStore.saveTestimonials(list);
     showToast('Ulasan berhasil dihapus dari website!', 'success');
     renderTestimoniAdmin();
     renderDashboardStats();
+  } catch (err) {
+    console.error('Gagal menghapus ulasan:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
   }
 }
 
@@ -1437,7 +1655,7 @@ function closeAddTestimoniModal() {
   }
 }
 
-function saveNewTestimoniAdmin(e) {
+async function saveNewTestimoniAdmin(e) {
   if (e) e.preventDefault();
   const nama = document.getElementById('new-testi-nama').value.trim();
   const asal = document.getElementById('new-testi-asal').value.trim() || 'Wisatawan';
@@ -1459,18 +1677,25 @@ function saveNewTestimoniAdmin(e) {
     rating: rating,
     pesan: pesan,
     avatar: nama.charAt(0).toUpperCase(),
-    isGoogle: true,
+    // Ulasan yang ditambahkan admin bukan dari Google Maps, jadi jangan tandai
+    // sebagai Google: tanpa ini semua ulasan dapat badge "Terverifikasi".
+    isGoogle: false,
     tanggal: new Date().toISOString().split('T')[0]
   };
 
   const list = DataStore.getTestimonials() || [];
   list.unshift(newReview);
-  DataStore.saveTestimonials(list);
 
-  showToast('Ulasan baru berhasil ditambahkan!', 'success');
-  closeAddTestimoniModal();
-  renderTestimoniAdmin();
-  renderDashboardStats();
+  try {
+    await DataStore.saveTestimonials(list);
+    showToast('Ulasan baru berhasil ditambahkan!', 'success');
+    closeAddTestimoniModal();
+    renderTestimoniAdmin();
+    renderDashboardStats();
+  } catch (err) {
+    console.error('Gagal menambahkan ulasan:', err);
+    showToast('Gagal menyimpan ke cloud: ' + (err.message || err), 'error');
+  }
 }
 
 // ---- 9. Init Admin System ----
@@ -1567,12 +1792,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   initGaleriFileListener();
+  if (document.getElementById('faq-admin-list')) initFaqAdminPage();
   if (document.getElementById('testimoni-admin-list')) initTestimoniAdminPage();
 
   // Auto-refresh admin views when cloud database updates
   window.addEventListener('packraft_data_updated', function () {
     if (document.getElementById('hero-slots-container')) renderHeroSlotsAdmin();
-    if (document.getElementById('banner-list') || document.getElementById('banner-admin-list')) renderBannerList();
+    // Id lama (`banner-list` / `banner-admin-list`) tidak pernah ada di halaman
+    // banner, sehingga field headline tidak pernah ter-refresh.
+    if (document.getElementById('banner-judul')) loadBannerHeadlineAdmin();
+    if (document.getElementById('faq-admin-list')) renderFaqAdmin();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
     if (document.getElementById('operation-dates-list')) loadOperationScheduleAdmin();
     if (document.getElementById('galeri-admin-grid') || document.getElementById('galeri-admin-list')) renderGaleriAdmin();

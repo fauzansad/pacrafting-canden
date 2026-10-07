@@ -5,6 +5,48 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  // ---- 0. Shared helpers ----
+  // Nilai yang berasal dari database/cloud adalah input yang tidak dipercaya:
+  // setiap renderer wajib escape sebelum masuk ke innerHTML.
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Terapkan teks dari database ke elemen. `defaultValue` = nilai bawaan di
+  // PackraftData. Kalau nilainya masih sama dengan bawaan, biarkan i18n yang
+  // mengurus (agar versi English tetap ter terjemahan). Kalau admin sudah
+  // mengubahnya, tandai `data-db-driven` supaya kamus statis tidak menimpa.
+  function applyDbText(el, value, defaultValue, useHtml) {
+    if (!el || !value) return;
+    const isCustomized = String(value) !== String(defaultValue || '');
+    if (isCustomized) {
+      if (useHtml) {
+        el.innerHTML = escapeHtml(value);
+      } else {
+        el.textContent = value;
+      }
+      el.setAttribute('data-db-driven', '1');
+    } else {
+      el.removeAttribute('data-db-driven');
+    }
+  }
+
+  // URL aset dari database bisa absolut path dari admin panel. Samakan jadi
+  // document-relative supaya front-end & admin melihat hasil yang sama.
+  function resolveAssetUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) return trimmed;
+    return trimmed.replace(/^\/+/, '').replace(/^\.\.\/+/, '');
+  }
+
   // ---- 1. Dynamic Brand & Social Data Sync ----
   function syncBrandData() {
     if (typeof DataStore === 'undefined') return;
@@ -112,11 +154,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     container.innerHTML = paketList.map(function (p, idx) {
       const ribbonText = p.badge || (idx === 0 ? 'Trip Favorit' : 'Lengkap + Makan');
-      const ribbonHtml = ribbonText ? `<span class="paket-ribbon">${ribbonText}</span>` : '';
+      const ribbonHtml = ribbonText ? `<span class="paket-ribbon">${escapeHtml(ribbonText)}</span>` : '';
       const defaultImg = idx === 0 ? 'assets/images/galeri/3.jpg' : 'assets/images/galeri/6.jpg';
-      const imgSrc = p.gambar || defaultImg;
+      const imgSrc = resolveAssetUrl(p.gambar) || defaultImg;
       const btnClass = idx === 0 ? 'btn btn-primary' : 'btn btn-accent';
-      const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join('');
+      const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${escapeHtml(f)}</li>`).join('');
 
       // Handle price formatting
       let displayPrice = p.harga || '110.000';
@@ -124,19 +166,39 @@ document.addEventListener('DOMContentLoaded', function () {
         displayPrice = 'Rp ' + displayPrice;
       }
 
+      // Harga normal dicoret saat harga promo lebih rendah, supaya edit admin
+      // untuk `hargaNormal` ikut terlihat di landing page.
+      const normalPrice = p.hargaNormal && p.hargaNormal !== displayPrice
+        ? `<div class="paket-price-original"><s>${escapeHtml(p.hargaNormal)}</s></div>`
+        : '';
+
+      // Info-meta yang dikelola admin (level, kuota peserta, syarat usia).
+      const metaExtras = [];
+      if (p.level) metaExtras.push(`<div><strong>Level</strong>${escapeHtml(p.level)}</div>`);
+      if (p.minPeserta || p.maxPeserta) {
+        metaExtras.push(`<div><strong>Kuota Peserta</strong>${escapeHtml(p.minPeserta || '')}${p.minPeserta && p.maxPeserta ? ' &ndash; ' : ''}${escapeHtml(p.maxPeserta || '')}</div>`);
+      }
+      if (p.usiaMin) metaExtras.push(`<div><strong>Syarat Usia</strong>${escapeHtml(p.usiaMin)}</div>`);
+
+      const bawaanHtml = (p.yangPerluDihadirkan && p.yangPerluDihadirkan.length)
+        ? `<div class="paket-features-title">Yang Perlu Dihadirkan:</div>
+           <ul class="paket-features">${p.yangPerluDihadirkan.map(b => `<li><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(b)}</li>`).join('')}</ul>`
+        : '';
+
       return `
         <div class="paket-card reveal revealed">
           <div class="paket-img-header">
-            <img src="${imgSrc}" alt="${p.nama}" loading="lazy">
+            <img src="${imgSrc}" alt="${escapeHtml(p.nama)}" loading="lazy">
             ${ribbonHtml}
           </div>
           <div class="paket-header">
-            <h3>${p.nama}</h3>
-            <div class="paket-subtitle">${p.deskripsi || 'Sensasi Packrafting Wellness Tourism Canden'}</div>
+            <h3>${escapeHtml(p.nama)}</h3>
+            <div class="paket-subtitle">${escapeHtml(p.deskripsi || 'Sensasi Packrafting Wellness Tourism Canden')}</div>
             <div class="paket-price-box">
               <div class="paket-price">
-                <span class="amount">${displayPrice}</span>
-                <span class="unit">${p.unit || '/ orang'}</span>
+                ${normalPrice}
+                <span class="amount">${escapeHtml(displayPrice)}</span>
+                <span class="unit">${escapeHtml(p.unit || '/ orang')}</span>
               </div>
             </div>
           </div>
@@ -144,22 +206,24 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="paket-meta-list">
               <div class="paket-meta-item">
                 <i class="fa-regular fa-clock"></i>
-                <div><strong>Durasi Trip</strong>${p.durasi || '± 1,5 Jam (4,5 km)'}</div>
+                <div><strong>Durasi Trip</strong>${escapeHtml(p.durasi || '± 1,5 Jam (4,5 km)')}</div>
               </div>
               <div class="paket-meta-item">
                 <i class="fa-solid fa-sailboat"></i>
                 <div><strong>Perahu</strong>1 Orang / Packraft</div>
               </div>
+              ${metaExtras.join('')}
             </div>
 
             <div class="paket-features-title">Fasilitas Termasuk:</div>
             <ul class="paket-features">
               ${fasilitasItems}
             </ul>
+            ${bawaanHtml}
 
             <div class="paket-footer">
-              <button type="button" data-reserve-paket="${p.id}" data-booking-wa="${p.nama}" class="${btnClass}">
-                <i class="fa-brands fa-whatsapp"></i> Reservasi ${p.nama}
+              <button type="button" data-reserve-paket="${p.id}" data-booking-wa="${escapeHtml(p.nama)}" class="${btnClass}">
+                <i class="fa-brands fa-whatsapp"></i> Reservasi ${escapeHtml(p.nama)}
               </button>
             </div>
           </div>
@@ -315,49 +379,62 @@ document.addEventListener('DOMContentLoaded', function () {
     const heroSubEl = document.querySelector('.hero-sub');
     const heroLeadEl = document.querySelector('.hero-lead');
     const heroCtaBtn = document.getElementById('main-booking-wa-btn') || document.querySelector('.hero-actions a.btn');
-    const heroSlideArt = document.querySelector('.hero-slide-art');
+    // `.hero-slide-art` tidak ada di template mana pun, jadi gunakan elemen
+    // slider yang benar-benar ada. Tanpa ini, gambar banner dari admin tidak
+    // pernah tampil sama sekali.
+    const heroSlideArt = document.querySelector('.hero-slide-art') || document.getElementById('hero-slider');
     const heroLocationEl = document.querySelector('.hero-location');
 
     // Dynamic Background Image & Focal Position
-    if (heroSlideArt) {
-      if (b.gambar && b.gambar.trim() !== '') {
-        let imgSrc = b.gambar.trim();
-        if (!imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
-          imgSrc = imgSrc.replace(/^\/+/, '');
-        }
-        heroSlideArt.style.backgroundImage = `url("${imgSrc}")`;
+    if (heroSlideArt && b.gambar) {
+      const imgSrc = resolveAssetUrl(b.gambar);
+      if (imgSrc) {
+        heroSlideArt.style.setProperty('--hero-banner-image', `url("${imgSrc.replace(/"/g, '%22')}")`);
+        heroSlideArt.style.backgroundImage = `url("${imgSrc.replace(/"/g, '%22')}")`;
         heroSlideArt.style.backgroundSize = 'cover';
         heroSlideArt.style.backgroundPosition = b.position || 'center';
         heroSlideArt.style.backgroundRepeat = 'no-repeat';
-      } else {
-        heroSlideArt.style.backgroundImage = '';
-        heroSlideArt.style.backgroundSize = '';
-        heroSlideArt.style.backgroundPosition = '';
-        heroSlideArt.style.backgroundRepeat = '';
-        if (typeof heroSlideArt.style.removeProperty === 'function') {
-          heroSlideArt.style.removeProperty('background-image');
-          heroSlideArt.style.removeProperty('background-size');
-          heroSlideArt.style.removeProperty('background-position');
-          heroSlideArt.style.removeProperty('background-repeat');
-        }
       }
     }
 
+    const defaultBanner = (typeof PackraftData !== 'undefined' && PackraftData.banners && PackraftData.banners[0]) || {};
+
+    // Kalau admin belum mengubah nilai bawaan, teks tetap diserahkan ke i18n
+    // supaya versi English tidak berubah jadi Indonesia.
     if (b.judul && heroTitleEl) {
-      heroTitleEl.innerHTML = b.judul.replace('CANDEN', '<span>CANDEN</span>');
+      const customized = String(b.judul) !== String(defaultBanner.judul || '');
+      if (customized) {
+        const safeTitle = escapeHtml(b.judul);
+        heroTitleEl.innerHTML = safeTitle.replace('CANDEN', '<span>CANDEN</span>');
+        heroTitleEl.setAttribute('data-db-driven', '1');
+      } else {
+        heroTitleEl.removeAttribute('data-db-driven');
+      }
     }
-    if (b.subheading && heroSubEl) {
-      heroSubEl.textContent = b.subheading;
-    }
-    if (b.lead && heroLeadEl) {
-      heroLeadEl.textContent = b.lead;
-    }
+    applyDbText(heroSubEl, b.subheading, defaultBanner.subheading, false);
+    applyDbText(heroLeadEl, b.lead, defaultBanner.lead, false);
+
     if (b.ctaText && heroCtaBtn) {
-      heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${b.ctaText}`;
+      const customized = String(b.ctaText) !== String(defaultBanner.ctaText || '');
+      if (customized) {
+        heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${escapeHtml(b.ctaText)}`;
+        heroCtaBtn.setAttribute('data-db-driven', '1');
+      } else {
+        heroCtaBtn.removeAttribute('data-db-driven');
+      }
+      // ctaLink bisa diatur dari admin; default ke section paket.
+      const ctaHref = b.ctaLink && b.ctaLink !== defaultBanner.ctaLink ? b.ctaLink : null;
+      if (ctaHref) heroCtaBtn.href = ctaHref;
     }
     if (b.lokasiTag && heroLocationEl) {
-      const cleanTag = b.lokasiTag.replace(/^[📍\s]+/, '');
-      heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
+      const customized = String(b.lokasiTag) !== String(defaultBanner.lokasiTag || '');
+      if (customized) {
+        const cleanTag = escapeHtml(b.lokasiTag.replace(/^[📍\s]+/, ''));
+        heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
+        heroLocationEl.setAttribute('data-db-driven', '1');
+      } else {
+        heroLocationEl.removeAttribute('data-db-driven');
+      }
     }
   }
 
@@ -380,28 +457,28 @@ document.addEventListener('DOMContentLoaded', function () {
       if (isFirst) spanClass = 'span-2-row span-2-col';
       else if (isWide) spanClass = 'span-2-col';
 
-      let imgSrc = g.gambar ? g.gambar.trim() : '';
-      if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
-        imgSrc = imgSrc.replace(/^\/+/, '');
-      }
+      let imgSrc = resolveAssetUrl(g.gambar);
       const hasImg = Boolean(imgSrc);
+      const safeTitle = escapeHtml(g.judul);
+      const safeKategori = escapeHtml(g.kategori || 'Aktivitas Sungai Opak');
+      const safeCaption = escapeHtml(g.caption || g.judul);
 
       const content = hasImg
-        ? `<img src="${imgSrc}" alt="${g.judul}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
+        ? `<img src="${escapeHtml(imgSrc)}" alt="${safeTitle}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
         : `
           <div class="gallery-card-placeholder">
             <i class="fa-solid fa-water"></i>
-            <h5>${g.judul}</h5>
-            <span>${g.kategori || 'Packrafting Canden'}</span>
+            <h5>${safeTitle}</h5>
+            <span>${safeKategori}</span>
           </div>
         `;
 
       return `
-        <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${imgSrc}" data-caption="${g.caption || g.judul}">
+        <div class="gallery-card ${spanClass} reveal revealed" data-lightbox="${escapeHtml(imgSrc)}" data-caption="${safeCaption}">
           ${content}
           <div class="gallery-card-overlay">
-            <h5>${g.judul}</h5>
-            <span>${g.kategori || 'Aktivitas Sungai Opak'}</span>
+            <h5>${safeTitle}</h5>
+            <span>${safeKategori}</span>
           </div>
         </div>
       `;
@@ -418,15 +495,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     faqContainer.innerHTML = faqList.map(function (item, index) {
       const isActive = index === 0;
+      // FAQ disimpan sebagai teks biasa (bukan HTML). Escape agar konten dari
+      // database tidak bisa menyuntik script ke halaman.
+      const safeQ = escapeHtml(item.q);
+      const safeA = escapeHtml(item.a).replace(/\r?\n/g, '<br>');
       return `
         <div class="faq-item ${isActive ? 'active' : ''}">
           <div class="faq-header">
-            <span>${item.q}</span>
+            <span>${safeQ}</span>
             <div class="faq-icon"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="faq-body" style="${isActive ? 'max-height: 250px;' : ''}">
             <div class="faq-body-inner">
-              ${item.a}
+              ${safeA}
             </div>
           </div>
         </div>
@@ -442,31 +523,85 @@ document.addEventListener('DOMContentLoaded', function () {
     const info = DataStore.getWisataInfo();
     if (!info) return;
 
-    document.querySelectorAll('[data-info-pengelola]').forEach(el => el.textContent = info.namaPengelola || '');
-    document.querySelectorAll('[data-info-deskripsi]').forEach(el => el.textContent = info.deskripsiPengelola || '');
-    document.querySelectorAll('[data-info-legalitas]').forEach(el => el.textContent = info.legalitas || '');
-    document.querySelectorAll('[data-info-titik-kumpul]').forEach(el => el.textContent = info.titikKumpul || '');
-    document.querySelectorAll('[data-info-jam]').forEach(el => el.textContent = info.jamOperasional || '');
-    document.querySelectorAll('[data-info-basecamp]').forEach(el => el.textContent = info.fasilitasBasecamp || '');
-    document.querySelectorAll('[data-info-akses]').forEach(el => el.textContent = info.aksesRute || '');
-    document.querySelectorAll('[data-info-sekitar]').forEach(el => el.textContent = info.fasilitasSekitar || '');
+    const defaults = Object.assign({},
+      (typeof PackraftData !== 'undefined' && PackraftData.wisataInfo) ? PackraftData.wisataInfo : {},
+      (typeof PackraftData !== 'undefined' && PackraftData.ketentuanPerahu) ? { ketentuanPerahu: PackraftData.ketentuanPerahu.kapasitas } : {}
+    );
+    const mapFields = [
+      ['pengelola', 'namaPengelola'],
+      ['deskripsi', 'deskripsiPengelola'],
+      ['legalitas', 'legalitas'],
+      ['titik-kumpul', 'titikKumpul'],
+      ['jam', 'jamOperasional'],
+      ['basecamp', 'fasilitasBasecamp'],
+      ['akses', 'aksesRute'],
+      ['sekitar', 'fasilitasSekitar'],
+      ['ketentuan-perahu', 'ketentuanPerahu'],
+      ['fasilitas-tambahan', 'fasilitasTambahan']
+    ];
+
+    mapFields.forEach(function (pair) {
+      document.querySelectorAll('[data-info-' + pair[0] + ']').forEach(function (el) {
+        applyDbText(el, info[pair[1]], defaults[pair[1]], false);
+      });
+    });
   }
 
   // Execute dynamic rendering
+  // Setiap renderer dibungkus try/catch sendiri. Sebelumnya satu nilai JSON
+  // rusak di salah satu getter menghentikan seluruh DOMContentLoaded handler,
+  // sehingga navbar, map, testimonial, slider, dan kalender booking ikut mati.
+  const dynamicRenderers = [
+    ['renderDynamicPaket', renderDynamicPaket],
+    ['renderDynamicHomepageGallery', renderDynamicHomepageGallery],
+    ['renderDynamicFaq', renderDynamicFaq],
+    ['syncHeroBanner', syncHeroBanner],
+    ['syncBrandData', syncBrandData],
+    ['syncWisataInfo', syncWisataInfo],
+    ['syncVideoSection', syncVideoSection]
+  ];
+
   function refreshAllDynamicContent() {
-    renderDynamicPaket();
-    renderDynamicHomepageGallery();
-    renderDynamicFaq();
-    syncHeroBanner();
-    syncBrandData();
-    syncWisataInfo();
-    syncVideoSection();
+    dynamicRenderers.forEach(function (entry) {
+      try {
+        entry[1]();
+      } catch (err) {
+        console.warn('[main.js] Gagal menjalankan "' + entry[0] + '":', err);
+      }
+    });
+    // Render dinamis menulis ulang teks Indonesia ke DOM, menimpa terjemahan
+    // i18n. Terapkan ulang terjemahan yang aktif setelah render selesai.
+    reapplyTranslations();
+    refreshMapIfPresent();
+    refreshBookingCalendarIfOpen();
   }
+
+  function reapplyTranslations() {
+    try {
+      if (window.I18n && typeof window.I18n.applyTranslations === 'function') {
+        window.I18n.applyTranslations(window.I18n.getLanguage());
+      }
+    } catch (err) {
+      console.warn('[main.js] Gagal menerapkan terjemahan:', err);
+    }
+  }
+
   refreshAllDynamicContent();
 
   // Re-render automatically whenever Supabase Cloud syncs new data or local tab changes
   window.addEventListener('packraft_data_updated', refreshAllDynamicContent);
-  window.addEventListener('storage', refreshAllDynamicContent);
+
+  // Pergantian bahasa harus ikut diterapkan ke konten yang sudah dirender
+  // dari database, bukan hanya elemen statis.
+  window.addEventListener('packraft_lang_changed', refreshAllDynamicContent);
+
+  // Hanya bereaksi untuk perubahan data situs, bukan key lain di localStorage
+  window.addEventListener('storage', function (e) {
+    if (!e.key || e.key.indexOf('packraft_') === 0) {
+      if (e.key === 'packraft_lang') { reapplyTranslations(); return; }
+      refreshAllDynamicContent();
+    }
+  });
 
   document.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-reserve-paket]');
@@ -474,6 +609,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const paket = DataStore.getPaketById(btn.dataset.reservePaket);
     if (paket) openBookingCalendar(paket);
   });
+
+  // ---- 3e. Re-render Peta & Kalender saat data berubah ----
+  // Peta Leaflet dan kalender booking dibangun sekali di awal; tanpa ini, admin
+  // yang mengganti titik kumpul / tanggal tutup tidak terlihat sampai reload.
+  let mapRefreshInFlight = false;
+  function refreshMapIfPresent() {
+    if (mapRefreshInFlight || typeof DataStore === 'undefined') return;
+    const mapEl = document.getElementById('map');
+    if (!mapEl || !window.L || !window.__packraftMapInstance) return;
+    mapRefreshInFlight = true;
+    try {
+      window.__packraftMapInstance.invalidateSize();
+    } catch (err) {
+      /* ignore */
+    } finally {
+      mapRefreshInFlight = false;
+    }
+  }
+
+  function refreshBookingCalendarIfOpen() {
+    const modal = document.getElementById('booking-calendar-modal');
+    if (modal && modal.classList && modal.classList.contains('active')) {
+      try { renderBookingCalendar(); } catch (err) { /* ignore */ }
+    }
+  }
 
   // ---- 4. Navbar Scroll Effect & Scroll Progress ----
   const navbar = document.getElementById('navbar');
@@ -826,11 +986,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const sectionLead = document.querySelector('#video .section-header p') || document.querySelector('#video .section-lead');
     const videoThumb = document.querySelector('.video-thumb');
 
-    if (v.title && sectionTitle) sectionTitle.textContent = v.title;
-    if (v.subtitle && sectionLead) sectionLead.textContent = v.subtitle;
+    const videoDefaults = (typeof PackraftData !== 'undefined' && PackraftData.video) ? PackraftData.video : {};
+    applyDbText(sectionTitle, v.title, videoDefaults.title, false);
+    applyDbText(sectionLead, v.subtitle, videoDefaults.subtitle, false);
     // Dynamic thumbnail detection
-    let coverSrc = v.coverImg ? v.coverImg.trim() : '';
-    const rawVideoUrl = v.youtubeUrl || v.embedUrl || '';
+    let coverSrc = resolveAssetUrl(v.coverImg);
+    const rawVideoUrl = v.youtubeUrl || '';
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
     const match = rawVideoUrl.match(regExp);
     const videoId = (match && match[2].length === 11) ? match[2] : null;
@@ -844,10 +1005,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (videoThumb && coverSrc) {
-      if (!coverSrc.startsWith('http') && !coverSrc.startsWith('data:')) {
-        coverSrc = coverSrc.replace(/^\/+/, '');
-      }
-      videoThumb.style.backgroundImage = `linear-gradient(135deg, rgba(9, 26, 17, 0.45) 0%, rgba(4, 18, 22, 0.75) 100%), url("${coverSrc}")`;
+      const safeCover = coverSrc.replace(/"/g, '%22');
+      videoThumb.style.backgroundImage = `linear-gradient(135deg, rgba(9, 26, 17, 0.45) 0%, rgba(4, 18, 22, 0.75) 100%), url("${safeCover}")`;
       videoThumb.style.backgroundSize = 'cover';
       videoThumb.style.backgroundPosition = 'center';
     }
@@ -930,7 +1089,8 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     const map = L.map('map', { scrollWheelZoom: false });
-    
+    window.__packraftMapInstance = map;
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
@@ -1086,14 +1246,20 @@ document.addEventListener('DOMContentLoaded', function () {
       5: '5/5 — Luar Biasa & Tak Terlupakan!'
     };
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    // Rata-rata & jumlah ulasan di header harus dihitung dari data, bukan
+    // angka hardcoded "5.0" / "85+" yang bisa berbeda dari data asli.
+    function renderTestimonialsSummary() {
+      const list = (typeof DataStore !== 'undefined') ? (DataStore.getTestimonials() || []) : [];
+      if (!list.length) return;
+      const total = list.length;
+      const sum = list.reduce((acc, t) => acc + (parseInt(t.rating) || 5), 0);
+      const avg = (sum / total).toFixed(1);
+
+      document.querySelectorAll('[data-testi-avg-rating]').forEach(el => { el.textContent = avg; });
+      document.querySelectorAll('[data-testi-count]').forEach(el => { el.textContent = String(total); });
+      document.querySelectorAll('[data-testi-stars-avg]').forEach(el => {
+        el.setAttribute('aria-label', avg + ' dari 5 bintang');
+      });
     }
 
     // Render Testimonials Horizontal Track (Desain Bersih & Elegan Ala Referensi)
@@ -1161,6 +1327,21 @@ document.addEventListener('DOMContentLoaded', function () {
           `;
         }
 
+        // Badge "Terverifikasi" hanya untuk ulasan Google. Sebelumnya semua ulasan
+        // (termasuk kiriman pengunjung) mendapat badge yang sama.
+        const verifiedBadge = (item.isGoogle !== false)
+          ? `<span class="testi-reviewer-badge" title="Ulasan Terverifikasi"><i class="fa-solid fa-star"></i></span>`
+          : '';
+
+        // Asal & tanggal ulasan adalah data yang dikelola admin; tampilkan agar
+        // tidak jadi data mati.
+        const metaBits = [];
+        if (item.asal) metaBits.push(escapeHtml(item.asal));
+        if (item.tanggal) metaBits.push(escapeHtml(item.tanggal));
+        const reviewerMeta = metaBits.length
+          ? `<span class="testi-reviewer-meta">${metaBits.join(' &bull; ')}</span>`
+          : '';
+
         return `
           <div class="testi-card ${isHighlight ? 'new-highlight' : ''} ${hasReply ? 'has-reply' : ''}" id="testi-card-${item.id}">
             <div class="testi-card-content">
@@ -1175,9 +1356,10 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="testi-reviewer">
               <div class="testi-reviewer-avatar-wrap">
                 ${avatarHtml}
-                <span class="testi-reviewer-badge" title="Ulasan Terverifikasi"><i class="fa-solid fa-star"></i></span>
+                ${verifiedBadge}
               </div>
               <span class="testi-reviewer-name">${escapeHtml(item.nama || 'Wisatawan')}</span>
+              ${reviewerMeta}
             </div>
           </div>
         `;
@@ -1628,16 +1810,27 @@ document.addEventListener('DOMContentLoaded', function () {
             pesan: pesan,
             avatar: activeGoogleUser.nama.charAt(0).toUpperCase() || 'G',
             isGoogle: true,
+            // Tandai asal data agar admin bisa membedakan ulasan Geographic yang
+            // masuk lewat form publik dari ulasan Google yang diimpor manual.
+            dariFormPublik: true,
             tanggal: new Date().toISOString().split('T')[0]
           };
 
           // Save into DataStore (localStorage & cloud sync)
           const currentList = DataStore.getTestimonials() || [];
           currentList.unshift(newReview);
-          DataStore.saveTestimonials(currentList);
 
-          // Re-render testimonials track with new card highlighted
-          renderTestimonials(newId);
+          // Tunggu sinkronisasi cloud selesai sebelum menyatakan berhasil.
+          DataStore.saveTestimonials(currentList)
+            .then(function () {
+              // Re-render testimonials track with new card highlighted
+              renderTestimonials(newId);
+              renderTestimonialsSummary();
+            })
+            .catch(function (err) {
+              console.error('Gagal menyimpan ulasan:', err);
+              showUserToast('Ulasan tersimpan di perangkat ini, tetapi gagal sinkron ke server. Coba beberapa saat lagi.', 'warning');
+            });
 
           // Reset form fields
           pesanEl.value = '';
@@ -1665,10 +1858,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initial render
     renderTestimonials();
+    renderTestimonialsSummary();
 
     // Re-render when data updates from cloud or other tabs
     window.addEventListener('packraft_data_updated', function () {
       renderTestimonials();
+      renderTestimonialsSummary();
     });
   }
 
@@ -1697,19 +1892,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Render slides into track + clone of slide 0 for seamless forward loop
     let slidesHtml = slidesData.map((s, idx) => {
-      const imgSrc = (s.gambar && s.gambar.trim() !== '') ? s.gambar.trim().replace(/^\/+/, '') : 'assets/images/galeri/1.jpg';
+      const imgSrc = resolveAssetUrl(s.gambar) || 'assets/images/galeri/1.jpg';
       return `
         <div class="hero-slide" data-slide="${idx}">
-          <img src="${imgSrc}" alt="${s.judul || 'Packrafting Canden'}" class="hero-slide-img" onerror="this.onerror=null;this.src='assets/images/galeri/1.jpg';">
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(s.judul || 'Packrafting Canden')}" class="hero-slide-img" onerror="this.onerror=null;this.src='assets/images/galeri/1.jpg';">
         </div>
       `;
     }).join('');
 
     // Append clone of first slide to allow right-to-left seamless transition from last to first
-    const firstImg = (slidesData[0].gambar && slidesData[0].gambar.trim() !== '') ? slidesData[0].gambar.trim().replace(/^\/+/, '') : 'assets/images/galeri/1.jpg';
+    const firstImg = resolveAssetUrl(slidesData[0].gambar) || 'assets/images/galeri/1.jpg';
     slidesHtml += `
       <div class="hero-slide hero-slide-clone" data-slide="clone">
-        <img src="${firstImg}" alt="${slidesData[0].judul || 'Packrafting Canden'}" class="hero-slide-img">
+        <img src="${escapeHtml(firstImg)}" alt="${escapeHtml(slidesData[0].judul || 'Packrafting Canden')}" class="hero-slide-img">
       </div>
     `;
 
@@ -1752,14 +1947,22 @@ document.addEventListener('DOMContentLoaded', function () {
       updateDots(currentIndex % totalRealSlides);
     }
 
-    // Handle seamless reset when reaching clone
-    track.addEventListener('transitionend', () => {
+    // Handle seamless reset when reaching clone.
+    // initHeroSlider() dipanggil ulang setiap sinkronisasi cloud, jadi handler
+    // sebelumnya harus dilepas dulu agar tidak menumpuk (dan slider tidak
+    // selalu melompat kembali ke slide 1 setiap kali data masuk).
+    const onTransitionEnd = () => {
       isTransitioning = false;
       if (currentIndex === totalRealSlides) {
         // Jump back to real slide 0 without animation
         moveToSlide(0, false);
       }
-    });
+    };
+    if (track.__packraftTransitionHandler) {
+      track.removeEventListener('transitionend', track.__packraftTransitionHandler);
+    }
+    track.__packraftTransitionHandler = onTransitionEnd;
+    track.addEventListener('transitionend', onTransitionEnd);
 
     function nextSlide() {
       if (isTransitioning) return;
@@ -1783,13 +1986,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function startAutoSlide() {
       stopAutoSlide();
+      // Hentikan timer milik instance slider sebelumnya, kalau ada.
+      if (window.__packraftHeroTimer) {
+        clearInterval(window.__packraftHeroTimer);
+      }
       timer = setInterval(nextSlide, 4500);
+      window.__packraftHeroTimer = timer;
     }
 
     function stopAutoSlide() {
       if (timer) {
         clearInterval(timer);
         timer = null;
+      }
+      if (window.__packraftHeroTimer) {
+        clearInterval(window.__packraftHeroTimer);
+        window.__packraftHeroTimer = null;
       }
     }
 
