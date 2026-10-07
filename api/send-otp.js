@@ -173,41 +173,81 @@ module.exports = async function handler(req, res) {
       //    jadi `mailRes.ok` saja tidak cukup — itulah bug yang membuat UI
       //    menampilkan "kode berhasil dikirim" padahal email tidak pernah keluar.
       const siteOrigin = 'https://' + (req.headers['x-forwarded-host'] || req.headers.host || 'packrafting-canden.vercel.app');
-      const mailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Origin: siteOrigin,
-          Referer: siteOrigin + '/admin/login',
-          'User-Agent': 'Mozilla/5.0 (compatible; PackraftingCaden/1.0)'
-        },
-        body: JSON.stringify({
-          _subject: '[Packrafting Canden] Kode OTP Reset Password Admin',
-          _template: 'box',
-          'Halo Admin': 'Berikut kode verifikasi OTP resmi untuk mereset password akun admin Packrafting Canden:',
-          'KODE VERIFIKASI (OTP)': otp,
-          'Waktu Berlaku': '10 Menit sejak permintaan dibuat',
-          'Email Terdaftar': adminEmail,
-          'Penting': 'Jangan bagikan kode ini kepada anybody demi keamanan website. Abaikan email ini jika Anda tidak meminta penggantian password.'
-        })
-      });
+      const otpMailBody = {
+        _subject: '[Packrafting Canden] Kode OTP Reset Password Admin',
+        _template: 'box',
+        'Halo Admin': 'Berikut kode verifikasi OTP resmi untuk mereset password akun admin Packrafting Canden:',
+        'KODE VERIFIKASI (OTP)': otp,
+        'Waktu Berlaku': '10 Menit sejak permintaan dibuat',
+        'Email Terdaftar': adminEmail,
+        'Penting': 'Jangan bagikan kode ini kepada anybody demi keamanan website. Abaikan email ini jika Anda tidak meminta penggantian password.'
+      };
 
+      const mailHeaders = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Origin: siteOrigin,
+        Referer: siteOrigin + '/admin/login',
+        'User-Agent': 'Mozilla/5.0 (compatible; PackraftingCaden/1.0)'
+      };
+
+      let mailRes = null;
       let mailBody = {};
-      try {
-        mailBody = await mailRes.json();
-      } catch (e) {
-        mailBody = {};
+      let lastTransportError = null;
+
+      // FormSubmit kadang gagal sesaat (rate limit / CDN). Satu kali percobaan
+      // ulang dengan jeda singkat membuat alur ini jauh lebih andal.
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          mailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
+            method: 'POST',
+            headers: mailHeaders,
+            body: JSON.stringify(otpMailBody)
+          });
+          const text = await mailRes.text();
+          try { mailBody = JSON.parse(text); } catch (e) { mailBody = { raw: text }; }
+        } catch (err) {
+          lastTransportError = err.message || String(err);
+          mailRes = null;
+        }
+        // `success` dikirim sebagai string "true"/"false", bukan boolean.
+        if (mailRes && mailRes.ok && String(mailBody.success) === 'true') break;
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1200));
       }
-      // `success` dikirim sebagai string "true"/"false", bukan boolean.
-      const mailAccepted = mailRes.ok && String(mailBody.success) === 'true';
+
+      const mailAccepted = !!(mailRes && mailRes.ok && String(mailBody.success) === 'true');
 
       if (!mailAccepted) {
         await supabaseUpsertRow(OTP_ROW_KEY, { email: adminEmail, salt: null, hash: null, expiry: 0, sentAt: 0, attempts: 0 });
-        console.error('[send-otp] FormSubmit menolak:', mailRes.status, JSON.stringify(mailBody));
+
+        const providerMessage = String(mailBody.message || '').trim();
+        const httpStatus = mailRes ? mailRes.status : 0;
+        console.error('[send-otp] FormSubmit gagal:', JSON.stringify({
+          httpStatus,
+          success: mailBody.success,
+          message: providerMessage,
+          transportError: lastTransportError
+        }));
+
+        // Bedakan penyebabnya supaya pesan di UI bisa spesifik dan berguna.
+        let message = 'Email gagal dikirim. Silakan coba lagi beberapa saat lagi.';
+        if (!mailRes && lastTransportError) {
+          message = 'Tidak bisa menghubungi layanan email. Periksa koneksi server lalu coba lagi.';
+        } else if (/open this page through a web server/i.test(providerMessage)) {
+          message = 'Layanan email menolak permintaan server. Silakan hubungi pengelola situs.';
+        } else if (/confirm/i.test(providerMessage)) {
+          message = 'Alamat email ini belum pernah dikonfirmasi oleh layanan email. Buka inbox ' + adminEmail + ' dan klik link konfirmasi yang dikirim FormSubmit, lalu minta kode lagi.';
+        } else if (httpStatus === 429 || /rate|limit|too many/i.test(providerMessage)) {
+          message = 'Terlalu banyak permintaan ke layanan email. Tunggu 1 menit lalu coba lagi.';
+        } else if (providerMessage) {
+          message = 'Layanan email menolak: ' + providerMessage;
+        }
+
         return res.status(502).json({
           success: false,
-          message: 'Email gagal dikirim. Silakan coba lagi beberapa saat lagi.'
+          message: message,
+          providerStatus: httpStatus,
+          providerMessage: providerMessage
         });
       }
 
