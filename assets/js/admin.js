@@ -118,34 +118,6 @@ function openChangePasswordModal() {
             </button>
           </div>
         </form>
-
-        <div style="padding:1.25rem 1.5rem;border-top:1px solid #e2e8f0;background:#f8fafc;border-radius:0 0 16px 16px;">
-          <h4 style="margin:0 0 0.35rem;font-size:0.95rem;color:#0f172a;display:flex;align-items:center;gap:0.45rem;">
-            <i class="fa-solid fa-key" style="color:#059669;"></i> Kode Pemulihan
-          </h4>
-          <p style="margin:0 0 0.85rem;font-size:0.8rem;color:#64748b;line-height:1.55;">
-            Jalur masuk ulang kalau password <strong>dan</strong> email sama-sama tidak bisa diakses.
-            Berbeda dengan OTP email, cara ini tidak bergantung pada layanan email apa pun.
-          </p>
-
-          <div id="cp-recovery-status" style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem;">
-            Memuat status kode pemulihan...
-          </div>
-
-          <div id="cp-recovery-result" style="display:none;margin-bottom:0.85rem;padding:0.9rem 1rem;background:#fff;border:1px solid #f59e0b;border-radius:10px;">
-            <div style="font-size:0.78rem;font-weight:700;color:#92400e;margin-bottom:0.5rem;">
-              <i class="fa-solid fa-triangle-exclamation"></i> Salin kode ini sekarang — tidak akan ditampilkan lagi.
-            </div>
-            <div id="cp-recovery-code" style="font-family:monospace;font-size:1.15rem;font-weight:700;letter-spacing:0.12em;color:#0f172a;background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:0.7rem;text-align:center;word-break:break-all;"></div>
-            <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" style="margin-top:0.6rem;width:100%;justify-content:center;" onclick="copyRecoveryCode()">
-              <i class="fa-regular fa-copy"></i> Salin Kode
-            </button>
-          </div>
-
-          <button type="button" class="btn-admin btn-admin-primary" id="btn-generate-recovery" onclick="generateRecoveryCode()" style="width:100%;justify-content:center;">
-            <i class="fa-solid fa-rotate-right"></i> Buat Kode Pemulihan Baru
-          </button>
-        </div>
       </div>
     `;
 
@@ -251,8 +223,6 @@ function openChangePasswordModal() {
     }).catch(() => {});
   }
 
-  loadRecoveryStatus();
-
   // Lock body scroll while modal is open
   document.body.classList.add('modal-open');
   document.documentElement.classList.add('modal-open');
@@ -347,93 +317,6 @@ function formatTanggal(iso) {
     return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
   } catch (e) {
     return '-';
-  }
-}
-
-async function loadRecoveryStatus() {
-  const box = document.getElementById('cp-recovery-status');
-  if (!box) return;
-  try {
-    const res = await fetch('/api/admin-save', {
-      method: 'POST',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, DataStore.adminAuthHeader()),
-      body: JSON.stringify({ action: 'recovery-status' })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.success) {
-      box.innerHTML = '<span style="color:#b45309;">Status tidak dapat dimuat. Pastikan deploy terbaru sudah aktif.</span>';
-      return;
-    }
-    if (data.active) {
-      box.innerHTML = '<span style="color:#059669;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Kode pemulihan aktif</span> &nbsp;dibuat ' + escapeHtmlAdmin(formatTanggal(data.createdAt));
-    } else if (data.usedAt) {
-      box.innerHTML = '<span style="color:#b45309;font-weight:600;"><i class="fa-solid fa-triangle-exclamation"></i> Kode sebelumnya sudah dipakai</span> &nbsp;(' + escapeHtmlAdmin(formatTanggal(data.usedAt)) + ') — buat kode baru.';
-    } else {
-      box.innerHTML = '<span style="color:#dc2626;font-weight:600;"><i class="fa-solid fa-circle-xmark"></i> Belum ada kode pemulihan.</span> Buat sekarang supaya tidak terkunci kalau lupa password.';
-    }
-  } catch (err) {
-    box.innerHTML = '<span style="color:#dc2626;">Gagal memuat status kode pemulihan.</span>';
-  }
-}
-
-async function generateRecoveryCode() {
-  if (!confirm('Buat kode pemulihan baru? Kode lama langsung tidak berlaku. Kode baru hanya akan ditampilkan sekali.')) return;
-
-  const btn = document.getElementById('btn-generate-recovery');
-  const originalHtml = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membuat...';
-  }
-
-  try {
-    const res = await fetch('/api/admin-save', {
-      method: 'POST',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, DataStore.adminAuthHeader()),
-      body: JSON.stringify({ action: 'recovery-generate' })
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.success) {
-      showToast(data.message || 'Gagal membuat kode pemulihan.', 'error');
-      return;
-    }
-
-    const resultBox = document.getElementById('cp-recovery-result');
-    const codeBox = document.getElementById('cp-recovery-code');
-    if (resultBox) resultBox.style.display = 'block';
-    if (codeBox) codeBox.textContent = data.code;
-
-    showToast('Kode pemulihan dibuat! Salin dan simpan sekarang.', 'success');
-    loadRecoveryStatus();
-  } catch (err) {
-    console.error('Gagal membuat kode pemulihan:', err);
-    showToast('Gagal menghubungi server.', 'error');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalHtml;
-    }
-  }
-}
-
-function copyRecoveryCode() {
-  const codeBox = document.getElementById('cp-recovery-code');
-  if (!codeBox) return;
-  const code = codeBox.textContent || '';
-  const done = () => showToast('Kode disalin. Simpan di tempat aman!', 'success');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(code).then(done).catch(() => {
-      // Clipboard API butuh HTTPS; kalau gagal, pilih manual.
-      const range = document.createRange();
-      range.selectNodeContents(codeBox);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-      showToast('Kode dipilih. Tekan Ctrl+C untuk menyalin.', 'info');
-    });
-  } else {
-    showToast('Kode: ' + code, 'info');
   }
 }
 

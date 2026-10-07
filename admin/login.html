@@ -138,15 +138,11 @@
 
             <div id="forgot-error-detail" style="display:none;margin-top:0.75rem;padding:0.7rem 0.85rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#991b1b;font-size:0.78rem;line-height:1.5;word-break:break-word;"></div>
 
-<button type="submit" class="btn-admin btn-admin-primary" id="btn-send-otp" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.5rem;">
+            <button type="submit" class="btn-admin btn-admin-primary" id="btn-send-otp" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.5rem;">
               <i class="fa-solid fa-paper-plane"></i> Kirim Kode OTP ke Gmail
             </button>
-            </form>
-
-            <button type="button" class="btn-admin btn-admin-outline" onclick="toggleRecoveryPanel()" style="width:100%;justify-content:center;padding:0.7rem;margin-top:0.75rem;">
-              <i class="fa-solid fa-key"></i> Tidak dapat email? Pakai Kode Pemulihan
-            </button>
-          </div>
+          </form>
+        </div>
 
         <!-- Step 2: Input OTP -->
         <div id="forgot-step-2" style="display:none;">
@@ -173,7 +169,6 @@
               <ol style="margin:0.4rem 0 0 1.1rem;padding:0;">
                 <li>Cek folder <strong>Spam / Promosi</strong> di Gmail.</li>
                 <li>Tunggu 10–30 detik lalu klik <strong>Kirim Ulang Kode</strong> jika belum muncul.</li>
-                <li>Atau gunakan <strong>Kode Pemulihan</strong> jika membutuhkan akses langsung.</li>
               </ol>
             </div>
             </div>
@@ -237,55 +232,6 @@
           <button type="button" class="btn-admin btn-admin-primary" onclick="closeForgotPasswordModal()" style="width:100%;justify-content:center;padding:0.75rem;">
             <i class="fa-solid fa-right-to-bracket"></i> Masuk Sekarang
           </button>
-        </div>
-
-        <!-- Jalur alternatif: Kode Pemulihan (tanpa email) -->
-        <div id="recovery-panel" style="display:none;padding:0.25rem 0 0;">
-          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
-            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-            <span style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;">atau</span>
-            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-          </div>
-
-          <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;">
-            <h4 style="margin:0 0 0.35rem;font-size:0.95rem;color:#065f46;display:flex;align-items:center;gap:0.45rem;">
-              <i class="fa-solid fa-key" style="color:#059669;"></i> Pemulihan Lewat Kode
-            </h4>
-            <p style="margin:0;font-size:0.78rem;color:#047857;line-height:1.5;">
-              Kalau email tidak pernah sampai, pakai <strong>Kode Pemulihan</strong> yang kamu buat di panel
-              <strong>Ganti Password</strong>. Cara ini tidak butuh email sama sekali.
-            </p>
-          </div>
-
-          <form id="form-recovery" class="admin-form">
-            <div class="form-group">
-              <label for="recovery-code">Kode Pemulihan</label>
-              <input type="text" id="recovery-code" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX"
-                autocomplete="off" autocapitalize="characters" spellcheck="false"
-                style="font-family:monospace;font-size:1.05rem;letter-spacing:0.12em;text-transform:uppercase;">
-              <small style="color:#64748b;display:block;margin-top:0.35rem;font-size:0.75rem;">
-                16 karakter, 4 kelompok. Huruf yang mudah tertukar (O/0, I/1, S/5) tidak dipakai.
-              </small>
-            </div>
-
-            <div class="form-group">
-              <label for="recovery-new-pwd">Password Baru * (Min. 8 Karakter)</label>
-              <div class="password-input-wrap">
-                <input type="password" id="recovery-new-pwd" placeholder="Masukkan password baru" required>
-                <button type="button" class="toggle-pwd-btn" onclick="toggleInputType('recovery-new-pwd', this)"><i class="fa-regular fa-eye"></i></button>
-              </div>
-            </div>
-
-            <div id="recovery-error-detail" style="display:none;margin-top:0.6rem;padding:0.65rem 0.8rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#991b1b;font-size:0.78rem;line-height:1.5;"></div>
-
-            <button type="submit" class="btn-admin btn-admin-primary" id="btn-recovery-submit" style="width:100%;justify-content:center;padding:0.75rem;margin-top:0.75rem;">
-              <i class="fa-solid fa-unlock-keyhole"></i> Reset Password dengan Kode
-            </button>
-
-            <button type="button" class="btn-admin btn-admin-outline" onclick="toggleRecoveryPanel()" style="width:100%;justify-content:center;padding:0.7rem;margin-top:0.6rem;">
-              <i class="fa-solid fa-arrow-left"></i> Kembali ke Kirim Kode OTP
-            </button>
-          </form>
         </div>
       </div>
     </div>
@@ -503,11 +449,6 @@ submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi
       document.getElementById('forgot-step-2').style.display = (step === 2) ? 'block' : 'none';
       document.getElementById('forgot-step-3').style.display = (step === 3) ? 'block' : 'none';
       document.getElementById('forgot-step-4').style.display = (step === 4) ? 'block' : 'none';
-
-      // Panel pemulihan adalah jalur terpisah dari 4 step di atas, jadi harus
-      // disembunyikan setiap kali pindah step.
-      const recoveryPanel = document.getElementById('recovery-panel');
-      if (recoveryPanel && step !== 1) recoveryPanel.style.display = 'none';
 
       // Update dots & lines
       const dot1 = document.getElementById('step-dot-1');
@@ -738,85 +679,6 @@ submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi
         btnSaveNewPwd.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Password Baru';
       }
     });
-
-    // ---- Kode Pemulihan (tanpa email) ----
-    // Jalur alternatif yang tidak bergantung pada layanan email. FormSubmit
-    // memblokir IP data center, jadi OTP email tidak bisa diandalkan.
-    function toggleRecoveryPanel() {
-      const panel = document.getElementById('recovery-panel');
-      const step1 = document.getElementById('forgot-step-1');
-      if (!panel || !step1) return;
-      const showPanel = panel.style.display === 'none' || !panel.style.display;
-      panel.style.display = showPanel ? 'block' : 'none';
-      step1.style.display = showPanel ? 'none' : 'block';
-      if (showPanel) {
-        const codeInput = document.getElementById('recovery-code');
-        if (codeInput) setTimeout(() => codeInput.focus(), 120);
-      }
-    }
-
-    const formRecovery = document.getElementById('form-recovery');
-    if (formRecovery) {
-      // Auto-format saat mengetik: XXXX-XXXX-XXXX-XXXX
-      const recoveryCodeInput = document.getElementById('recovery-code');
-      if (recoveryCodeInput) {
-        recoveryCodeInput.addEventListener('input', function () {
-          const raw = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
-          this.value = raw.replace(/(.{4})/g, '$1-').replace(/-$/, '');
-        });
-      }
-
-      formRecovery.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const code = recoveryCodeInput ? recoveryCodeInput.value : '';
-        const newPwd = document.getElementById('recovery-new-pwd').value;
-        const btn = document.getElementById('btn-recovery-submit');
-        const errBox = document.getElementById('recovery-error-detail');
-
-        if (!code || code.replace(/[^A-Z0-9]/g, '').length !== 16) {
-          showRecoveryError('Kode pemulihan harus 16 karakter (XXXX-XXXX-XXXX-XXXX).');
-          return;
-        }
-        if (!newPwd || newPwd.length < 8) {
-          showRecoveryError('Password baru minimal 8 karakter.');
-          return;
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa Kode...';
-        if (errBox) errBox.style.display = 'none';
-
-        try {
-          const res = await fetch('/api/recovery', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'recover', code, newPassword: newPwd })
-          });
-          const data = await res.json().catch(() => ({}));
-
-          if (res.ok && data.success) {
-            showToast(data.message || 'Password berhasil diganti!', 'success');
-            formRecovery.reset();
-            setForgotStep(4);
-            return;
-          }
-          showRecoveryError(data.message || 'Kode pemulihan ditolak.');
-        } catch (err) {
-          showRecoveryError('Tidak bisa menghubungi server. Periksa koneksi Anda lalu coba lagi.');
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> Reset Password dengan Kode';
-        }
-      });
-    }
-
-    function showRecoveryError(message) {
-      showToast(message, 'error');
-      const box = document.getElementById('recovery-error-detail');
-      if (!box) return;
-      box.style.display = 'block';
-      box.textContent = message;
-    }
 
   </script>
 </body>
