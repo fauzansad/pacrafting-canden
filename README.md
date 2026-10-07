@@ -176,7 +176,7 @@ OTP email memakai provider transactional yang dipilih dari environment:
 Kalau keduanya kosong, kode jatuh ke FormSubmit — **tapi FormSubmit memblokir
 permintaan dari IP data center**, jadi email tidak akan sampai dari Vercel.
 (FormSubmit membalas 200 dari IP rumah, 403 dari server.) Kalau itu terjadi,
-pakai **Kode Pemulihan** di halaman login.
+pastikan salah satu env var di atas sudah diisi.
 
 ### 3. Rotasi password admin
 

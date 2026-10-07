@@ -305,17 +305,17 @@ module.exports = async function handler(req, res) {
 
         let message;
         if (provider === 'formsubmit') {
-          message = 'FormSubmit memblokir pengiriman dari server hosting, jadi email tidak akan sampai. Set RESEND_API_KEY atau BREVO_API_KEY di Vercel, atau pakai Kode Pemulihan di halaman login.';
+          message = 'FormSubmit memblokir pengiriman dari server hosting, jadi email tidak akan sampai dari Vercel. Set RESEND_API_KEY atau BREVO_API_KEY di environment_variables Vercel.';
         } else if (httpStatus === 401 || httpStatus === 403) {
-          message = 'Layanan email menolak API key / pengirim. Periksa RESEND_API_KEY atau BREVO_API_KEY dan MAIL_FROM di Vercel. Sementara itu, pakai Kode Pemulihan.';
+          message = 'Layanan email menolak API key / pengirim. Periksa RESEND_API_KEY atau BREVO_API_KEY dan MAIL_FROM di Vercel.';
         } else if (httpStatus === 400 || httpStatus === 422) {
-          message = 'Layanan email menolak alamat tujuan atau pengirim: ' + (providerMessage || 'tidak valid') + '. Sementara itu, pakai Kode Pemulihan.';
+          message = 'Layanan email menolak alamat tujuan atau pengirim: ' + (providerMessage || 'tidak valid') + '. Periksa MAIL_FROM di Vercel.';
         } else if (httpStatus === 429) {
-          message = 'Batas kuota layanan email tercapai. Tunggu sebentar, atau pakai Kode Pemulihan.';
+          message = 'Batas kuota layanan email tercapai. Tunggu sebentar lalu coba lagi.';
         } else if (lastTransportError) {
           message = 'Tidak bisa menghubungi layanan email. Periksa koneksi server lalu coba lagi.';
         } else {
-          message = 'Email gagal dikirim' + (providerMessage ? ': ' + providerMessage : '.') + ' Sementara itu, pakai Kode Pemulihan.';
+          message = 'Email gagal dikirim' + (providerMessage ? ': ' + providerMessage : '.') + ' Silakan coba lagi.';
         }
 
         return res.status(502).json({

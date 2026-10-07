@@ -305,21 +305,6 @@ function renderDashboardStats() {
   setEl('stat-faq', faq.length);
 }
 
-// ---- Kode Pemulihan (recovery code) ----
-// Dibuat dari sini hanya dengan sesi admin yang sah. Yang disimpan di database
-// hanya SHA-256 + salt; kode aslinya muncul SEKALI di layar lalu hilang.
-
-function formatTanggal(iso) {
-  if (!iso) return '-';
-  try {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '-';
-    return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-  } catch (e) {
-    return '-';
-  }
-}
-
 // ---- 4. Hero Banner & 3 Photo Slots Management ----
 let adminHeroSlidesState = [];
 let currentPickerSlotIndex = null;

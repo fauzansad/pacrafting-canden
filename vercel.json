@@ -13,10 +13,6 @@
     "api/admin-save.js": {
       "memory": 1024,
       "maxDuration": 15
-    },
-    "api/recovery.js": {
-      "memory": 1024,
-      "maxDuration": 10
     }
   },
   "headers": [
