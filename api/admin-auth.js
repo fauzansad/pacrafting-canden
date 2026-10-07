@@ -15,8 +15,10 @@
 const crypto = require('crypto');
 
 const SUPABASE_URL = 'https://fnyocuashzlrklduehzu.supabase.co';
-const SUPABASE_READ_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv';
+// `admin_cred` sengaja tidak lagi bisa dibaca peran anon (lihat supabase-rls.sql),
+// jadi server WAJIB memakai service_role untuk membacanya.
 const SUPABASE_WRITE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const SUPABASE_READ_KEY = SUPABASE_WRITE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv';
 const SECRET = process.env.ADMIN_SESSION_SECRET || SUPABASE_WRITE_KEY;
 
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 jam, sama dengan timeout UI
@@ -69,6 +71,10 @@ module.exports = async function handler(req, res) {
 
   if (!username || !password) {
     return res.status(400).json({ success: false, message: 'Username dan password wajib diisi.' });
+  }
+
+  if (!SUPABASE_WRITE_KEY) {
+    return res.status(500).json({ success: false, message: 'Verifikasi login belum dikonfigurasi di server.' });
   }
 
   try {

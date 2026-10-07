@@ -17,7 +17,9 @@ const SUPABASE_URL = 'https://fnyocuashzlrklduehzu.supabase.co';
 // dimiliki service_role. Set SUPABASE_SERVICE_ROLE_KEY di environment Vercel.
 // Tanpa key itu, reset password akan gagal dengan pesan yang jelas (bukan diam).
 const SUPABASE_WRITE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const SUPABASE_READ_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv';
+// `admin_cred` tidak lagi bisa dibaca peran anon, jadi baca kredensial juga
+// harus memakai service_role.
+const SUPABASE_READ_KEY = SUPABASE_WRITE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_ordvwXeWl8ggR2glcfDwYQ_NvFC_Tgv';
 
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_ATTEMPTS = 5;

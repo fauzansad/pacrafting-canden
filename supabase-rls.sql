@@ -1,47 +1,48 @@
 -- =============================================================================
--- Packrafting Canden — Supabase RLS (WAJIB DIJALANKAN)
+-- Packrafting Canden — Supabase RLS (sudah dijalankan 7 Oktober 2026)
 -- =============================================================================
--- masalah: tabel `site_data` saat ini dapat dibaca, ditulis, dan dihapus oleh
--- peran `anon` memakai kunci publishable yang publik di assets/js/data.js.
--- Akibatnya siapa pun bisa:
---   1. Membaca baris `admin_cred` (hash password admin).
---   2. Menimpa `admin_cred` dengan hash pilihan sendiri lalu login ke portal admin.
---   3. Mengubah `brand.whatsapp` / `brand.instagram` (defacement / phising).
---   4. Menghapus semua baris sehingga situs kosong.
 --
--- Jalankan skrip ini di Supabase Dashboard -> SQL Editor.
--- PENTING: jalankan LANGKAH 1 (rotasi password admin) sebelum atau sesudah,
--- karena baris `admin_cred` yang ada sudah pernah terekspos publik.
+-- SEBELUMNYA tabel `site_data` punya policy:
+--     "Public Write Access"  cmd=ALL   roles={public}  using=true  check=true
+--     "Public Read Access"   cmd=SELECT roles={public} using=true
+-- Artinya siapa pun yang punya publishable key (publik di file frontend) bisa
+-- membaca, menulis, dan menghapus semua baris — termasuk admin_cred.
+--
+-- HASIL: peran `anon` sekarang hanya boleh MEMBACA, dan baris `admin_cred` /
+-- `admin_otp` tidak lagi terlihat sama sekali.
+--
+-- Script ini idempoten: aman dijalankan berkali-kali.
+-- Jalankan di Supabase Dashboard -> SQL Editor.
 -- =============================================================================
 
--- 1. Pastikan kunci pada baris `admin_cred` tidak lagi dapat dibaca publik.
---    Contoh hash SHA-256 untuk password baru dapat dibuat dengan:
---      node -e "console.log(require('crypto').createHash('sha256').update('PasswordBaruAnda!').digest('hex'))"
+-- 1. Hapus semua policy lama yang terlalu longgar.
+DROP POLICY IF EXISTS "Public Write Access"  ON public.site_data;
+DROP POLICY IF EXISTS "Public Read Access"   ON public.site_data;
+DROP POLICY IF EXISTS "anon_all_site_data"   ON public.site_data;
+DROP POLICY IF EXISTS "anon_write_site_data" ON public.site_data;
+DROP POLICY IF EXISTS "anon_read_site_data"  ON public.site_data;
 
--- 2. Matikan akses anon ke seluruh tabel.
+-- 2. Pastikan RLS aktif.
 ALTER TABLE public.site_data ENABLE ROW LEVEL SECURITY;
 
--- Hapus policy lama bila ada (aman dijalankan ulang).
-DROP POLICY IF EXISTS "anon_all_site_data" ON public.site_data;
-
--- 3. Front-end (landing page) tetap harus bisa MEMBACA data supaya konten
---    admin tampil di website. Ini satu-satunya hak yang boleh dimiliki anon.
+-- 3. Satu-satunya hak untuk peran anon: membaca, KECUALI baris kredensial.
+--    Front-end memakai anon key, jadi konten website tetap tampil normal.
 CREATE POLICY "anon_read_site_data"
   ON public.site_data
   FOR SELECT
   TO anon
-  USING (true);
+  USING (key <> 'admin_cred' AND key <> 'admin_otp');
 
--- 4. Menulis / menghapus / mengubah data hanya boleh lewat server (service_role).
---    Tidak ada policy INSERT/UPDATE/DELETE untuk peran anon sama sekali,
---    sehingga saveToCloud() di browser tidak lagi bisa mengubah apa pun.
---    Untuk itu, API server (api/send-otp.js) harus memakai service_role key
---    melalui environment variable:
---      SUPABASE_SERVICE_ROLE_KEY=<service_role key>
---    (service_role key JANGAN pernah ditaruh di file frontend.)
-
--- 5. Verifikasi (hasilnya: hanya policy "anon_read_site_data" dengan cmd = SELECT):
---    SELECT key FROM public.site_data;
---    --oanbi confirmasi policy aktif:
---    SELECT policyname, cmd, roles FROM pg_policies
---      WHERE tablename = 'site_data';
+-- 4. Tidak ada policy INSERT / UPDATE / DELETE untuk peran anon.
+--    Semua tulisan wajib lewat server memakai service_role:
+--      - /api/admin-save  (konten + ganti password)
+--      - /api/send-otp    (reset password via OTP)
+--
+-- 5. Environment variables di Vercel (wajib, kalau belum diset):
+--      SUPABASE_SERVICE_ROLE_KEY = service_role key
+--      ADMIN_SESSION_SECRET     = string acak panjang
+--
+-- 6. Verifikasi (hasilnya harus persis seperti ini):
+--      SELECT policyname, cmd, roles, qual FROM pg_policies
+--       WHERE tablename='site_data';
+--    -> anon_read_site_data | SELECT | {anon} | ((key <> 'admin_cred') AND (key <> 'admin_otp'))
