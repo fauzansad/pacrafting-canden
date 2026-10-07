@@ -101,6 +101,119 @@ async function resolveAdminEmail() {
   return registered;
 }
 
+// ---- Pengiriman email: pilih provider dari environment ------------------
+//
+// FormSubmit DIBLOKIR untuk IP data center: request dari komputer biasa
+// dibalas 200 + success:true, tapi request dari Vercel dibalas 403. Karena itu
+// FormSubmit tidak bisa dipakai di sini. Provider transactional (Resend/Brevo)
+// tidak punya pembatasan seperti itu.
+//
+// Set salah satu env var ini di Vercel untuk mengaktifkan:
+//   RESEND_API_KEY   (+ MAIL_FROM, contoh: "Packrafting Canden <noreply@domainmu.id>")
+//   BREVO_API_KEY   (+ MAIL_FROM, contoh: "Packrafting Canden <noreply@domainmu.id>")
+const RESEND_KEY = process.env.RESEND_API_KEY || '';
+const BREVO_KEY = process.env.BREVO_API_KEY || '';
+const MAIL_FROM = process.env.MAIL_FROM || 'Packrafting Canden <onboarding@resend.dev>';
+
+function pickProvider() {
+  if (RESEND_KEY) return 'resend';
+  if (BREVO_KEY) return 'brevo';
+  return 'formsubmit';
+}
+
+function otpEmailHtml(otp) {
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+  return `<!doctype html><html><body style="margin:0;padding:24px;background:#f4f7f5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+    <div style="background:linear-gradient(135deg,#0b1710,#1b4332);padding:22px 26px;color:#ffffff;">
+      <h1 style="margin:0;font-size:18px;letter-spacing:.3px;">Packrafting Canden</h1>
+      <p style="margin:4px 0 0;font-size:13px;color:#a7f3d0;">Reset Password Admin</p>
+    </div>
+    <div style="padding:26px;">
+      <p style="margin:0 0 6px;font-size:14px;color:#334155;">Halo Admin,</p>
+      <p style="margin:0 0 18px;font-size:14px;color:#334155;line-height:1.6;">
+        Berikut kode verifikasi untuk mereset password akun admin Packrafting Canden:
+      </p>
+      <div style="background:#fff7ed;border:2px solid #f97316;border-radius:10px;padding:18px;text-align:center;">
+        <span style="font-family:monospace;font-size:32px;font-weight:700;letter-spacing:10px;color:#c2410c;">${esc(otp)}</span>
+      </div>
+      <p style="margin:18px 0 0;font-size:13px;color:#64748b;line-height:1.6;">
+        Berlaku <strong>10 menit</strong> dan hanya bisa dipakai <strong>satu kali</strong>.
+      </p>
+      <p style="margin:14px 0 0;padding:12px;background:#fef2f2;border-radius:8px;font-size:12px;color:#991b1b;line-height:1.6;">
+        Jangan bagikan kode ini kepada siapa pun. Abaikan email ini jika Anda tidak meminta penggantian password.
+      </p>
+    </div>
+  </div>
+</body></html>`;
+}
+
+function otpEmailText(otp) {
+  return `Packrafting Canden â€” Reset Password Admin\n\nKode verifikasi OTP Anda: ${otp}\n\nBerlaku 10 menit dan hanya bisa dipakai satu kali.\nJangan bagikan kode ini kepada siapa pun. Abaikan email ini jika Anda tidak meminta penggantian password.`;
+}
+
+// Mengembalikan { ok, status, message }.
+async function sendViaProvider(provider, adminEmail, otp) {
+  if (provider === 'resend') {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to: [adminEmail],
+        subject: 'Kode OTP Reset Password Admin Packrafting Canden',
+        html: otpEmailHtml(otp),
+        text: otpEmailText(otp)
+      })
+    });
+    const body = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, message: body.message || '' };
+  }
+
+  if (provider === 'brevo') {
+    const fromMatch = String(MAIL_FROM).match(/<([^>]+)>/);
+    const fromEmail = fromMatch ? fromMatch[1] : 'noreply@' + String(MAIL_FROM).split('@').pop();
+    const fromName = String(MAIL_FROM).match(/^([^\n<]*)</);
+    const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        sender: fromName ? { name: fromName[1].trim() || 'Packrafting Canden', email: fromEmail } : { email: fromEmail },
+        to: [{ email: adminEmail }],
+        subject: 'Kode OTP Reset Password Admin Packrafting Canden',
+        htmlContent: otpEmailHtml(otp),
+        textContent: otpEmailText(otp)
+      })
+    });
+    const body = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, message: body.message || body.error || '' };
+  }
+
+  // FormSubmit: hanya bisa jalan kalau dijalankan dari IP non-data-center.
+  const siteOrigin = 'https://' + (process.env.PUBLIC_ORIGIN || 'https://packrafting-canden.vercel.app');
+  const r = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Origin: siteOrigin,
+      Referer: siteOrigin + '/admin/login',
+      'User-Agent': 'Mozilla/5.0 (compatible; PackraftingCanden/1.0)'
+    },
+    body: JSON.stringify({
+      _subject: '[Packrafting Canden] Kode OTP Reset Password Admin',
+      _template: 'box',
+      'KODE VERIFIKASI (OTP)': otp,
+      'Waktu Berlaku': '10 Menit sejak permintaan dibuat',
+      'Email Terdaftar': adminEmail
+    })
+  });
+  const body = await r.json().catch(() => ({}));
+  // `success` dikirim sebagai string "true"/"false", bukan boolean.
+  return { ok: r.ok && String(body.success) === 'true', status: r.status, message: body.message || '' };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -164,94 +277,51 @@ module.exports = async function handler(req, res) {
         attempts: 0
       });
 
-      // Kirim lewat FormSubmit.
-      //
-      // Dua hal wajib agar request ini diterima:
-      // 1. Header Origin/Referer/User-Agent. Tanpa itu FormSubmit membalas
-      //    "Make sure you open this page through a web server".
-      // 2. Body HARUS dicek. FormSubmit membalas HTTP 200 bahkan saat menolak,
-      //    jadi `mailRes.ok` saja tidak cukup — itulah bug yang membuat UI
-      //    menampilkan "kode berhasil dikirim" padahal email tidak pernah keluar.
-      const siteOrigin = 'https://' + (req.headers['x-forwarded-host'] || req.headers.host || 'packrafting-canden.vercel.app');
-      const otpMailBody = {
-        _subject: '[Packrafting Canden] Kode OTP Reset Password Admin',
-        _template: 'box',
-        'Halo Admin': 'Berikut kode verifikasi OTP resmi untuk mereset password akun admin Packrafting Canden:',
-        'KODE VERIFIKASI (OTP)': otp,
-        'Waktu Berlaku': '10 Menit sejak permintaan dibuat',
-        'Email Terdaftar': adminEmail,
-        'Penting': 'Jangan bagikan kode ini kepada anybody demi keamanan website. Abaikan email ini jika Anda tidak meminta penggantian password.'
-      };
-
-      const mailHeaders = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Origin: siteOrigin,
-        Referer: siteOrigin + '/admin/login',
-        'User-Agent': 'Mozilla/5.0 (compatible; PackraftingCaden/1.0)'
-      };
-
-      let mailRes = null;
-      let mailBody = {};
+      // Kirim email lewat provider yang tersedia di environment.
+      const provider = pickProvider();
+      let result = null;
       let lastTransportError = null;
 
-      // FormSubmit kadang gagal sesaat (rate limit / CDN). Satu kali percobaan
-      // ulang dengan jeda singkat membuat alur ini jauh lebih andal.
+      // Satu kali percobaan ulang: layanan email sesekali gagal sesaat.
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          mailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
-            method: 'POST',
-            headers: mailHeaders,
-            body: JSON.stringify(otpMailBody)
-          });
-          const text = await mailRes.text();
-          try { mailBody = JSON.parse(text); } catch (e) { mailBody = { raw: text }; }
+          result = await sendViaProvider(provider, adminEmail, otp);
         } catch (err) {
           lastTransportError = err.message || String(err);
-          mailRes = null;
+          result = { ok: false, status: 0, message: '' };
         }
-        // `success` dikirim sebagai string "true"/"false", bukan boolean.
-        if (mailRes && mailRes.ok && String(mailBody.success) === 'true') break;
+        if (result && result.ok) break;
         if (attempt < 2) await new Promise(r => setTimeout(r, 1200));
       }
 
-      const mailAccepted = !!(mailRes && mailRes.ok && String(mailBody.success) === 'true');
-
-      if (!mailAccepted) {
+      if (!result || !result.ok) {
         await supabaseUpsertRow(OTP_ROW_KEY, { email: adminEmail, salt: null, hash: null, expiry: 0, sentAt: 0, attempts: 0 });
 
-        const providerMessage = String(mailBody.message || '').trim();
-        const httpStatus = mailRes ? mailRes.status : 0;
-        console.error('[send-otp] FormSubmit gagal:', JSON.stringify({
-          httpStatus,
-          success: mailBody.success,
-          message: providerMessage,
-          transportError: lastTransportError
+        const providerMessage = String(result && result.message ? result.message : '').trim();
+        const httpStatus = result ? result.status : 0;
+        console.error('[send-otp] pengiriman email gagal:', JSON.stringify({
+          provider, httpStatus, providerMessage, transportError: lastTransportError
         }));
 
-        // Bedakan penyebabnya supaya pesan di UI bisa spesifik dan berguna.
-        let message = 'Email gagal dikirim. Silakan coba lagi beberapa saat lagi.';
-        if (!mailRes && lastTransportError) {
+        let message;
+        if (provider === 'formsubmit') {
+          message = 'FormSubmit memblokir pengiriman dari server hosting, jadi email tidak akan sampai. Set RESEND_API_KEY atau BREVO_API_KEY di Vercel, atau pakai Kode Pemulihan di halaman login.';
+        } else if (httpStatus === 401 || httpStatus === 403) {
+          message = 'Layanan email menolak API key / pengirim. Periksa RESEND_API_KEY atau BREVO_API_KEY dan MAIL_FROM di Vercel. Sementara itu, pakai Kode Pemulihan.';
+        } else if (httpStatus === 400 || httpStatus === 422) {
+          message = 'Layanan email menolak alamat tujuan atau pengirim: ' + (providerMessage || 'tidak valid') + '. Sementara itu, pakai Kode Pemulihan.';
+        } else if (httpStatus === 429) {
+          message = 'Batas kuota layanan email tercapai. Tunggu sebentar, atau pakai Kode Pemulihan.';
+        } else if (lastTransportError) {
           message = 'Tidak bisa menghubungi layanan email. Periksa koneksi server lalu coba lagi.';
-        } else if (/open this page through a web server/i.test(providerMessage)) {
-          message = 'Layanan email menolak permintaan dari server. Silakan hubungi pengelola situs.';
-        } else if (httpStatus === 403) {
-          // Terverifikasi: FormSubmit membalas 200 dari IP biasa tapi 403 dari
-          // IP data center (Vercel). FormSubmit memblokir pengiriman dari
-          // server, jadi email tidak akan pernah sampai selama masih pakai
-          // FormSubmit. Ganti ke layanan email transactional (Resend/Brevo).
-          message = 'Layanan email memblokir pengiriman dari server hosting. Email tidak akan sampai sampai layanan email diganti ke provider transactional (mis. Resend atau Brevo).';
-        } else if (/confirm/i.test(providerMessage)) {
-          message = 'Alamat email ini belum pernah dikonfirmasi oleh layanan email. Buka inbox ' + adminEmail + ' dan klik link konfirmasi yang dikirim FormSubmit, lalu minta kode lagi.';
-        } else if (httpStatus === 429 || /rate|limit|too many/i.test(providerMessage)) {
-          message = 'Terlalu banyak permintaan ke layanan email. Tunggu 1 menit lalu coba lagi.';
-        } else if (providerMessage) {
-          message = 'Layanan email menolak: ' + providerMessage;
+        } else {
+          message = 'Email gagal dikirim' + (providerMessage ? ': ' + providerMessage : '.') + ' Sementara itu, pakai Kode Pemulihan.';
         }
 
         return res.status(502).json({
           success: false,
           message: message,
+          provider: provider,
           providerStatus: httpStatus,
           providerMessage: providerMessage
         });

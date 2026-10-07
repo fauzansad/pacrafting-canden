@@ -158,9 +158,25 @@ membaca, dan semua tulisan harus lewat server.
 | --- | --- |
 | `SUPABASE_SERVICE_ROLE_KEY` | service_role key dari Supabase → Project Settings → API |
 | `ADMIN_SESSION_SECRET` | string acak panjang, mis. hasil `openssl rand -hex 32` |
+| `RESEND_API_KEY` | API key dari Resend (opsional, untuk OTP email) |
+| `MAIL_FROM` | pengirim email, mis. `Packrafting Canden <noreply@domainmu.id>` |
 
 Tanpa `SUPABASE_SERVICE_ROLE_KEY`, login dan penyimpanan dari panel akan gagal
 dengan pesan "belum dikonfigurasi di server".
+
+### Layanan email untuk OTP
+
+OTP email memakai provider transactional yang dipilih dari environment:
+
+| Provider | Env var | Free tier |
+| --- | --- | --- |
+| Resend | `RESEND_API_KEY` | 3.000 email/bulan |
+| Brevo | `BREVO_API_KEY` | 300 email/hari |
+
+Kalau keduanya kosong, kode jatuh ke FormSubmit — **tapi FormSubmit memblokir
+permintaan dari IP data center**, jadi email tidak akan sampai dari Vercel.
+(FormSubmit membalas 200 dari IP rumah, 403 dari server.) Kalau itu terjadi,
+pakai **Kode Pemulihan** di halaman login.
 
 ### 3. Rotasi password admin
 
