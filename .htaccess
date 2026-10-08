@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# /api/nama-fungsi -> /api/nama-fungsi.php
+RewriteRule ^api/([a-zA-Z0-9_-]+)$ api/$1.php [L]
+
+# Clean URLs: /galeri -> /galeri.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# Headers keamanan (port dari vercel.json)
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  <FilesMatch "\.(js|css)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Jangan ekspos file sensitif
+<FilesMatch "(config\.php|_lib\.php|\.env|\.sql|\.md|package\.json|package-lock\.json)$">
+  Require all denied
+</FilesMatch>

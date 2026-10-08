@@ -21,3 +21,6 @@ Desktop.ini
 scratch/
 
 .vercel
+
+api/config.php
+
