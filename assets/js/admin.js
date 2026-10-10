@@ -16,6 +16,31 @@ function formatAdminAssetUrl(url) {
   return '../' + clean;
 }
 
+// Terjemahkan teks Bahasa Indonesia ke Inggris lewat /api/translate.
+// textsMap: { key: 'teks indonesia' }. Mengembalikan { key: 'english' }.
+// Melempar Error kalau server menolak / gagal menerjemahkan.
+async function autoTranslateToEnglish(textsMap) {
+  const keys = Object.keys(textsMap || {}).filter(k => (textsMap[k] || '').trim() !== '');
+  if (!keys.length) return {};
+
+  const payload = {};
+  keys.forEach(k => { payload[k] = textsMap[k]; });
+
+  const res = await fetch('/api/translate', {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, DataStore.adminAuthHeader()),
+    body: JSON.stringify({ texts: payload })
+  });
+
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Gagal menerjemahkan teks ke Inggris.');
+  }
+  return data.translated || {};
+}
+
 function clearAdminSession() {
   sessionStorage.removeItem('admin_logged_in');
   sessionStorage.removeItem('admin_user');
@@ -348,6 +373,37 @@ async function saveBannerHeadlineText() {
   b.lead_id = document.getElementById('banner-lead-id').value.trim();
   b.lead_en = document.getElementById('banner-lead-en').value.trim();
 
+  // Field _en yang dikosongkan otomatis diterjemahkan dari _id.
+  // Kalau admin sudah mengisi _en secara manual, nilai manual itu yang dipakai.
+  const toTranslate = {};
+  const enInputs = {
+    judul_en: 'banner-judul-en',
+    sub_en: 'banner-sub-en',
+    lead_en: 'banner-lead-en'
+  };
+  Object.keys(enInputs).forEach(function (key) {
+    if (!b[key] && b[key.replace(/_en$/, '_id')]) toTranslate[key] = b[key.replace(/_en$/, '_id')];
+  });
+
+  if (Object.keys(toTranslate).length) {
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menerjemahkan...';
+    try {
+      const tr = await autoTranslateToEnglish(toTranslate);
+      Object.keys(toTranslate).forEach(function (key) {
+        if (tr[key]) b[key] = tr[key];
+      });
+      // Tulis balik ke input supaya admin bisa mengoreksi hasil terjemahan.
+      Object.keys(enInputs).forEach(function (key) {
+        const el = document.getElementById(enInputs[key]);
+        if (el && b[key]) el.value = b[key];
+      });
+    } catch (terr) {
+      // Kekecewaan translate tidak boleh membatalkan penyimpanan.
+      console.error(terr);
+      showToast('Teks Inggris gagal dibuat otomatis (' + (terr.message || terr) + '). Simpan ulang / isi manual.', 'warning');
+    }
+  }
+
   banners[0] = b;
 
   try {
@@ -590,9 +646,35 @@ async function saveWellnessInfo() {
 
   try {
     const titleId = document.getElementById('wellness-title-id').value.trim();
-    const titleEn = document.getElementById('wellness-title-en').value.trim();
+    let titleEn = document.getElementById('wellness-title-en').value.trim();
     const descId = document.getElementById('wellness-desc-id').value.trim();
-    const descEn = document.getElementById('wellness-desc-en').value.trim();
+    let descEn = document.getElementById('wellness-desc-en').value.trim();
+
+    // _en kosong otomatis diterjemahkan dari _id; _en terisi manual menang.
+    const toTranslate = {};
+    if (!titleEn && titleId) toTranslate.wellness_title_en = titleId;
+    if (!descEn && descId) toTranslate.wellness_desc_en = descId;
+
+    if (Object.keys(toTranslate).length) {
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menerjemahkan...';
+      try {
+        const tr = await autoTranslateToEnglish(toTranslate);
+        if (tr.wellness_title_en) {
+          titleEn = tr.wellness_title_en;
+          const tEl = document.getElementById('wellness-title-en');
+          if (tEl) tEl.value = titleEn;
+        }
+        if (tr.wellness_desc_en) {
+          descEn = tr.wellness_desc_en;
+          const dEl = document.getElementById('wellness-desc-en');
+          if (dEl) dEl.value = descEn;
+        }
+      } catch (terr) {
+        console.error(terr);
+        showToast('Teks Inggris gagal dibuat otomatis (' + (terr.message || terr) + '). Isi manual bila perlu.', 'warning');
+      }
+    }
+
     await DataStore.saveWisataInfo({
       ...DataStore.getWisataInfo(),
       wellness_title_id: titleId,
