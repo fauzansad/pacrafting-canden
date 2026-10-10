@@ -311,7 +311,6 @@ let currentPickerSlotIndex = null;
 
 function initBannerAdminPage() {
   renderHeroSlotsAdmin();
-  loadBannerHeadlineAdmin();
 }
 
 function renderHeroSlotsAdmin() {
@@ -529,68 +528,6 @@ async function resetHeroSlidesToDefault() {
   ];
   await saveAllHeroSlides();
   renderHeroSlotsAdmin();
-}
-
-// Headline Text Admin Sync
-function loadBannerHeadlineAdmin() {
-  const banners = DataStore.getBanners();
-  if (!banners || banners.length === 0) return;
-  const b = banners[0];
-
-  const setVal = (id, val, fallback) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val || fallback || '';
-  };
-
-  setVal('banner-judul', b.judul, 'PACKRAFTING CANDEN');
-  setVal('banner-sub', b.subheading, 'Adventure on the River');
-  setVal('banner-lead', b.lead, '');
-  setVal('banner-cta', b.ctaText, 'JELAJAHI PAKET WISATA');
-  setVal('banner-lokasi', b.lokasiTag, 'Rute Sungai Opak • 4,5 KM (± 1,5 Jam) • Canden ke Potrobayan');
-  setVal('banner-cta-link', b.ctaLink, '#paket');
-  setVal('banner-gambar', b.gambar, '');
-}
-
-async function saveBannerHeadlineText() {
-  const btn = document.getElementById('btn-save-banner-text');
-  const originalHtml = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-  }
-
-  // Pertahankan banner lain yang mungkin tersimpan; sebelumnya seluruh array
-  // ditimpa menjadi satu elemen.
-  const banners = DataStore.getBanners().map(function (x) { return Object.assign({}, x); });
-  const b = banners[0] || Object.assign({}, PackraftData.banners[0], { id: 1, status: 'active', urutan: 1 });
-
-  b.judul = (document.getElementById('banner-judul') ? document.getElementById('banner-judul').value.trim() : '') || 'PACKRAFTING CANDEN';
-  b.subheading = document.getElementById('banner-sub') ? document.getElementById('banner-sub').value.trim() : 'Adventure on the River';
-  b.lead = document.getElementById('banner-lead') ? document.getElementById('banner-lead').value.trim() : '';
-  b.ctaText = document.getElementById('banner-cta') ? document.getElementById('banner-cta').value.trim() : 'JELAJAHI PAKET WISATA';
-  b.lokasiTag = document.getElementById('banner-lokasi') ? document.getElementById('banner-lokasi').value.trim() : '';
-
-  const ctaLinkInput = document.getElementById('banner-cta-link');
-  if (ctaLinkInput) b.ctaLink = ctaLinkInput.value.trim();
-  const gambarInput = document.getElementById('banner-gambar');
-  if (gambarInput) b.gambar = gambarInput.value.trim();
-
-  // Simpan seluruh array, bukan hanya elemen pertama.
-  banners[0] = b;
-
-  try {
-    showToast('Menyimpan teks headline banner...', 'info');
-    await DataStore.saveBanners(banners);
-    showToast('Teks headline banner berhasil disimpan!', 'success');
-  } catch (err) {
-    console.error(err);
-    showToast('Gagal menyimpan teks: ' + (err.message || err), 'error');
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalHtml;
-    }
-  }
 }
 
 // Backward compatibility helper
@@ -1816,7 +1753,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('hero-slots-container')) renderHeroSlotsAdmin();
     // Id lama (`banner-list` / `banner-admin-list`) tidak pernah ada di halaman
     // banner, sehingga field headline tidak pernah ter-refresh.
-    if (document.getElementById('banner-judul')) loadBannerHeadlineAdmin();
+
     if (document.getElementById('faq-admin-list')) renderFaqAdmin();
     if (document.getElementById('paket-admin-list')) renderPaketAdmin();
     if (document.getElementById('operation-dates-list')) loadOperationScheduleAdmin();
