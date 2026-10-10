@@ -219,7 +219,10 @@ document.addEventListener('DOMContentLoaded', function () {
       const minPeserta = pick(p.minPeserta, p.minPeserta_en);
       const maxPeserta = pick(p.maxPeserta, p.maxPeserta_en);
       const usiaMin = pick(p.usiaMin, p.usiaMin_en);
-      const unit = pick(p.unit, p.unit_en);
+      // `unit` tidak punya pasangan `_en`: isinya singkatan singkat ("/ orang",
+      // "/ pax") yang tidak layak dikirim ke API translate. Label "/ orang"
+      // yang perlu diterjemahkan sudah ditangani i18n key `pkg_unit_orang`.
+      const unit = p.unit;
       const fasilitas = pickList(p.fasilitas || [], p.fasilitas_en);
       const yangPerluDihadirkan = pickList(p.yangPerluDihadirkan || [], p.yangPerluDihadirkan_en);
 
