@@ -773,10 +773,16 @@ function renderPaketAdmin() {
 }
 
 const PAKET_FORM_FIELDS = [
-  'paket-nama', 'paket-badge', 'paket-harga-normal', 'paket-harga', 'paket-unit',
-  'paket-durasi', 'paket-level', 'paket-gambar', 'paket-min-peserta',
-  'paket-max-peserta', 'paket-usia-min', 'paket-deskripsi', 'paket-fasilitas',
-  'paket-bawaan', 'paket-status'
+  'paket-nama', 'paket-nama-en', 'paket-badge', 'paket-badge-en',
+  'paket-harga-normal', 'paket-harga', 'paket-unit',
+  'paket-durasi', 'paket-durasi-en', 'paket-level', 'paket-level-en', 'paket-gambar',
+  'paket-min-peserta', 'paket-min-peserta-en',
+  'paket-max-peserta', 'paket-max-peserta-en',
+  'paket-usia-min', 'paket-usia-min-en',
+  'paket-deskripsi', 'paket-deskripsi-en',
+  'paket-fasilitas', 'paket-fasilitas-en',
+  'paket-bawaan', 'paket-bawaan-en',
+  'paket-status'
 ];
 
 function setPaketFormValues(values) {
@@ -795,19 +801,29 @@ function readPaketFormValues() {
 
   return {
     nama: get('paket-nama'),
+    nama_en: get('paket-nama-en'),
     badge: get('paket-badge'),
+    badge_en: get('paket-badge-en'),
     hargaNormal: get('paket-harga-normal'),
     harga: get('paket-harga'),
     unit: get('paket-unit') || '/ orang',
     durasi: get('paket-durasi'),
+    durasi_en: get('paket-durasi-en'),
     level: get('paket-level'),
+    level_en: get('paket-level-en'),
     gambar: get('paket-gambar'),
     minPeserta: get('paket-min-peserta'),
+    minPeserta_en: get('paket-min-peserta-en'),
     maxPeserta: get('paket-max-peserta'),
+    maxPeserta_en: get('paket-max-peserta-en'),
     usiaMin: get('paket-usia-min'),
+    usiaMin_en: get('paket-usia-min-en'),
     deskripsi: get('paket-deskripsi'),
+    deskripsi_en: get('paket-deskripsi-en'),
     fasilitas: lines('paket-fasilitas'),
+    fasilitas_en: lines('paket-fasilitas-en'),
     yangPerluDihadirkan: lines('paket-bawaan'),
+    yangPerluDihadirkan_en: lines('paket-bawaan-en'),
     status: get('paket-status') || 'active'
   };
 }
@@ -838,19 +854,29 @@ function editPaket(id) {
     form.dataset.editId = id;
     setPaketFormValues({
       'paket-nama': paket.nama || '',
+      'paket-nama-en': paket.nama_en || '',
       'paket-badge': paket.badge || '',
+      'paket-badge-en': paket.badge_en || '',
       'paket-harga-normal': paket.hargaNormal || '',
       'paket-harga': paket.harga || '',
       'paket-unit': paket.unit || '',
       'paket-durasi': paket.durasi || '',
+      'paket-durasi-en': paket.durasi_en || '',
       'paket-level': paket.level || '',
+      'paket-level-en': paket.level_en || '',
       'paket-gambar': paket.gambar || '',
       'paket-min-peserta': paket.minPeserta || '',
+      'paket-min-peserta-en': paket.minPeserta_en || '',
       'paket-max-peserta': paket.maxPeserta || '',
+      'paket-max-peserta-en': paket.maxPeserta_en || '',
       'paket-usia-min': paket.usiaMin || '',
+      'paket-usia-min-en': paket.usiaMin_en || '',
       'paket-deskripsi': paket.deskripsi || '',
+      'paket-deskripsi-en': paket.deskripsi_en || '',
       'paket-fasilitas': (paket.fasilitas || []).join('\n'),
+      'paket-fasilitas-en': (paket.fasilitas_en || []).join('\n'),
       'paket-bawaan': (paket.yangPerluDihadirkan || []).join('\n'),
+      'paket-bawaan-en': (paket.yangPerluDihadirkan_en || []).join('\n'),
       'paket-status': paket.status || 'active'
     });
     window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
@@ -869,14 +895,115 @@ async function savePaket() {
 
   const paketList = DataStore.getPaket().map(function (p) { return Object.assign({}, p); });
 
+  // Id paket sudah perlu diketahui sebelum kunci peta terjemahan dibuat,
+  // supaya format kuncinya 'p<id>_<field>' sama persis dengan nama field _en.
+  const editId = mode === 'edit' ? parseInt(form.dataset.editId, 10) : null;
+  const itemId = (mode === 'edit') ? editId : DataStore.generateId(paketList);
+  const prefix = 'p' + itemId;
+
+  // Field _en yang masih kosong otomatis diterjemahkan dari teks Indonesia
+  // (pola sama seperti saveBannerHeadlineText / saveGaleriAdmin / saveFaqAdmin).
+  // Kalau admin sudah mengisi _en manual, nilai manual itu yang menang.
+  // harga / hargaNormal / unit / gambar / status sengaja tidak diterjemahkan
+  // karena tidak relevan bahasa.
+  const enInputs = {
+    nama_en: 'paket-nama-en',
+    badge_en: 'paket-badge-en',
+    deskripsi_en: 'paket-deskripsi-en',
+    durasi_en: 'paket-durasi-en',
+    level_en: 'paket-level-en',
+    minPeserta_en: 'paket-min-peserta-en',
+    maxPeserta_en: 'paket-max-peserta-en',
+    usiaMin_en: 'paket-usia-min-en',
+    fasilitas_en: 'paket-fasilitas-en',
+    yangPerluDihadirkan_en: 'paket-bawaan-en'
+  };
+  const scalarPairs = [
+    ['nama_en', 'nama'],
+    ['badge_en', 'badge'],
+    ['deskripsi_en', 'deskripsi'],
+    ['durasi_en', 'durasi'],
+    ['level_en', 'level'],
+    ['minPeserta_en', 'minPeserta'],
+    ['maxPeserta_en', 'maxPeserta'],
+    ['usiaMin_en', 'usiaMin']
+  ];
+
+  const toTranslate = {};
+  scalarPairs.forEach(function (pair) {
+    const enKey = pair[0];
+    const idKey = pair[1];
+    if (!values[enKey] && values[idKey]) toTranslate[prefix + '_' + idKey] = values[idKey];
+  });
+
+  // Fasilitas & "yang perlu dibawa" berupa daftar baris. Menerjemahkan tiap
+  // baris terpisah menghasilkan terjemahan yang terpotong konteksnya, jadi
+  // satu blok digabung dengan pemisah baris kosong, diterjemahkan sebagai
+  // satu string utuh, lalu dipecah lagi pada baris kosong.
+  const BLOCK_SEP = '\n\n';
+  const EN_SPLIT = /\n\s*\n/;
+
+  const blockKeys = [
+    ['fasilitas_en', 'fasilitas'],
+    ['yangPerluDihadirkan_en', 'yangPerluDihadirkan']
+  ];
+  const blockSource = {};
+  blockKeys.forEach(function (pair) {
+    const list = values[pair[1]] || [];
+    if (!values[pair[0]] && list.length) {
+      blockSource[pair[0]] = list;
+      toTranslate[prefix + '_' + pair[1]] = list.join(BLOCK_SEP);
+    }
+  });
+
+  if (Object.keys(toTranslate).length) {
+    try {
+      const tr = await autoTranslateToEnglish(toTranslate);
+
+      scalarPairs.forEach(function (pair) {
+        const translated = tr[prefix + '_' + pair[1]];
+        if (!translated) return;
+        values[pair[0]] = translated;
+        // Tulis balik ke input supaya admin bisa mengoreksi hasil terjemahan.
+        const el = document.getElementById(enInputs[pair[0]]);
+        if (el) el.value = translated;
+      });
+
+      blockKeys.forEach(function (pair) {
+        const translated = tr[prefix + '_' + pair[1]];
+        const source = blockSource[pair[0]];
+        if (!translated || !source) return;
+        const parts = translated.split(EN_SPLIT).map(function (s) { return s.trim(); }).filter(Boolean);
+        // Jumlah baris hasil terjemahan harus sama dengan sumber; kalau tidak,
+        // lebih aman memakai array Indonesia daripada menulis teks acak.
+        if (parts.length !== source.length) return;
+        values[pair[0]] = parts;
+        const el = document.getElementById(enInputs[pair[0]]);
+        if (el) el.value = parts.join('\n');
+      });
+    } catch (terr) {
+      // Kegagalan terjemahan tidak boleh membatalkan penyimpanan: teks
+      // Bahasa Indonesia admin tetap tersimpan utuh.
+      console.error(terr);
+      showToast('Teks Inggris gagal dibuat otomatis (' + (terr.message || terr) + '). Isi manual bila perlu.', 'warning');
+    }
+  }
+
   if (mode === 'edit') {
-    const id = parseInt(form.dataset.editId, 10);
-    const index = paketList.findIndex(p => p.id === id);
+    const index = paketList.findIndex(p => p.id === itemId);
     if (index === -1) { showToast('Paket tidak ditemukan', 'error'); return; }
-    paketList[index] = Object.assign({}, paketList[index], values);
+    const previous = paketList[index];
+    paketList[index] = Object.assign({}, previous, values);
+    // Field _en yang kosong (mis. terjemahan otomatis gagal) tidak boleh
+    // menimpa nilai lama yang sudah tersimpan di DB.
+    Object.keys(enInputs).forEach(function (key) {
+      const incoming = values[key];
+      const isEmpty = !incoming || (Array.isArray(incoming) && !incoming.length);
+      if (isEmpty && previous[key]) paketList[index][key] = previous[key];
+    });
   } else {
     paketList.push(Object.assign({}, values, {
-      id: DataStore.generateId(paketList),
+      id: itemId,
       featured: false
     }));
   }

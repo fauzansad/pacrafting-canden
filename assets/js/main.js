@@ -179,13 +179,56 @@ document.addEventListener('DOMContentLoaded', function () {
     const paketList = DataStore.getPaket().filter(p => p.status !== 'inactive');
     if (!paketList || paketList.length === 0) return;
 
+    const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
+    const isEn = lang === 'en';
+
+    const i18nText = function (key, fallback) {
+      const fb = (fallback === undefined || fallback === null) ? '' : fallback;
+      try {
+        if (window.I18n && typeof window.I18n.t === 'function') {
+          const val = window.I18n.t(key, fb);
+          // I18n.t mengembalikan nama key-nya sendiri kalau tidak ada di kamus
+          // dan fallback kosong; nilai seperti itu dianggap "tidak ada".
+          if (val && val !== key) return val;
+        }
+      } catch (err) {}
+      return fb;
+    };
+
     container.innerHTML = paketList.map(function (p, idx) {
-      const ribbonText = p.badge || (idx === 0 ? 'Trip Favorit' : 'Lengkap + Makan');
+      // Field _en dari DB dipakai kalau bahasa Inggris aktif. Kalau kolom _en
+      // kosong (paket lama / admin belum pernah menyimpan), jatuh kembali ke
+      // teks Indonesia agar kartu tidak pernah tampil kosong.
+      const pick = function (idVal, enVal) {
+        if (!isEn) return idVal;
+        const en = (enVal === undefined || enVal === null) ? '' : String(enVal).trim();
+        return en || idVal;
+      };
+      // Array harus diperlakukan sebagai satu kesatuan: kalau versi Inggris
+      // tidak ada / kosong, pakai utuh array Indonesia.
+      const pickList = function (idList, enList) {
+        if (isEn && Array.isArray(enList) && enList.length) return enList;
+        return idList;
+      };
+
+      const nama = pick(p.nama, p.nama_en);
+      const badge = pick(p.badge, p.badge_en);
+      const deskripsi = pick(p.deskripsi, p.deskripsi_en);
+      const durasi = pick(p.durasi, p.durasi_en);
+      const level = pick(p.level, p.level_en);
+      const minPeserta = pick(p.minPeserta, p.minPeserta_en);
+      const maxPeserta = pick(p.maxPeserta, p.maxPeserta_en);
+      const usiaMin = pick(p.usiaMin, p.usiaMin_en);
+      const unit = pick(p.unit, p.unit_en);
+      const fasilitas = pickList(p.fasilitas || [], p.fasilitas_en);
+      const yangPerluDihadirkan = pickList(p.yangPerluDihadirkan || [], p.yangPerluDihadirkan_en);
+
+      const ribbonText = badge || (idx === 0 ? 'Trip Favorit' : 'Lengkap + Makan');
       const ribbonHtml = ribbonText ? `<span class="paket-ribbon">${escapeHtml(ribbonText)}</span>` : '';
       const defaultImg = idx === 0 ? 'assets/images/galeri/3.jpg' : 'assets/images/galeri/6.jpg';
       const imgSrc = resolveAssetUrl(p.gambar) || defaultImg;
       const btnClass = idx === 0 ? 'btn btn-primary' : 'btn btn-accent';
-      const fasilitasItems = (p.fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${escapeHtml(f)}</li>`).join('');
+      const fasilitasItems = (fasilitas || []).map(f => `<li><i class="fa-solid fa-circle-check"></i> ${escapeHtml(f)}</li>`).join('');
 
       // Handle price formatting
       let displayPrice = p.harga || '110.000';
@@ -201,31 +244,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Info-meta yang dikelola admin (level, kuota peserta, syarat usia).
       const metaExtras = [];
-      if (p.level) metaExtras.push(`<div><strong>Level</strong>${escapeHtml(p.level)}</div>`);
-      if (p.minPeserta || p.maxPeserta) {
-        metaExtras.push(`<div><strong>Kuota Peserta</strong>${escapeHtml(p.minPeserta || '')}${p.minPeserta && p.maxPeserta ? ' &ndash; ' : ''}${escapeHtml(p.maxPeserta || '')}</div>`);
+      if (level) metaExtras.push(`<div><strong>${i18nText('pkg_label_level', 'Level')}</strong>${escapeHtml(level)}</div>`);
+      if (minPeserta || maxPeserta) {
+        metaExtras.push(`<div><strong>${i18nText('pkg_label_kuota', 'Kuota Peserta')}</strong>${escapeHtml(minPeserta || '')}${minPeserta && maxPeserta ? ' &ndash; ' : ''}${escapeHtml(maxPeserta || '')}</div>`);
       }
-      if (p.usiaMin) metaExtras.push(`<div><strong>Syarat Usia</strong>${escapeHtml(p.usiaMin)}</div>`);
+      if (usiaMin) metaExtras.push(`<div><strong>${i18nText('pkg_label_usia', 'Syarat Usia')}</strong>${escapeHtml(usiaMin)}</div>`);
 
-      const bawaanHtml = (p.yangPerluDihadirkan && p.yangPerluDihadirkan.length)
-        ? `<div class="paket-features-title">Yang Perlu Dihadirkan:</div>
-           <ul class="paket-features">${p.yangPerluDihadirkan.map(b => `<li><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(b)}</li>`).join('')}</ul>`
+      const bawaanHtml = (yangPerluDihadirkan && yangPerluDihadirkan.length)
+        ? `<div class="paket-features-title">${i18nText('pkg_label_bawaan', 'Yang Perlu Dihadirkan:')}</div>
+           <ul class="paket-features">${yangPerluDihadirkan.map(b => `<li><i class="fa-solid fa-circle-exclamation"></i> ${escapeHtml(b)}</li>`).join('')}</ul>`
         : '';
 
       return `
         <div class="paket-card reveal revealed">
           <div class="paket-img-header">
-            <img src="${imgSrc}" alt="${escapeHtml(p.nama)}" loading="lazy">
+            <img src="${imgSrc}" alt="${escapeHtml(nama)}" loading="lazy">
             ${ribbonHtml}
           </div>
           <div class="paket-header">
-            <h3>${escapeHtml(p.nama)}</h3>
-            <div class="paket-subtitle">${escapeHtml(p.deskripsi || 'Sensasi Packrafting Wellness Tourism Canden')}</div>
+            <h3>${escapeHtml(nama)}</h3>
+            <div class="paket-subtitle">${escapeHtml(deskripsi || i18nText('pkg_default_desc', 'Sensasi Packrafting Wellness Tourism Canden'))}</div>
             <div class="paket-price-box">
               <div class="paket-price">
                 ${normalPrice}
                 <span class="amount">${escapeHtml(displayPrice)}</span>
-                <span class="unit">${escapeHtml(p.unit || '/ orang')}</span>
+                <span class="unit">${escapeHtml(unit || i18nText('pkg_unit_orang', '/ orang'))}</span>
               </div>
             </div>
           </div>
@@ -233,24 +276,24 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="paket-meta-list">
               <div class="paket-meta-item">
                 <i class="fa-regular fa-clock"></i>
-                <div><strong>Durasi Trip</strong>${escapeHtml(p.durasi || '± 1,5 Jam (4,5 km)')}</div>
+                <div><strong>${i18nText('pkg_duration_label', 'Durasi Trip')}</strong>${escapeHtml(durasi || i18nText('pkg_duration_val', '± 1,5 Jam (4,5 km)'))}</div>
               </div>
               <div class="paket-meta-item">
                 <i class="fa-solid fa-sailboat"></i>
-                <div><strong>Perahu</strong>1 Orang / Packraft</div>
+                <div><strong>${i18nText('pkg_boat_label', 'Perahu')}</strong>${i18nText('pkg_boat_val', '1 Orang / Packraft')}</div>
               </div>
               ${metaExtras.join('')}
             </div>
 
-            <div class="paket-features-title">Fasilitas Termasuk:</div>
+            <div class="paket-features-title">${i18nText('pkg_features_title', 'Fasilitas Termasuk:')}</div>
             <ul class="paket-features">
               ${fasilitasItems}
             </ul>
             ${bawaanHtml}
 
             <div class="paket-footer">
-              <button type="button" data-reserve-paket="${p.id}" data-booking-wa="${escapeHtml(p.nama)}" class="${btnClass}">
-                <i class="fa-brands fa-whatsapp"></i> Reservasi ${escapeHtml(p.nama)}
+              <button type="button" data-reserve-paket="${p.id}" data-booking-wa="${escapeHtml(nama)}" class="${btnClass}">
+                <i class="fa-brands fa-whatsapp"></i> ${i18nText('pkg_btn_reserve', 'Reservasi')} ${escapeHtml(nama)}
               </button>
             </div>
           </div>
