@@ -41,7 +41,15 @@ document.addEventListener('DOMContentLoaded', function () {
   // mengurus (agar versi English tetap ter terjemahan). Kalau admin sudah
   // mengubahnya, tandai `data-db-driven` supaya kamus statis tidak menimpa.
   function applyDbText(el, value, defaultValue, useHtml) {
-    if (!el || !value) return;
+    if (!el) return;
+    // Tanpa nilai untuk bahasa aktif, atribut data-db-driven harus dilepas.
+    // Kalau tidak, atribut basi dari render bahasa sebelumnya membuat
+    // i18n.applyTranslations() melewati elemen ini dan teks lama tidak pernah
+    // diganti (mis. subheading Indonesia tetap tampil saat pilih Inggris).
+    if (!value) {
+      el.removeAttribute('data-db-driven');
+      return;
+    }
     const decoded = decodeEntities(String(value));
     const isCustomized = decoded !== decodeEntities(String(defaultValue || ''));
     if (isCustomized) {
@@ -421,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
     const fieldSuffix = lang === 'en' ? '_en' : '_id';
 
-    if (b.judul && heroTitleEl) {
+    if (heroTitleEl) {
       const customTitle = b['judul' + fieldSuffix];
       const customized = customTitle && decodeEntities(String(customTitle)) !== decodeEntities(String(defaultBanner.judul || ''));
       if (customized) {
@@ -435,8 +443,8 @@ document.addEventListener('DOMContentLoaded', function () {
     applyDbText(heroSubEl, b['sub' + fieldSuffix], defaultBanner.subheading, false);
     applyDbText(heroLeadEl, b['lead' + fieldSuffix], defaultBanner.lead, false);
 
-    if (b.ctaText && heroCtaBtn) {
-      const customized = decodeEntities(String(b.ctaText)) !== decodeEntities(String(defaultBanner.ctaText || ''));
+    if (heroCtaBtn) {
+      const customized = b.ctaText && decodeEntities(String(b.ctaText)) !== decodeEntities(String(defaultBanner.ctaText || ''));
       if (customized) {
         heroCtaBtn.innerHTML = `<i class="fa-solid fa-compass"></i> ${escapeHtml(decodeEntities(String(b.ctaText)))}`;
         heroCtaBtn.setAttribute('data-db-driven', '1');
@@ -448,17 +456,22 @@ document.addEventListener('DOMContentLoaded', function () {
       if (ctaHref) heroCtaBtn.href = ctaHref;
     }
     // lokasiTag hanya punya versi Bahasa Indonesia (field admin-nya sudah
-    // dihapus), jadi saat bahasa aktif Inggris nilai DB tidak boleh dipasang
-    // ke DOM. Cukup hapus atribut data-db-driven supaya elemen kembali memakai
-    // kunci i18n `hero_location` yang sudah punya terjemahan Inggris.
-    if (b.lokasiTag && heroLocationEl && lang !== 'en') {
-      const customized = decodeEntities(String(b.lokasiTag)) !== decodeEntities(String(defaultBanner.lokasiTag || ''));
-      if (customized) {
-        const cleanTag = escapeHtml(decodeEntities(String(b.lokasiTag)).replace(/^[📍\s]+/, ''));
-        heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
-        heroLocationEl.setAttribute('data-db-driven', '1');
-      } else {
+    // dihapus). Saat bahasa aktif Inggris, atribut data-db-driven dari render
+    // sebelumnya HARUS dilepas: i18n.applyTranslations() melewati setiap
+    // elemen ber-atribut itu (i18n.js isDbDriven), sehingga tanpa removeAttribute
+    // teks Indonesia tetap nempel dan tidak pernah diganti ke Inggris.
+    if (heroLocationEl) {
+      if (lang === 'en') {
         heroLocationEl.removeAttribute('data-db-driven');
+      } else if (b.lokasiTag) {
+        const customized = decodeEntities(String(b.lokasiTag)) !== decodeEntities(String(defaultBanner.lokasiTag || ''));
+        if (customized) {
+          const cleanTag = escapeHtml(decodeEntities(String(b.lokasiTag)).replace(/^[📍\s]+/, ''));
+          heroLocationEl.innerHTML = `<i class="fa-solid fa-route text-accent"></i> <span>${cleanTag}</span>`;
+          heroLocationEl.setAttribute('data-db-driven', '1');
+        } else {
+          heroLocationEl.removeAttribute('data-db-driven');
+        }
       }
     }
   }
