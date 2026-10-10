@@ -250,7 +250,56 @@
         </div>
       </div>
 
-
+      <!-- CARD 2: TEKS HEADLINE BANNER (BILINGUAL) -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-text-height" style="color:#0e7490;margin-right:0.4rem;"></i> Teks Headline Banner (ID/EN)</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label>Judul Utama Hero</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label for="banner-judul-id" style="font-size:0.75rem;color:#64748b;">Bahasa Indonesia</label>
+                <input type="text" id="banner-judul-id" placeholder="PACKRAFTING CANDEN">
+              </div>
+              <div>
+                <label for="banner-judul-en" style="font-size:0.75rem;color:#64748b;">English</label>
+                <input type="text" id="banner-judul-en" placeholder="PACKRAFTING CANDEN">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Subheading</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label for="banner-sub-id" style="font-size:0.75rem;color:#64748b;">Bahasa Indonesia</label>
+                <input type="text" id="banner-sub-id" placeholder="Adventure on the River">
+              </div>
+              <div>
+                <label for="banner-sub-en" style="font-size:0.75rem;color:#64748b;">English</label>
+                <input type="text" id="banner-sub-en" placeholder="Adventure on the River">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Teks Deskripsi Singkat</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label for="banner-lead-id" style="font-size:0.75rem;color:#64748b;">Bahasa Indonesia</label>
+                <textarea id="banner-lead-id" rows="3" placeholder="Deskripsi singkat tentang petualangan packrafting..."></textarea>
+              </div>
+              <div>
+                <label for="banner-lead-en" style="font-size:0.75rem;color:#64748b;">English</label>
+                <textarea id="banner-lead-en" rows="3" placeholder="Short description of the packrafting adventure..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+            <button type="button" class="btn-admin btn-admin-primary" id="btn-save-banner-text" onclick="saveBannerHeadlineText()" style="padding:0.75rem 2rem;font-size:0.95rem;">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Teks Headline
+            </button>
+          </div>
         </div>
       </div>
 
@@ -284,9 +333,7 @@
   <script src="../assets/js/admin.js?v=4.7"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      if (typeof initBannerAdminPage === 'function') {
-        initBannerAdminPage();
-      }
+      initBannerAdminPage();
     });
   </script>
 </body>

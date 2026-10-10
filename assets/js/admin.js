@@ -311,6 +311,57 @@ let currentPickerSlotIndex = null;
 
 function initBannerAdminPage() {
   renderHeroSlotsAdmin();
+  loadBannerHeadlineAdmin();
+}
+
+function loadBannerHeadlineAdmin() {
+  const banners = DataStore.getBanners();
+  if (!banners || banners.length === 0) return;
+  const b = banners[0];
+  const setVal = (id, val, fallback) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || fallback || '';
+  };
+  setVal('banner-judul-id', b.judul_id, '');
+  setVal('banner-judul-en', b.judul_en, '');
+  setVal('banner-sub-id', b.sub_id, '');
+  setVal('banner-sub-en', b.sub_en, '');
+  setVal('banner-lead-id', b.lead_id, '');
+  setVal('banner-lead-en', b.lead_en, '');
+}
+
+async function saveBannerHeadlineText() {
+  const btn = document.getElementById('btn-save-banner-text');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  }
+
+  const banners = DataStore.getBanners().map(function (x) { return Object.assign({}, x); });
+  const b = banners[0] || Object.assign({}, { id: 1, status: 'active', urutan: 1 });
+
+  b.judul_id = document.getElementById('banner-judul-id').value.trim();
+  b.judul_en = document.getElementById('banner-judul-en').value.trim();
+  b.sub_id = document.getElementById('banner-sub-id').value.trim();
+  b.sub_en = document.getElementById('banner-sub-en').value.trim();
+  b.lead_id = document.getElementById('banner-lead-id').value.trim();
+  b.lead_en = document.getElementById('banner-lead-en').value.trim();
+
+  banners[0] = b;
+
+  try {
+    await DataStore.saveBanners(banners);
+    showToast('Teks headline banner berhasil disimpan!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal menyimpan: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
 }
 
 function renderHeroSlotsAdmin() {
@@ -528,6 +579,35 @@ async function resetHeroSlidesToDefault() {
   ];
   await saveAllHeroSlides();
   renderHeroSlotsAdmin();
+}
+
+async function saveWellnessInfo() {
+  const btn = document.getElementById('btn-save-wellness');
+  if (!btn) return;
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+  try {
+    const titleId = document.getElementById('wellness-title-id').value.trim();
+    const titleEn = document.getElementById('wellness-title-en').value.trim();
+    const descId = document.getElementById('wellness-desc-id').value.trim();
+    const descEn = document.getElementById('wellness-desc-en').value.trim();
+    await DataStore.saveWisataInfo({
+      ...DataStore.getWisataInfo(),
+      wellness_title_id: titleId,
+      wellness_title_en: titleEn,
+      wellness_desc_id: descId,
+      wellness_desc_en: descEn
+    });
+    showToast('Informasi wellness berhasil disimpan!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal: ' + (err.message || err), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
 }
 
 // Backward compatibility helper

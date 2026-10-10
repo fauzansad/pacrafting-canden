@@ -151,6 +151,46 @@
         </div>
       </div>
 
+      <!-- Wellness Tourism Section (Bilingual) -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="fa-solid fa-spa" style="color:#0e7490;margin-right:0.4rem;"></i> 6. Wellness Tourism Section (ID/EN)</h3>
+        </div>
+        <div class="admin-card-body admin-form">
+          <div class="form-group">
+            <label>Judul Section Wellness</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label for="wellness-title-id" style="font-size:0.75rem;color:#64748b;">Bahasa Indonesia</label>
+                <input type="text" id="wellness-title-id" placeholder="WELLNESS TOURISM DI DESA CANDEN">
+              </div>
+              <div>
+                <label for="wellness-title-en" style="font-size:0.75rem;color:#64748b;">English</label>
+                <input type="text" id="wellness-title-en" placeholder="WELLNESS TOURISM IN CANDEN VILLAGE">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Deskripsi Wellness</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label for="wellness-desc-id" style="font-size:0.75rem;color:#64748b;">Bahasa Indonesia</label>
+                <textarea id="wellness-desc-id" rows="4" placeholder="Deskripsi tentang wellness tourism..."></textarea>
+              </div>
+              <div>
+                <label for="wellness-desc-en" style="font-size:0.75rem;color:#64748b;">English</label>
+                <textarea id="wellness-desc-en" rows="4" placeholder="Description about wellness tourism..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+            <button type="button" class="btn-admin btn-admin-primary" id="btn-save-wellness" onclick="saveWellnessInfo()" style="padding:0.75rem 2rem;font-size:0.95rem;">
+              <i class="fa-solid fa-floppy-disk"></i> Simpan Wellness Info
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Save Button -->
       <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;margin-bottom:2rem;">
         <button type="button" class="btn-admin btn-admin-primary" onclick="saveWisataInfoAdmin()" style="padding:0.85rem 2.25rem;font-size:0.95rem;">
@@ -186,6 +226,21 @@
       setVal('info-fasilitas-tambahan', info.fasilitasTambahan);
     }
 
+    function loadWellnessInfoAdmin() {
+      const info = DataStore.getWisataInfo();
+      if (!info) return;
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+      };
+
+      setVal('wellness-title-id', info.wellness_title_id);
+      setVal('wellness-title-en', info.wellness_title_en);
+      setVal('wellness-desc-id', info.wellness_desc_id);
+      setVal('wellness-desc-en', info.wellness_desc_en);
+    }
+
     async function saveWisataInfoAdmin() {
       const info = Object.assign({}, DataStore.getWisataInfo() || {});
       info.namaPengelola = document.getElementById('info-nama-pengelola').value.trim();
@@ -210,6 +265,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       loadWisataInfoAdmin();
+      loadWellnessInfoAdmin();
     });
   </script>
 </body>

@@ -418,20 +418,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const defaultBanner = (typeof PackraftData !== 'undefined' && PackraftData.banners && PackraftData.banners[0]) || {};
 
-    // Kalau admin belum mengubah nilai bawaan, teks tetap diserahkan ke i18n
-    // supaya versi English tidak berubah jadi Indonesia.
+    const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
+    const fieldSuffix = lang === 'en' ? '_en' : '_id';
+
     if (b.judul && heroTitleEl) {
-      const customized = decodeEntities(String(b.judul)) !== decodeEntities(String(defaultBanner.judul || ''));
+      const customTitle = b['judul' + fieldSuffix];
+      const customized = customTitle && decodeEntities(String(customTitle)) !== decodeEntities(String(defaultBanner.judul || ''));
       if (customized) {
-        const safeTitle = escapeHtml(decodeEntities(String(b.judul)));
+        const safeTitle = escapeHtml(decodeEntities(String(customTitle)));
         heroTitleEl.innerHTML = safeTitle.replace('CANDEN', '<span>CANDEN</span>');
         heroTitleEl.setAttribute('data-db-driven', '1');
       } else {
         heroTitleEl.removeAttribute('data-db-driven');
       }
     }
-    applyDbText(heroSubEl, b.subheading, defaultBanner.subheading, false);
-    applyDbText(heroLeadEl, b.lead, defaultBanner.lead, false);
+    applyDbText(heroSubEl, b['sub' + fieldSuffix], defaultBanner.subheading, false);
+    applyDbText(heroLeadEl, b['lead' + fieldSuffix], defaultBanner.lead, false);
 
     if (b.ctaText && heroCtaBtn) {
       const customized = decodeEntities(String(b.ctaText)) !== decodeEntities(String(defaultBanner.ctaText || ''));
@@ -564,6 +566,34 @@ document.addEventListener('DOMContentLoaded', function () {
         applyDbText(el, info[pair[1]], defaults[pair[1]], false);
       });
     });
+
+    const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
+    const fieldSuffix = lang === 'en' ? '_en' : '_id';
+    const wellnessDefaults = (typeof PackraftData !== 'undefined' && PackraftData.wisataInfo) ? PackraftData.wisataInfo : {};
+
+    const wellnessTitleEl = document.querySelector('#wellness [data-i18n="wellness_title"]');
+    if (wellnessTitleEl) {
+      const customTitle = info['wellness_title' + fieldSuffix];
+      const customized = customTitle && decodeEntities(String(customTitle)) !== decodeEntities(String(wellnessDefaults.wellness_title || ''));
+      if (customized) {
+        wellnessTitleEl.textContent = decodeEntities(String(customTitle));
+        wellnessTitleEl.setAttribute('data-db-driven', '1');
+      } else {
+        wellnessTitleEl.removeAttribute('data-db-driven');
+      }
+    }
+
+    const wellnessDescEl = document.querySelector('#wellness [data-i18n="wellness_desc"]');
+    if (wellnessDescEl) {
+      const customDesc = info['wellness_desc' + fieldSuffix];
+      const customized = customDesc && decodeEntities(String(customDesc)) !== decodeEntities(String(wellnessDefaults.wellness_desc || ''));
+      if (customized) {
+        wellnessDescEl.textContent = decodeEntities(String(customDesc));
+        wellnessDescEl.setAttribute('data-db-driven', '1');
+      } else {
+        wellnessDescEl.removeAttribute('data-db-driven');
+      }
+    }
   }
 
   // ---- 3e. Re-render Peta & Kalender saat data berubah ----
