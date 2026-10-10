@@ -1090,6 +1090,12 @@ function renderGaleriAdmin() {
 
     const cardStyle = isShown ? '' : 'style="opacity:0.8;border:1.5px dashed #f87171;background:#fffaf0;"';
 
+    // Tampilkan versi Inggris sebagai baris sekunder agar admin bisa melihat
+    // hasil auto-translate yang dibuat sistem saat menyimpan.
+    const judulEnLine = (g.judul_en || '').trim()
+      ? `<div style="font-size:0.775rem;color:#0e7490;margin-top:0.15rem;"><i class="fa-solid fa-language"></i> ${escapeHtmlAdmin(g.judul_en)}</div>`
+      : '';
+
     return `
       <div class="media-item" ${cardStyle}>
         <div style="position:relative;">
@@ -1100,6 +1106,7 @@ function renderGaleriAdmin() {
         </div>
         <div class="media-item-info">
           <h4 class="media-item-title">${escapeHtmlAdmin(g.judul)}</h4>
+          ${judulEnLine}
           <div style="font-size:0.775rem;color:#64748b;margin-bottom:0.5rem;">
             <span><i class="fa-solid fa-tag"></i> ${escapeHtmlAdmin(g.kategori || 'Petualangan')}</span>
           </div>
@@ -1126,6 +1133,12 @@ function addGaleriAdmin() {
     document.getElementById('galeri-judul').value = '';
     document.getElementById('galeri-kategori').value = 'Aktivitas';
     document.getElementById('galeri-deskripsi').value = '';
+    const jEn = document.getElementById('galeri-judul-en');
+    if (jEn) jEn.value = '';
+    const kEn = document.getElementById('galeri-kategori-en');
+    if (kEn) kEn.value = '';
+    const dEn = document.getElementById('galeri-deskripsi-en');
+    if (dEn) dEn.value = '';
     if (document.getElementById('galeri-status')) {
       document.getElementById('galeri-status').value = 'active';
     }
@@ -1148,6 +1161,12 @@ function editGaleriAdmin(id) {
     document.getElementById('galeri-judul').value = galeri.judul || '';
     document.getElementById('galeri-kategori').value = galeri.kategori || 'Kegiatan Desa';
     document.getElementById('galeri-deskripsi').value = galeri.caption || galeri.deskripsi || '';
+    const jEn = document.getElementById('galeri-judul-en');
+    if (jEn) jEn.value = galeri.judul_en || '';
+    const kEn = document.getElementById('galeri-kategori-en');
+    if (kEn) kEn.value = galeri.kategori_en || '';
+    const dEn = document.getElementById('galeri-deskripsi-en');
+    if (dEn) dEn.value = galeri.caption_en || '';
     if (document.getElementById('galeri-status')) {
       document.getElementById('galeri-status').value = (galeri.status === 'hidden') ? 'hidden' : 'active';
     }
@@ -1170,6 +1189,16 @@ async function saveGaleriAdmin() {
   const deskripsi = document.getElementById('galeri-deskripsi').value.trim();
   const status = document.getElementById('galeri-status') ? document.getElementById('galeri-status').value : 'active';
 
+  // Field _en yang dikosongkan otomatis diterjemahkan dari _id; kalau admin
+  // sudah mengisinya manual, nilai manual itu yang menang (pola yang sama
+  // seperti saveBannerHeadlineText / saveWellnessInfo).
+  const judulEnInput = document.getElementById('galeri-judul-en');
+  const kategoriEnInput = document.getElementById('galeri-kategori-en');
+  const deskripsiEnInput = document.getElementById('galeri-deskripsi-en');
+  let judulEn = judulEnInput ? judulEnInput.value.trim() : '';
+  let kategoriEn = kategoriEnInput ? kategoriEnInput.value.trim() : '';
+  let deskripsiEn = deskripsiEnInput ? deskripsiEnInput.value.trim() : '';
+
   if (!judul) {
     showToast('Judul foto harus diisi!', 'error');
     return;
@@ -1177,24 +1206,65 @@ async function saveGaleriAdmin() {
 
   const list = DataStore.getGaleri().map(function (g) { return Object.assign({}, g); });
 
+  // Tentukan id item lebih dulu supaya kunci peta terjemahan bisa memakai
+  // format 'g<id>_judul' persis seperti field _en yang akan disimpan.
+  const editId = mode === 'edit' ? parseInt(form.dataset.editId, 10) : null;
+  const itemId = (mode === 'edit') ? editId : DataStore.generateId(list);
+  const prefix = 'g' + itemId;
+
+  // Hanya field _en yang masih kosong yang diterjemahkan.
+  const toTranslate = {};
+  if (!judulEn && judul) toTranslate[prefix + '_judul'] = judul;
+  if (!kategoriEn && kategori) toTranslate[prefix + '_kategori'] = kategori;
+  if (!deskripsiEn && deskripsi) toTranslate[prefix + '_caption'] = deskripsi;
+
+  if (Object.keys(toTranslate).length) {
+    try {
+      const tr = await autoTranslateToEnglish(toTranslate);
+      // Tulis balik ke input supaya admin bisa mengoreksi hasil terjemahan.
+      if (tr[prefix + '_judul']) {
+        judulEn = tr[prefix + '_judul'];
+        if (judulEnInput) judulEnInput.value = judulEn;
+      }
+      if (tr[prefix + '_kategori']) {
+        kategoriEn = tr[prefix + '_kategori'];
+        if (kategoriEnInput) kategoriEnInput.value = kategoriEn;
+      }
+      if (tr[prefix + '_caption']) {
+        deskripsiEn = tr[prefix + '_caption'];
+        if (deskripsiEnInput) deskripsiEnInput.value = deskripsiEn;
+      }
+    } catch (terr) {
+      // Kegagalan terjemahan tidak boleh membatalkan penyimpanan: teks
+      // Bahasa Indonesia admin tetap tersimpan utuh.
+      console.error(terr);
+      showToast('Teks Inggris gagal dibuat otomatis (' + (terr.message || terr) + '). Isi manual bila perlu.', 'warning');
+    }
+  }
+
   if (mode === 'edit') {
-    const id = parseInt(form.dataset.editId, 10);
-    const item = list.find(g => g.id === id);
+    const item = list.find(g => g.id === editId);
     if (item) {
       item.judul = judul;
       item.kategori = kategori;
       item.caption = deskripsi;
       item.deskripsi = deskripsi;
       item.status = status;
+      item.judul_en = judulEn || item.judul_en || '';
+      item.kategori_en = kategoriEn || item.kategori_en || '';
+      item.caption_en = deskripsiEn || item.caption_en || '';
       if (currentGaleriImageData) item.gambar = currentGaleriImageData;
     }
   } else {
     list.unshift({
-      id: DataStore.generateId(list),
+      id: itemId,
       judul: judul,
       kategori: kategori,
       caption: deskripsi,
       deskripsi: deskripsi,
+      judul_en: judulEn,
+      kategori_en: kategoriEn,
+      caption_en: deskripsiEn,
       gambar: currentGaleriImageData || '',
       status: status
     });
@@ -1286,15 +1356,30 @@ function renderFaqAdmin() {
   }
 
   container.innerHTML = adminFaqDraft.map(function (item, idx) {
+    // Baris sekunder berbahasa Inggris supaya admin bisa memeriksa hasil
+    // auto-translate tanpa perlu membuka form edit.
+    const qEnLine = (item.q_en || '').trim()
+      ? `<div style="font-size:0.775rem;color:#0e7490;margin-top:0.15rem;"><i class="fa-solid fa-language"></i> ${escapeHtmlAdmin(item.q_en)}</div>`
+      : '';
+
     return `
       <div style="border:1px solid var(--admin-border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;background:#fff;">
         <div class="form-group" style="margin-bottom:0.65rem;">
           <label for="faq-q-${idx}">Pertanyaan</label>
           <input type="text" id="faq-q-${idx}" value="${escapeHtmlAdmin(item.q || '')}">
+          ${qEnLine}
+        </div>
+        <div class="form-group" style="margin-bottom:0.65rem;">
+          <label for="faq-q-en-${idx}">English (auto — boleh dikoreksi manual)</label>
+          <input type="text" id="faq-q-en-${idx}" value="${escapeHtmlAdmin(item.q_en || '')}">
         </div>
         <div class="form-group" style="margin-bottom:0.65rem;">
           <label for="faq-a-${idx}">Jawaban</label>
           <textarea id="faq-a-${idx}" rows="3">${escapeHtmlAdmin(item.a || '')}</textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:0.65rem;">
+          <label for="faq-a-en-${idx}">English (auto — boleh dikoreksi manual)</label>
+          <textarea id="faq-a-en-${idx}" rows="3">${escapeHtmlAdmin(item.a_en || '')}</textarea>
         </div>
         <div style="display:flex;gap:0.5rem;">
           <button type="button" class="btn-admin btn-admin-outline btn-admin-sm" onclick="moveFaqAdmin(${idx}, -1)" title="Naik"><i class="fa-solid fa-arrow-up"></i></button>
@@ -1307,7 +1392,7 @@ function renderFaqAdmin() {
 }
 
 function addFaqAdmin() {
-  adminFaqDraft.push({ q: '', a: '' });
+  adminFaqDraft.push({ q: '', a: '', q_en: '', a_en: '' });
   renderFaqAdmin();
 }
 
@@ -1333,10 +1418,16 @@ async function saveFaqAdmin() {
   for (let i = 0; i < adminFaqDraft.length; i++) {
     const qEl = document.getElementById('faq-q-' + i);
     const aEl = document.getElementById('faq-a-' + i);
+    const qEnEl = document.getElementById('faq-q-en-' + i);
+    const aEnEl = document.getElementById('faq-a-en-' + i);
     const q = qEl ? qEl.value.trim() : '';
     const a = aEl ? aEl.value.trim() : '';
+    const qEn = qEnEl ? qEnEl.value.trim() : '';
+    const aEn = aEnEl ? aEnEl.value.trim() : '';
     if (!q) continue;
-    collected.push({ q: q, a: a });
+    // draftIndex disimpan supaya penulisan balik hasil terjemahan memakai id
+    // input yang benar, walau ada baris kosong yang dilewati.
+    collected.push({ q: q, a: a, q_en: qEn, a_en: aEn, draftIndex: i });
   }
 
   if (collected.length === 0) {
@@ -1352,7 +1443,46 @@ async function saveFaqAdmin() {
   }
 
   try {
-    await DataStore.saveFAQ(collected);
+    // Field _en yang kosong otomatis diterjemahkan dari teks Indonesia;
+    // _en terisi manual selalu menang (pola saveBannerHeadlineText /
+    // saveWellnessInfo).
+    const toTranslate = {};
+    collected.forEach(function (item, index) {
+      if (!item.q_en && item.q) toTranslate['f' + index + '_q'] = item.q;
+      if (!item.a_en && item.a) toTranslate['f' + index + '_a'] = item.a;
+    });
+
+    if (Object.keys(toTranslate).length) {
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menerjemahkan...';
+      try {
+        const tr = await autoTranslateToEnglish(toTranslate);
+        collected.forEach(function (item, index) {
+          if (tr['f' + index + '_q']) {
+            item.q_en = tr['f' + index + '_q'];
+            const el = document.getElementById('faq-q-en-' + item.draftIndex);
+            if (el) el.value = item.q_en;
+          }
+          if (tr['f' + index + '_a']) {
+            item.a_en = tr['f' + index + '_a'];
+            const el = document.getElementById('faq-a-en-' + item.draftIndex);
+            if (el) el.value = item.a_en;
+          }
+        });
+      } catch (terr) {
+        // Kekecewaan translate tidak boleh membatalkan penyimpanan; teks
+        // Bahasa Indonesia admin tetap tersimpan utuh.
+        console.error(terr);
+        showToast('Teks Inggris gagal dibuat otomatis (' + (terr.message || terr) + '). Isi manual bila perlu.', 'warning');
+      }
+    }
+
+    // draftIndex hanya dibutuhkan untuk menulis balik ke input; jangan ikut
+    // tersimpan ke database.
+    const payload = collected.map(function (item) {
+      return { q: item.q, a: item.a, q_en: item.q_en, a_en: item.a_en };
+    });
+
+    await DataStore.saveFAQ(payload);
     showToast('Pertanyaan umum berhasil disimpan!', 'success');
     renderFaqAdmin();
   } catch (err) {

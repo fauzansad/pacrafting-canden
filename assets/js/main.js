@@ -447,7 +447,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const ctaHref = b.ctaLink && b.ctaLink !== defaultBanner.ctaLink ? b.ctaLink : null;
       if (ctaHref) heroCtaBtn.href = ctaHref;
     }
-    if (b.lokasiTag && heroLocationEl) {
+    // lokasiTag hanya punya versi Bahasa Indonesia (field admin-nya sudah
+    // dihapus), jadi saat bahasa aktif Inggris nilai DB tidak boleh dipasang
+    // ke DOM. Cukup hapus atribut data-db-driven supaya elemen kembali memakai
+    // kunci i18n `hero_location` yang sudah punya terjemahan Inggris.
+    if (b.lokasiTag && heroLocationEl && lang !== 'en') {
       const customized = decodeEntities(String(b.lokasiTag)) !== decodeEntities(String(defaultBanner.lokasiTag || ''));
       if (customized) {
         const cleanTag = escapeHtml(decodeEntities(String(b.lokasiTag)).replace(/^[📍\s]+/, ''));
@@ -471,6 +475,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const displayList = galeriList;
+
+    // Galeri dari database menyimpan teks dwibahasa dengan sufiks _en / _id.
+    // Saat bahasa Inggris aktif, pakai field _en; kalau kosong, kembali ke
+    // teks Indonesia supaya kartu tidak pernah tampil tanpa judul.
+    const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
+
     galleryGrid.innerHTML = displayList.map(function (g, idx) {
       const isFirst = (idx === 0 && displayList.length >= 4);
       const isWide = (displayList.length === 8 && idx === 7) || (displayList.length === 6 && (idx === 4 || idx === 5));
@@ -480,9 +490,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       let imgSrc = resolveAssetUrl(g.gambar);
       const hasImg = Boolean(imgSrc);
-      const safeTitle = escapeHtml(g.judul);
-      const safeKategori = escapeHtml(g.kategori || 'Aktivitas Sungai Opak');
-      const safeCaption = escapeHtml(g.caption || g.judul);
+      const judulEn = (g.judul_en || '').trim();
+      const kategoriEn = (g.kategori_en || '').trim();
+      const captionEn = (g.caption_en || '').trim();
+
+      const judul = (lang === 'en' && judulEn) ? judulEn : (g.judul || judulEn);
+      const kategori = (lang === 'en' && kategoriEn) ? kategoriEn : (g.kategori || kategoriEn);
+      const captionSrc = (lang === 'en' && captionEn) ? captionEn : (g.caption || g.judul || captionEn);
+
+      const safeTitle = escapeHtml(judul);
+      const safeKategori = escapeHtml(kategori || 'Aktivitas Sungai Opak');
+      const safeCaption = escapeHtml(captionSrc);
 
       const content = hasImg
         ? `<img src="${escapeHtml(imgSrc)}" alt="${safeTitle}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">`
@@ -514,12 +532,54 @@ document.addEventListener('DOMContentLoaded', function () {
     const faqList = DataStore.getFAQ();
     if (!faqList || faqList.length === 0) return;
 
+    const lang = (window.I18n && window.I18n.getLanguage) ? window.I18n.getLanguage() : 'id';
+
     faqContainer.innerHTML = faqList.map(function (item, index) {
       const isActive = index === 0;
-      // FAQ disimpan sebagai teks biasa (bukan HTML). Escape agar konten dari
-      // database tidak bisa menyuntik script ke halaman.
-      const safeQ = escapeHtml(item.q);
-      const safeA = escapeHtml(item.a).replace(/\r?\n/g, '<br>');
+      const i18nText = function (key) {
+        try {
+          if (window.I18n && typeof window.I18n.t === 'function') {
+            const val = window.I18n.t(key, '');
+            // I18n.t mengembalikan nama key-nya sendiri kalau tidak ada di kamus.
+            // Nilai seperti itu harus dianggap "tidak ada terjemahan".
+            if (val && val !== key) return val;
+          }
+        } catch (err) {}
+        return '';
+      };
+
+      const qEn = (item.q_en || '').trim();
+      const aEn = (item.a_en || '').trim();
+
+      // Pertanyaan: _en (DB) -> kamus i18n -> teks Indonesia dari DB.
+      let question = item.q || '';
+      if (lang === 'en') {
+        question = qEn || i18nText('faq_q' + (index + 1)) || question;
+      }
+      const safeQ = escapeHtml(question);
+
+      // Jawaban: pertanyaan di bawah memakai dua sumber dengan aturan keamanan
+      // BERBEDA, dan itu disengaja:
+      //  - Teks dari DATABASE selalu di-escape, karena isinya input admin /
+      //    pihak ketiga dan tidak boleh bisa menyuntik HTML ke halaman.
+      //  - Teks dari KAMUS i18n (assets/js/i18n.js) adalah string first-party
+      //    milik proyek sendiri yang memang sengaja memuat markup seperti
+      //    <strong>, <br>, dan <em> untuk format FAQ. String tepercaya ini
+      //    TIDAK boleh di-escape, karena escapingnya akan membuat tag-nya
+      //    tampil sebagai teks mentah "&lt;strong&gt;".
+      let answerHtml;
+      if (lang === 'en' && !aEn) {
+        const i18nAnswer = i18nText('faq_a' + (index + 1));
+        if (i18nAnswer) {
+          answerHtml = i18nAnswer; // tepercaya, sudah HTML -> pakai apa adanya
+        } else {
+          answerHtml = escapeHtml(item.a).replace(/\r?\n/g, '<br>');
+        }
+      } else {
+        const rawAnswer = (lang === 'en' && aEn) ? aEn : item.a;
+        answerHtml = escapeHtml(rawAnswer).replace(/\r?\n/g, '<br>');
+      }
+
       return `
         <div class="faq-item ${isActive ? 'active' : ''}">
           <div class="faq-header">
@@ -528,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function () {
           </div>
           <div class="faq-body" style="${isActive ? 'max-height: 250px;' : ''}">
             <div class="faq-body-inner">
-              ${safeA}
+              ${answerHtml}
             </div>
           </div>
         </div>
